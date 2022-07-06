@@ -193,17 +193,13 @@ const char *availableVarNames[] = {    // now NOT really used!!! just to see the
 
 
 
-
-
-
-
 // ######################################################################
 // class which performs accumulation of quantities for a given event
 // ######################################################################
+
 class WinPairFilling : public WinPairBase //WinPair2019
 {
 public:
-//    map<const char*,int> mapVar;
     // e-by-e data:
     //    double _nF; double _nB;
     int _int_counter_nF; int _int_counter_nB;
@@ -215,23 +211,17 @@ public:
     double _ptX; double _ptY;
     double _w_wMinus1_X; double _w_wMinus1_Y; // for corrections in one window!
 
-
     // extra info:
     Double_t pipjF; //, sum_piF;
     Double_t pipjB; //, sum_piB;
     // to calc C:
     double *arr_pF; //[FB_max_tracks_in_win];
     double *arr_pB; //[FB_max_tracks_in_win];
-    //      float arr_pF[ 10 ];//1200 ];
-    //      float arr_pB[ 10 ];//1200 ];
     int maxNtracks;
 
 
     // for dptdpt:
     Double_t piFpjB;
-
-//    TH1D *histAccumulatedValues;  //!    accumulated values for observables
-
 
 
     WinPairFilling():
@@ -239,42 +229,19 @@ public:
         _nF(0), _nB(0),
         _ptF(0), _ptB(0),
         _nX(0), _nY(0),    _w_wMinus1_X(0), _w_wMinus1_Y(0),
-        _ptX(0), _ptY(0) //,
-//        histAccumulatedValues(0x0)
-
+        _ptX(0), _ptY(0)
     {}
 
     void init(int _nMaxTracks) //setMaxNumberOfTracks(int _n)
     {
         arr_pF = new double[_nMaxTracks];
         arr_pB = new double[_nMaxTracks];
-
-//        cout << "initializing window: " << strAccumHistName.Data() << endl;
-//        histAccumulatedValues = new TH1D( strAccumHistName //"histAccumulatedValues"
-//                                          , strAccumHistName, nVars,-0.5,nVars-0.5);
-
-        //            TString gArrayMemberNames[nVars];
-//        for( int i = 0; i < nVars; i++ )
-//        {
-//            histAccumulatedValues->GetXaxis()->SetBinLabel( i+1, varNames[i] );
-//            mapVar.insert( pair<const char*,int>(varNames[i], i) );
-//        }
     }
 
 
-
-    //    void addTrack( int pid, double eta, double pt, int charge )
     void addTrack( int pid, double eta, double pt, int charge, double weight = 1.0 )
     {
-//        return;
-        //        cout << "test1" << endl;
         int pidAbs = abs(pid);
-        //        int charge = pid / pidAbs;
-        //        int charge = (pid!=0 ? pid / pidAbs : 0);
-
-        //        cout << pidAbs << " " << charge << endl;
-
-        //        cout << "test11" << endl;
 
         if ( pt < ptWin[0] || pt > ptWin[1] )
             return;
@@ -375,7 +342,6 @@ public:
         _w_wMinus1_Y = 0;
 
 
-
         // extra info:
         pipjF = 0; //sum_piF = 0;
         pipjB = 0; //sum_piB = 0;
@@ -401,6 +367,7 @@ const int MAX_N_WIN_PAIRS = 150;
 // ####################################################################################################################
 // class which collects all window pairs and performs filling of TH3D histogram with e-by-e calculated values
 // ####################################################################################################################
+
 class WinPairWrapper
 {
 public:
@@ -412,32 +379,19 @@ public:
     // some vars to make flexible hist filling (i.e. don't fill if bin name is not in varNames array):
     int currentSubsampleId;
     int currentWinId;
-//    bool DO_MARK_ONLY_EXISTING_VALUS_AT_FINISH_EVENT;
-//    bool VAR_IS_CHECKED_ALREADY[100] = {};
-//    bool VAR_IS_NOT_USED[100] = {};
-//    int varIds[100];
-//    int varCounter;
-
 
     map<const char*,int> mapVar;   // helps checking which vars are not requested in varNames array
-//    map<const char*,int> mapVarCheck;
 
-
+    // ############
     WinPairWrapper()
     {
         nEta = 0;
-//        DO_MARK_ONLY_EXISTING_VALUS_AT_FINISH_EVENT = true;
-//        varCounter = 0;
-//        for(int i=0; i<100; i++)
-//            VAR_IS_CHECKED_ALREADY[i] = false;
-
     }
-
 
     // ############
     void addWinPair( //const char* strPrefix,
                      int *_pTypes, int *_pCharges
-                     /*, int iCW, int cBin,*/ , double _eMinB, double _eMaxB, double _eMinF, double _eMaxF, double _ptMin, double _ptMax
+                     , double _eMinB, double _eMaxB, double _eMinF, double _eMaxF, double _ptMin, double _ptMax
                      , bool _fullEtaForDenom = false, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8 )
     {
         if ( nEta >= MAX_N_WIN_PAIRS )
@@ -447,13 +401,10 @@ public:
             cin >> aa;
         }
         int iEta = nEta;
-        WinPairFilling *_wp = new WinPairFilling; //&winPairs_GEN_ForWrapper[iSub][iType][iCW][cBin][iPt][iEta];
-        //            wp[iEta][iSub] = _wp;
+        WinPairFilling *_wp = new WinPairFilling;
         wp[iEta] = _wp;
-        //            WinPairFilling *_wp = &wp[iEta][iSub]; //new WinPairFilling; //&winPairs_GEN_ForWrapper[iSub][iType][iCW][cBin][iPt][iEta];
-//        _wp->setSubsampleId( 0 ); //iSub );
         _wp->setParticleTypes( _pTypes, _pCharges );
-        _wp->setWindows( /*strAnLevel.Data(),*//* iCW, cBin,*/ _eMinB, _eMaxB, _eMinF, _eMaxF, _ptMin, _ptMax, _fullEtaForDenom, _etaForDenomMin, _etaForDenomMax );
+        _wp->setWindows( _eMinB, _eMaxB, _eMinF, _eMaxF, _ptMin, _ptMax, _fullEtaForDenom, _etaForDenomMin, _etaForDenomMax );
         _wp->init( 1500 );
         nEta++;
     }
@@ -469,25 +420,6 @@ public:
 
         TString strHistName = Form("hAllWins_%s_cBin%d", strAnLevel.Data(), cBin);
 
-        // set PID and charges in title
-        //        if(nEta>0)
-        //        {
-        //            TString strPID = Form( "pid_%d_%d_%d_%d_charge_%d_%d_%d_%d",
-        //                                   wp[0]->partTypes[0], wp[0]->partTypes[1], wp[0]->partTypes[2], wp[0]->partTypes[3],
-        //                    wp[0]->partCharges[0], wp[0]->partCharges[1], wp[0]->partCharges[2], wp[0]->partCharges[3]
-        //                    );
-        //            strHistName.Append( Form( "_%s", strPID.Data() ) );
-        //        }
-
-        // take requested vars to map
-//        const int nVars = mapVar.size();//sizeof(varsRequested)/sizeof(*varsRequested);
-//        for( int i = 0; i < nVars; i++ )
-//        {
-//            mapVar.insert( pair<const char*,int>( varsRequested[i].c_str(), i) );
-//        }
-
-
-
 
         hAllWins = new TH3D( strHistName, strHistName
                              //, nBinsX, -0.5, nBinsX-0.5
@@ -496,22 +428,15 @@ public:
                              , nSub, -0.5, nSub-0.5
                              );
 
-        // set labels x
+        // set labels x and prepare a map with vars
         for( int i = 0; i < _nVars; i++ )
         {
-//            hAllWins->GetXaxis()->SetBinLabel( i+1, varNames[i] ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
-//            mapVar.insert( pair<const char*,int>(varNames[i], i) );
             mapVar.insert( pair<const char*,int>( _varNames[i], i ) );
             hAllWins->GetXaxis()->SetBinLabel( i+1, _varNames[i] ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
-
-            //            mapVarCheck.insert( pair<const char*,int>(varNames[i], i) ); // we need another map, since if no element found with map[...] - it inserts a new pair-key with null (=0)!
         }
 //        cout << "check mapVar size: " << mapVar.size() << endl;
 
         // set labels y
-        //        for( int eWin = 0; eWin < nEta; eWin++ )
-        //            for( int sub = 0; sub < nSub; sub++ )
-        //                hAllWins->GetYaxis()->SetBinLabel( eWin*nSub+sub+1, Form("eWin%d_sub%d", eWin, sub ) );
         for( int winId = 0; winId < nWins; winId++ )
             hAllWins->GetYaxis()->SetBinLabel( winId+1, Form("eB_%.2f_%.2f_eF_%.2f_%.2f", wp[winId]->eWin[0], wp[winId]->eWin[1], wp[winId]->eWin[2], wp[winId]->eWin[3] ) );
     }
@@ -540,14 +465,6 @@ public:
     void finishEvent( int subId )
     {
         currentSubsampleId = subId;
-
-
-        //        return;
-        // finish event for all hist 1D:
-//        for( int eWin = 0; eWin < nEta; eWin++ )
-//            wp[eWin]->finishEvent();
-
-//        int nSub = hAllWins->GetNbinsZ();
 
         for( int eWin = 0; eWin < nEta; eWin++ )
         {
@@ -834,24 +751,6 @@ public:
 
 
             w->resetEvent();
-
-
-//            DO_MARK_ONLY_EXISTING_VALUS_AT_FINISH_EVENT = false;
-
-
-            // BY HAND MAKE A MISTAKE:
-            // hAllWins->Fill( mapVar["zozo"] , eWin, subId,     w->_nF      );
-//            if ( MAKE_TEST_FIRST_FILL_FOR_NON_EXISTING_VALUES ) // important test!
-//            {
-//                if ( mapVar.size() != nVars )
-//                {
-//                    cout << "AHTUNG!!! mapVar.size() != nVars! Something new is added to the map in finishEvent() by mistake..." << endl;
-//                    int tmp_aa;
-//                    cin >> tmp_aa;
-//                }
-//                MAKE_TEST_FIRST_FILL_FOR_NON_EXISTING_VALUES = false;
-//            }
-
         } // end of loop over eta wins
 
     }   // end of finishEvent( int subId )

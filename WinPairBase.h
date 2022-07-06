@@ -18,7 +18,7 @@ using namespace std;
 
 
 // #############
-struct WinPairBase //WinPair2019
+struct WinPairBase
 {
 public:
     // acceptance of the windows:
@@ -27,21 +27,13 @@ public:
     int partTypes[4];   // F,B, X,Y  // 0 - NO PID SELECTION
     int partCharges[4]; // F,B, X,Y  // 0 - NO CHARGE SELECTION
 
-//    int subsampleId;
-    // main hist for data accumulation:
-//    TH1D *histAccumulatedValues;   //! accumulated values for observables
-
     // June 2021: new for ratio-ratio when denominator is in full acceptance
     bool fullEtaForDenom;
     double etaForDenomMin;
     double etaForDenomMax;
-    // end
-
-//    TString strAccumHistName;
 
     WinPairBase() // int _subsId = -1)
     {
-//        subsampleId = 0;
 //        cout << "constructor WinPairBase" << endl;
         for( int i = 0; i < 4; i++ )
         {
@@ -59,11 +51,6 @@ public:
     {
     }
 
-//    void setSubsampleId( int id )
-//    {
-//        subsampleId = id;
-//    }
-
     void setParticleTypes( int *_pTypes, int *_pCharges )
     {
         for( int i = 0; i < 4; i++ )
@@ -73,14 +60,9 @@ public:
         }
     }
 
-    void setWindows( //const char* strPrefix,
-                     /*int iCW, int cBin,*/ double _eMinB, double _eMaxB, double _eMinF, double _eMaxF, double _ptMin, double _ptMax
+    void setWindows( double _eMinB, double _eMaxB, double _eMinF, double _eMaxF, double _ptMin, double _ptMax
                      , bool _fullEtaForDenom = false, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8 )
     {
-        // fill map with name-number pairs
-//        for( int i=0; i < nVars; i++ )
-//            mapVar.insert( pair<const char*,int>(varNames[i], i) );
-
         eWin[0] = _eMinB;
         eWin[1] = _eMaxB;
         eWin[2] = _eMinF;
