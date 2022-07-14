@@ -24,179 +24,6 @@ using namespace std;
 
 //bool MAKE_TEST_FIRST_FILL_FOR_NON_EXISTING_VALUES = true;
 
-// available vars:
-const char *availableVarNames[] = {    // now NOT really used!!! just to see the list as it was on July 6, 2022
-    "Nevents",
-
-    "f_Nevents",
-    "b_Nevents",
-
-    "x_Nevents",
-    "y_Nevents",
-
-    "fb_Nevents",
-    "xy_Nevents",
-
-    "fx_Nevents",
-    "fy_Nevents",
-    "bx_Nevents",
-    "by_Nevents",
-
-    // f, b
-    "Nf",
-    "Nb",
-    "Nf2",
-    "Nb2",
-    "Nf*Nb",
-
-    // x, y
-    "Nx",
-    "Ny",
-    "Nx2",
-    "Ny2",
-    "Nx*Ny",
-
-    //
-    "NfPb_Nf",
-    "NfPb_Pb",
-    "NfPb_Nf2",
-    "NfPb_Pb2",
-    "NfPb_Nf_Pb",
-
-    "PfNb_Pf",
-    "PfNb_Nb",
-    "PfNb_Pf2",
-    "PfNb_Nb2",
-    "PfNb_Pf_Nb",
-
-    "PfPb_Pf",
-    "PfPb_Pb",
-    "PfPb_Pf2",
-    "PfPb_Pb2",
-    "PfPb_Pf_Pb",
-
-
-
-    "NxPy_Nx",
-    "NxPy_Py",
-    "NxPy_Nx2",
-    "NxPy_Py2",
-    "NxPy_Nx_Py",
-
-    "PxNy_Px",
-    "PxNy_Ny",
-    "PxNy_Px2",
-    "PxNy_Ny2",
-    "PxNy_Px_Ny",
-
-    "PxPy_Px",
-    "PxPy_Py",
-    "PxPy_Px2",
-    "PxPy_Py2",
-    "PxPy_Px_Py",
-
-
-    // ##### mixes:
-    "Nf*Nx",
-    "Nf*Ny",
-    "Nb*Nx",
-    "Nb*Ny",
-
-    "Nf_Px",
-    "Nf_Py",
-    "Nb_Px",
-    "Nb_Py",
-
-    "Pf_Nx",
-    "Pf_Ny",
-    "Pb_Nx",
-    "Pb_Ny",
-
-    "Pf_Px",
-    "Pf_Py",
-    "Pb_Px",
-    "Pb_Py",
-
-
-    // RATIOS:
-    "Nf_OVER_Nb",
-    "Nf_OVER_Nx",
-    "Nf_OVER_Ny",
-
-    "Nb_OVER_Nf",
-    "Nb_OVER_Nx",
-    "Nb_OVER_Ny",
-
-    "Nx_OVER_Nf",
-    "Nx_OVER_Nb",
-    "Nx_OVER_Ny",
-
-    "Ny_OVER_Nf",
-    "Ny_OVER_Nb",
-    "Ny_OVER_Nx",
-
-    // RATIO - RATIO:
-    "Nf_OVER_Nb_vs_Nx_OVER_Ny",
-    "Nf_OVER_Nx_vs_Nb_OVER_Ny",
-
-    "Nb_OVER_Nf_vs_Ny_OVER_Nx",
-    "Nx_OVER_Nf_vs_Ny_OVER_Nb",
-
-    // RATIO - pT:
-    "Nf_OVER_Nx_vs_Pb",
-    "Nf_OVER_Nx_vs_Py",
-    "Nb_OVER_Ny_vs_Pf",
-    "Nb_OVER_Ny_vs_Px",
-
-    "Nx_OVER_Nf_vs_Pb",
-    "Nx_OVER_Nf_vs_Py",
-    "Ny_OVER_Nb_vs_Pf",
-    "Ny_OVER_Nb_vs_Px",
-
-
-    // added on 04.04.2019: for dptdpt etc (from /Volumes/OptibaySSD/ALICE_analysis/AliceTaskGetEventTreeIA/task_FB_and_DptDpt_analysis/AliForwardBackwardAnalysis.cxx:1581)
-    "sumPtAllEvF"  ,
-    "sumPtAllEvB"  ,
-    "piFpjB"       ,
-    "nF*PB"    ,
-    "nB*PF"    ,
-    "pipjF"        ,
-    "(nF-1)*PF",
-    "nF*(nF-1)"    ,
-    "pipjB"        ,
-    "(nB-1)*PB",
-    "nB*(nB-1)"    ,
-
-
-    // to check VV comparison ptpt vs dptdpt: special terms:
-    "PF*PB",
-    "PF",
-    "PB",
-
-    // for new ratio-pt - April 2021
-    "nY*PF",
-    "nB*PX",
-    "nY*PX",
-
-    "nX*PB",
-    "nF*PY",
-    "nX*PY",
-
-    "Nb_OVER_Ny*PF",
-    "Nb_OVER_Ny*PX",
-    "Nf_OVER_Nx*PB",
-    "Nf_OVER_Nx*PY",
-
-    "sumPtAllEvX"  ,
-    "sumPtAllEvY"  ,
-
-
-
-};
-
-
-//const int nVars = sizeof(varNames)/sizeof(*varNames);
-
 
 
 // ######################################################################
@@ -619,7 +446,7 @@ public:
 
             // FROM /Volumes/OptibaySSD/ALICE_analysis/AliceTaskGetEventTreeIA/task_FB_and_DptDpt_analysis/AliForwardBackwardAnalysis.cxx:1583
             fillHistWithValue( "sumPtAllEvF" , w->_ptF );
-            if(0) fillHistWithValue( "sumPtAllEvB" , w->_ptB );
+            if(1) fillHistWithValue( "sumPtAllEvB" , w->_ptB );
             if(0) fillHistWithValue( "sumPtAllEvX" , w->_ptX );
             if(0) fillHistWithValue( "sumPtAllEvY" , w->_ptY );
 
@@ -686,17 +513,17 @@ public:
                 if(0) fillHistWithValue( "b_Nevents" ,    1                  );
 
                 if(0) fillHistWithValue( "NfPb_Nf" ,       w->_nF             );
-                if(0) fillHistWithValue( "NfPb_Pb" ,       meanPtB             );
+                if(0) fillHistWithValue( "NfPb_avPb" ,       meanPtB             );
                 if(0) fillHistWithValue( "NfPb_Nf2" ,      w->_nF*w->_nF      );
-                if(0) fillHistWithValue( "NfPb_Pb2" ,      meanPtB*meanPtB      );
-                if(0) fillHistWithValue( "NfPb_Nf_Pb" ,    w->_nF*meanPtB      );
+                if(0) fillHistWithValue( "NfPb_avPb2" ,      meanPtB*meanPtB      );
+                if(0) fillHistWithValue( "NfPb_Nf_avPb" ,    w->_nF*meanPtB      );
 
                 if(0) fillHistWithValue( "Nf_OVER_Nb" ,    w->_nF/(double)w->_nB      );
                 if(0) fillHistWithValue( "Nx_OVER_Nb" ,    w->_nX/(double)w->_nB      );
                 if(0) fillHistWithValue( "Ny_OVER_Nb" ,    w->_nY/(double)w->_nB      );
 
-                if(0) fillHistWithValue( "Pb_Nx" ,   meanPtB*w->_nX      );
-                if(0) fillHistWithValue( "Pb_Ny" ,   meanPtB*w->_nY      );
+                if(0) fillHistWithValue( "avPb_Nx" ,   meanPtB*w->_nX      );
+                if(0) fillHistWithValue( "avPb_Ny" ,   meanPtB*w->_nY      );
 
 
                 //            // for C when av over pairs is OUTSIDE sum:
@@ -719,18 +546,18 @@ public:
             {
                 fillHistWithValue( "f_Nevents" ,    1                  );
 
-                fillHistWithValue( "PfNb_Pf" ,         meanPtF           );
+                fillHistWithValue( "PfNb_avPf" ,         meanPtF           );
                 if(0) fillHistWithValue( "PfNb_Nb" ,        w->_nB            );
-                if(0) fillHistWithValue( "PfNb_Pf2" ,     meanPtF*meanPtF      );
+                if(0) fillHistWithValue( "PfNb_avPf2" ,     meanPtF*meanPtF      );
                 if(0) fillHistWithValue( "PfNb_Nb2" ,      w->_nB*w->_nB      );
-                if(0) fillHistWithValue( "PfNb_Pf_Nb" ,    meanPtF*w->_nB      );
+                if(0) fillHistWithValue( "PfNb_avPf_Nb" ,    meanPtF*w->_nB      );
 
                 if(0) fillHistWithValue( "Nb_OVER_Nf" ,    w->_nB/(double)w->_nF      );
                 if(0) fillHistWithValue( "Nx_OVER_Nf" ,    w->_nX/(double)w->_nF      );
                 if(0) fillHistWithValue( "Ny_OVER_Nf" ,    w->_nY/(double)w->_nF      );
 
-                if(0) fillHistWithValue( "Pf_Nx" ,   meanPtF*w->_nX      );
-                if(0) fillHistWithValue( "Pf_Ny" ,   meanPtF*w->_nY      );
+                if(0) fillHistWithValue( "avPf_Nx" ,   meanPtF*w->_nX      );
+                if(0) fillHistWithValue( "avPf_Ny" ,   meanPtF*w->_nY      );
 
                 //            // for C when av over pairs is OUTSIDE sum:
                 //            fillHistWithValue( "pipjF" ,              pipjF );
@@ -752,14 +579,14 @@ public:
             {
                 if(1) fillHistWithValue( "fb_Nevents" ,   1                  );
 
-                if(1) fillHistWithValue( "PfPb_Pf" ,       meanPtF             );
-                if(1) fillHistWithValue( "PfPb_Pb" ,       meanPtB             );
-                if(0) fillHistWithValue( "PfPb_Pf2" ,     meanPtF*meanPtF      );
-                if(0) fillHistWithValue( "PfPb_Pb2" ,     meanPtB*meanPtB      );
-                if(1) fillHistWithValue( "PfPb_Pf_Pb" ,   meanPtF*meanPtB      );
+                if(1) fillHistWithValue( "PfPb_avPf" ,       meanPtF             );
+                if(1) fillHistWithValue( "PfPb_avPb" ,       meanPtB             );
+                if(0) fillHistWithValue( "PfPb_avPf2" ,     meanPtF*meanPtF      );
+                if(0) fillHistWithValue( "PfPb_avPb2" ,     meanPtB*meanPtB      );
+                if(1) fillHistWithValue( "PfPb_avPf_avPb" ,   meanPtF*meanPtB      );
 
-                if(0) fillHistWithValue( "Nx_OVER_Nf_vs_Pb" ,   w->_nX/(double)w->_nF *meanPtB      );
-                if(0) fillHistWithValue( "Ny_OVER_Nb_vs_Pf" ,   w->_nY/(double)w->_nB *meanPtF      );
+                if(0) fillHistWithValue( "Nx_OVER_Nf_vs_avPb" ,   w->_nX/(double)w->_nF *meanPtB      );
+                if(0) fillHistWithValue( "Ny_OVER_Nb_vs_avPf" ,   w->_nY/(double)w->_nB *meanPtF      );
 
                 if(0) fillHistWithValue( "Nx_OVER_Nf_vs_Ny_OVER_Nb" ,   w->_nX/(double)w->_nF * w->_nY/(double)w->_nB      );
 
@@ -777,18 +604,18 @@ public:
                 if(0) fillHistWithValue( "y_Nevents" ,    1                  );
 
                 if(0) fillHistWithValue( "NxPy_Nx" ,        w->_nX             );
-                if(0) fillHistWithValue( "NxPy_Py" ,       meanPtY             );
+                if(0) fillHistWithValue( "NxPy_avPy" ,       meanPtY             );
                 if(0) fillHistWithValue( "NxPy_Nx2" ,      w->_nX*w->_nX      );
-                if(0) fillHistWithValue( "NxPy_Py2" ,      meanPtY*meanPtY      );
-                if(0) fillHistWithValue( "NxPy_Nx_Py" ,    w->_nX*meanPtY      );
+                if(0) fillHistWithValue( "NxPy_avPy2" ,      meanPtY*meanPtY      );
+                if(0) fillHistWithValue( "NxPy_Nx_avPy" ,    w->_nX*meanPtY      );
 
 
                 if(0) fillHistWithValue( "Nf_OVER_Ny" ,    w->_nF/(double)w->_nY      );
                 fillHistWithValue( "Nb_OVER_Ny" ,    w->_nB/(double)w->_nY      );
                 if(0) fillHistWithValue( "Nx_OVER_Ny" ,    w->_nX/(double)w->_nY      );
 
-                if(0) fillHistWithValue( "Nf_Py" ,   w->_nF*meanPtY       );
-                if(0) fillHistWithValue( "Nb_Py" ,   w->_nB*meanPtY       );
+                if(0) fillHistWithValue( "Nf_avPy" ,   w->_nF*meanPtY       );
+                if(0) fillHistWithValue( "Nb_avPy" ,   w->_nB*meanPtY       );
             }
 
             // x:
@@ -796,18 +623,18 @@ public:
             {
                 fillHistWithValue( "x_Nevents" ,    1                  );
 
-                if(0) fillHistWithValue( "PxNy_Px" ,         meanPtX           );
+                if(0) fillHistWithValue( "PxNy_avPx" ,         meanPtX           );
                 if(0) fillHistWithValue( "PxNy_Ny" ,        w->_nY            );
-                if(0) fillHistWithValue( "PxNy_Px2" ,     meanPtX*meanPtX      );
+                if(0) fillHistWithValue( "PxNy_avPx2" ,     meanPtX*meanPtX      );
                 if(0) fillHistWithValue( "PxNy_Ny2" ,      w->_nY*w->_nY      );
-                if(0) fillHistWithValue( "PxNy_Px_Ny" ,    meanPtX*w->_nY      );
+                if(0) fillHistWithValue( "PxNy_avPx_Ny" ,    meanPtX*w->_nY      );
 
                 fillHistWithValue( "Nf_OVER_Nx" ,    w->_nF/(double)w->_nX      );
                 if(0) fillHistWithValue( "Nb_OVER_Nx" ,    w->_nB/(double)w->_nX      );
                 if(0) fillHistWithValue( "Ny_OVER_Nx" ,    w->_nY/(double)w->_nX      );
 
-                if(0) fillHistWithValue( "Nf_Px" ,   w->_nF*meanPtX       );
-                if(0) fillHistWithValue( "Nb_Px" ,   w->_nB*meanPtX       );
+                if(0) fillHistWithValue( "Nf_avPx" ,   w->_nF*meanPtX       );
+                if(0) fillHistWithValue( "Nb_avPx" ,   w->_nB*meanPtX       );
             }
 
 
@@ -815,14 +642,14 @@ public:
             if ( w->_nX > 0 && w->_nY > 0 )
             {
                 fillHistWithValue( "xy_Nevents" ,   1                  );
-                if(1) fillHistWithValue( "PxPy_Px" ,       meanPtX             );
-                if(1) fillHistWithValue( "PxPy_Py" ,       meanPtY             );
-                if(0) fillHistWithValue( "PxPy_Px2" ,     meanPtX*meanPtX      );
-                if(0) fillHistWithValue( "PxPy_Py2" ,     meanPtY*meanPtY      );
-                if(1) fillHistWithValue( "PxPy_Px_Py" ,   meanPtX*meanPtY      );
+                if(1) fillHistWithValue( "PxPy_avPx" ,       meanPtX             );
+                if(1) fillHistWithValue( "PxPy_avPy" ,       meanPtY             );
+                if(0) fillHistWithValue( "PxPy_avPx2" ,     meanPtX*meanPtX      );
+                if(0) fillHistWithValue( "PxPy_avPy2" ,     meanPtY*meanPtY      );
+                if(1) fillHistWithValue( "PxPy_avPx_avPy" ,   meanPtX*meanPtY      );
 
-                if(0) fillHistWithValue( "Nf_OVER_Nx_vs_Py" ,   w->_nF/(double)w->_nX*meanPtY      );
-                if(0) fillHistWithValue( "Nb_OVER_Ny_vs_Px" ,   w->_nB/(double)w->_nY*meanPtX      );
+                if(0) fillHistWithValue( "Nf_OVER_Nx_vs_avPy" ,   w->_nF/(double)w->_nX*meanPtY      );
+                if(1) fillHistWithValue( "Nb_OVER_Ny_vs_avPx" ,   w->_nB/(double)w->_nY*meanPtX      );
 
                 fillHistWithValue( "Nf_OVER_Nx_vs_Nb_OVER_Ny" ,   w->_nF/(double)w->_nX * w->_nB/(double)w->_nY      );
             }
@@ -832,7 +659,7 @@ public:
             {
                 if(0) fillHistWithValue( "fx_Nevents" ,   1                  );
 
-                if(0) fillHistWithValue( "Pf_Px" ,   meanPtF*meanPtX      );
+                if(0) fillHistWithValue( "avPf_avPx" ,   meanPtF*meanPtX      );
 
                 if(0) fillHistWithValue( "Nb_OVER_Nf_vs_Ny_OVER_Nx" ,   w->_nB/(double)w->_nF * w->_nY/(double)w->_nX      );
             }
@@ -841,9 +668,9 @@ public:
             {
                 fillHistWithValue( "fy_Nevents" ,   1                  );
 
-                if(0) fillHistWithValue( "Pf_Py" ,   meanPtF*meanPtY      );
-                if(0) fillHistWithValue( "Nx_OVER_Nf_vs_Py" ,   w->_nX/(double)w->_nF *meanPtY      );
-                fillHistWithValue( "Nb_OVER_Ny_vs_Pf" ,   w->_nB/(double)w->_nY *meanPtF      );
+                if(0) fillHistWithValue( "avPf_avPy" ,   meanPtF*meanPtY      );
+                if(0) fillHistWithValue( "Nx_OVER_Nf_vs_avPy" ,   w->_nX/(double)w->_nF *meanPtY      );
+                if(0) fillHistWithValue( "Nb_OVER_Ny_vs_avPf" ,   w->_nB/(double)w->_nY *meanPtF      );
             }
             // bx:
             if ( w->_nB > 0 && w->_nX > 0 )
@@ -851,14 +678,14 @@ public:
                 if(0) fillHistWithValue( "bx_Nevents" ,   1                  );
 
                 if(0) fillHistWithValue( "Pb_Px" ,   meanPtB*meanPtX      );
-                if(0) fillHistWithValue( "Nf_OVER_Nx_vs_Pb" ,   w->_nF/(double)w->_nX *meanPtB      );
-                if(0) fillHistWithValue( "Ny_OVER_Nb_vs_Px" ,   w->_nY/(double)w->_nB *meanPtX      );
+                if(0) fillHistWithValue( "Nf_OVER_Nx_vs_avPb" ,   w->_nF/(double)w->_nX *meanPtB      );
+                if(0) fillHistWithValue( "Ny_OVER_Nb_vs_avPx" ,   w->_nY/(double)w->_nB *meanPtX      );
             }
             // by:
             if ( w->_nB > 0 && w->_nY > 0 )
             {
                 if(0) fillHistWithValue( "by_Nevents" ,   1                  );
-                if(0) fillHistWithValue( "Pb_Py" ,   meanPtB*meanPtY      );
+                if(0) fillHistWithValue( "avPb_avPy" ,   meanPtB*meanPtY      );
 
                 if(0) fillHistWithValue( "Nf_OVER_Nb_vs_Nx_OVER_Ny" ,   w->_nF/(double)w->_nB * w->_nX/(double)w->_nY      );
             }

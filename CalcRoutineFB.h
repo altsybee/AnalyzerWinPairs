@@ -42,17 +42,17 @@ struct cmp_str
 // names of final quantities
 const char *obsNames[] =
 {
-    "bcorr_FB",
-    "bcorr_PtN",
-    "bcorr_PtPt",
+//    "bcorr_FB",
+//    "bcorr_PtN",
+//    "bcorr_PtPt",
 
-    "nu_dyn_NN",
-    "nu_dyn_PtN",
-    "nu_dyn_PtPt",
+//    "nu_dyn_FB",
+//    "nu_dyn_PtN",
+//    "nu_dyn_PtPt",
 
     "sigma_FB",
-    "sigma_PtN",
-    "sigma_PtPt",
+//    "sigma_PtN",
+//    "sigma_PtPt",
 
     "avNF",
     "avNB",
@@ -61,20 +61,16 @@ const char *obsNames[] =
     "avPtB",
 
     // Dec2019: bonus:
-    "sigma_approx_FB",
 
     "bcorr_XY",
     "nu_dyn_XY",
     "sigma_XY",
-    "sigma_approx_XY",
 
     "nu_dyn_FY",
     "sigma_FY",
-    "sigma_approx_FY",
 
     "nu_dyn_XB",
     "sigma_XB",
-    "sigma_approx_XB",
 
 
     "avX",
@@ -92,8 +88,8 @@ const char *obsNames[] =
 
 
     // ##### meanPt-meanPt VS ETA (July 2022):
-    "R2_avPtavPt_direct",
-    "R2_avPtavPt_formula",
+    "avPtF_avPtB_direct",
+    "avPtF_avPtB_formula",
 
 
     // new ratio-ratio - June 2021: when denominator is in full acceptance
@@ -111,7 +107,6 @@ const char *obsNames[] =
 
     //
     "coeff_dptdpt",
-    "coeff_ptpt_with_means_in_denom",
     "coeff_ptpt_CHECK_VV_formula",
     "coeff_ptpt_BOZEK_2017",
     "C_BOZEK_F",
@@ -145,7 +140,7 @@ public:
     double avB[3];
 
     map<const char*,int> mapObs;   // helps checking which vars are not requested in array
-
+    bool firstFill; // to speed up (?) hist filling: skip if obs is not requested (but always try fill the first time because of the map usage)
 
 
     TH1D *histAccumulatedValues;   // //! accumulated values for observables
@@ -153,6 +148,7 @@ public:
 
     SimpleCalculations()
     {
+        firstFill = true;
 //        eSep = -1000;
         histAccumulatedValues = 0x0;
 
@@ -208,7 +204,12 @@ public:
     void fillHistWithValue( const char *varName, double value )
     {
         int varId = mapObs[varName];
-        histCalcObs->Fill( varId,   value );
+        if ( varId != 0 || firstFill ) // to avoid filling if no such obs name in array (== map returns zero)
+        {
+            histCalcObs->Fill( varId,   value );
+            if( firstFill )
+                firstFill = false;
+        }
     }
 
 
@@ -288,9 +289,10 @@ public:
     // ###########
     void finalCalc( double eSep, bool if_Identical_FB_XY, double eSizeNum, double eSizeDenom )
     {
-        bool identical = ( eSep==0 && if_Identical_FB_XY );
         // we assume that eSep=0 means windows are completely overlapped!
+        bool identical = ( eSep==0 && if_Identical_FB_XY );
 //        cout << "finalCalc: " << eSep << endl;
+
         histCalcObs->Reset();
 
         createNameValueMap();
@@ -304,29 +306,23 @@ public:
         averageOverEvents( "Nf*Nb", "Nevents" );
 
         averageOverEvents( "NfPb_Nf",     "b_Nevents" );
-        averageOverEvents( "NfPb_Pb",     "b_Nevents" );
+        averageOverEvents( "NfPb_avPb",     "b_Nevents" );
         averageOverEvents( "NfPb_Nf2",    "b_Nevents" );
-        averageOverEvents( "NfPb_Pb2",    "b_Nevents" );
-        averageOverEvents( "NfPb_Nf_Pb",  "b_Nevents" );
+        averageOverEvents( "NfPb_avPb2",    "b_Nevents" );
+        averageOverEvents( "NfPb_Nf_avPb",  "b_Nevents" );
 
-        averageOverEvents( "PfNb_Pf",     "f_Nevents" );
+        averageOverEvents( "PfNb_avPf",     "f_Nevents" );
         averageOverEvents( "PfNb_Nb",     "f_Nevents" );
-        averageOverEvents( "PfNb_Pf2",    "f_Nevents" );
+        averageOverEvents( "PfNb_avPf2",    "f_Nevents" );
         averageOverEvents( "PfNb_Nb2",    "f_Nevents" );
-        averageOverEvents( "PfNb_Pf_Nb",  "f_Nevents" );
+        averageOverEvents( "PfNb_avPf_Nb",  "f_Nevents" );
 
 
-        averageOverEvents( "PfPb_Pf",     "fb_Nevents" );
-        averageOverEvents( "PfPb_Pb",     "fb_Nevents" );
-        averageOverEvents( "PfPb_Pf2",    "fb_Nevents" );
-        averageOverEvents( "PfPb_Pb2",    "fb_Nevents" );
-        averageOverEvents( "PfPb_Pf_Pb",  "fb_Nevents" );
-        // KOSTYL'!!!!
-        //        averageOverEvents( "PfPb_Pf",     "Nevents" );
-        //        averageOverEvents( "PfPb_Pb",     "Nevents" );
-        //        averageOverEvents( "PfPb_Pf2",    "Nevents" );
-        //        averageOverEvents( "PfPb_Pb2",    "Nevents" );
-        //        averageOverEvents( "PfPb_Pf_Pb",  "Nevents" );
+        averageOverEvents( "PfPb_avPf",     "fb_Nevents" );
+        averageOverEvents( "PfPb_avPb",     "fb_Nevents" );
+        averageOverEvents( "PfPb_avPf2",    "fb_Nevents" );
+        averageOverEvents( "PfPb_avPb2",    "fb_Nevents" );
+        averageOverEvents( "PfPb_avPf_avPb",  "fb_Nevents" );
 
 
 
@@ -437,6 +433,13 @@ public:
 //        averageOverEvents( "nY*PX",  "Nevents" );
 
 
+        averageOverEvents( "PxPy_avPx",  "Nevents" );
+        averageOverEvents( "Nb_OVER_Ny_vs_avPx",  "xy_Nevents" );
+
+
+
+
+
 
         //  !!! ne nado average tut!!!      averageOverEvents( "sumPtAllEvF"  ,  "Nevents" );
         //  !!! ne nado average tut!!!      averageOverEvents( "sumPtAllEvB"  ,  "Nevents" );
@@ -453,15 +456,6 @@ public:
 
 
 
-
-        // ### !!! check that all data have been writen successfully:
-        //        for( int i = 11; i < nVars; i++ )
-        //            if ( data[i] == -1000 )
-        //            {
-        ////                cout << "ABNORMAL! data[i] == -1000 for i = " << i << ", varName = " << varNames[i] << endl;
-        ////                int tmpA;
-        ////                cin >> tmpA;
-        //            }
 
 
 
@@ -484,10 +478,10 @@ public:
         fillHistWithValue( "bcorr_FB",      bcorr[0] );
         fillHistWithValue( "bcorr_PtN",     bcorr[1] );
         fillHistWithValue( "bcorr_PtPt",    bcorr[2] );
-        fillHistWithValue( "nu_dyn_NN",     nu_dyn[0] );
+//        fillHistWithValue( "nu_dyn_FB",     nu_dyn[0] );
         fillHistWithValue( "nu_dyn_PtN",    nu_dyn[1] );
         fillHistWithValue( "nu_dyn_PtPt",   nu_dyn[2] );
-        fillHistWithValue( "sigma_FB",      sigma[0] );
+//        fillHistWithValue( "sigma_FB",      sigma[0] );
         fillHistWithValue( "sigma_PtN",     sigma[1] );
         fillHistWithValue( "sigma_PtPt",    sigma[2] );
 
@@ -501,12 +495,11 @@ public:
 
 
 
-
         // ##############################
-        // ##### coeff ratio-ratio
-        // ##############################
+        // now calc the observables
 
-        // formula:
+        double _nEvents     = mapData[ "Nevents" ];
+
         double FB = mapData[ "Nf*Nb" ];
         double XY = mapData[ "Nx*Ny" ];
         double FY = mapData[ "Nf*Ny" ];
@@ -517,217 +510,135 @@ public:
         double X = mapData[ "Nx" ];
         double Y = mapData[ "Ny" ];
 
+        double F2 = mapData[ "Nf2" ];
+        double X2 = mapData[ "Nx2" ];
+        double B2 = mapData[ "Nb2" ];
+        double Y2 = mapData[ "Ny2" ];
 
-        if(0)
+
+        // ###########
+        // ##### R2:
+        // ###########
         {
-            cout << "F=" << F << ", B=" << B;
-            cout << ", X=" << X << ", Y=" << Y;
-            cout << ", FB=" << FB << "    XY=" << XY << ", FY=" << FY <<  ", XB=" << XB;
-            cout << ", bcorr_ratio=" << FB/F/B + XY/X/Y - FY/F/Y - XB/X/B << endl;
+            double R2_aa = FB/F/B - 1;
+            double R2_bb = XY/X/Y - 1;
+            if ( identical )
+            {
+                R2_aa = F2/F/F -1/F - 1;
+                R2_bb = X2/X/X -1/X - 1;
+            }
+            fillHistWithValue( "corr_R2_ab", R2_aa );
+            fillHistWithValue( "corr_R2_ba", R2_bb );
         }
 
-        // R2:
-        {
-            double termToSubt = 0;
-            termToSubt = identical ? 1/F : 0;   /*cout << eSep << " --- " << termToSubt << endl;*/    fillHistWithValue( "corr_R2_aa", FB/F/B - termToSubt - 1 );
-            termToSubt = identical ? 1/X : 0;   /*cout << eSep << " --- " << termToSubt << endl;*/    fillHistWithValue( "corr_R2_bb", XY/X/Y - termToSubt - 1 );
-            fillHistWithValue( "corr_R2_ab", FY/F/Y - 1 );
-            fillHistWithValue( "corr_R2_ba", XB/X/B - 1 );
-        }
 
-
-        // rr coeffs:
+        // ##############################
+        // ##### coeff ratio-ratio
+        // ##############################
         double rFB = mapData[ "Nf_OVER_Nx_vs_Nb_OVER_Ny" ];
         double ratioF = mapData[ "Nf_OVER_Nx" ];
         double ratioB = mapData[ "Nb_OVER_Ny" ];
         {
-            // formula:
-//            double subtrF = identical ? 1/F : 0;
-//            double subtrX = identical ? 1/X : 0;
-//            double subtrAll = subtrF + subtrX;
-            //        fillHistWithValue( "corr_rr_formula", (F+B)/2 * (FB/F/B + XY/X/Y - FY/F/Y - XB/X/B) );
-            //        fillHistWithValue( "corr_rr_formula", F*B/(F+B) * (FB/F/B + XY/X/Y - FY/F/Y - XB/X/B) );
-
-            // direct:
-
-            //        fillHistWithValue( "corr_rr_direct", (F+B)/2 * ( rFB/ratioF/ratioB - 1 ) );
-            //        fillHistWithValue( "corr_rr_direct", F*B/(F+B) * ( rFB/ratioF/ratioB - 1 ) );
 
             double corr_rr_direct = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * ( rFB/ratioF/ratioB    - 1 );
             double corr_rr_formula = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * (FB/F/B + XY/X/Y - FY/F/Y - XB/X/B   );
 
             if (identical)
             {
-                double F2 = mapData[ "Nf2" ];
-                double X2 = mapData[ "Nx2" ];
-
                 corr_rr_direct = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * ( rFB/ratioF/ratioB - 1/F - 1/X   - 1 );
                 corr_rr_formula = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * (F2/F/F + X2/X/X - FY/F/Y - XB/X/B - 1/F - 1/X );
             }
             fillHistWithValue( "corr_rr_direct", corr_rr_direct );
             fillHistWithValue( "corr_rr_formula", corr_rr_formula );
 
+            // when denominator is in full acceptance:
+            {
+                double FX = FY;
 
+
+                double corr_rr_FULL_ETA_DENOM_formula = F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  ) ;
+                double corr_rr_FULL_ETA_DENOM_direct =  F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * ( rFB/ratioF/ratioB - 1   -1/X  ) ;
+
+                if (identical)
+                {
+                    corr_rr_FULL_ETA_DENOM_formula = F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  - 1/F ) ;
+                    corr_rr_FULL_ETA_DENOM_direct =  F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * ( rFB/ratioF/ratioB - 1   -1/X   - 1/F ) ;
+                }
+
+                //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", (F+B)/2 * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
+                //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", F*B/(F+B) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
+                fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", corr_rr_FULL_ETA_DENOM_formula );
+                fillHistWithValue( "corr_rr_FULL_ETA_DENOM_direct", corr_rr_FULL_ETA_DENOM_direct );
+
+            }
         }
-        //        cout <<
-
-        // new ratio-ratio - June 2021: when denominator is in full acceptance
-        {
-            double X2 = mapData[ "Nx2" ];
-            double FX = FY;
-
-            double termToSubt = 0;
-            termToSubt = identical ? 1/F : 0;
-
-            //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", (F+B)/2 * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
-            //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", F*B/(F+B) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
-            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  - termToSubt ) );
-
-
-            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_direct", F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * ( rFB/ratioF/ratioB - 1   -1/X   - termToSubt ) );
-
-        }
-
-        //        cout << ">>> F/eSizeNum = " << F/eSizeNum << ", X/eSizeNum = " << X/eSizeNum << ", X/eSizeDenom = " << X/eSizeDenom << endl;
-        //        cout << ">>> prefactor in corr_rr: " << F/eSizeNum * X/eSizeNum / (F/eSizeNum + X/eSizeNum) << "  ";
-        //        cout << ">>> prefactor in corr_rr_FULL_ETA_DENOM: " << F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) << endl;
-
-
 
 
 
         // ##############################
         // ##### coeff ratio-pT
         // ##############################
-
-        // formula:
-        //        double pXB = mapData[ "Nb_Px" ];
-        //        double pXY = mapData[ "PxNy_Px_Ny" ];
-        //        double ptX = mapData[ "PxNy_Px"  ];         // TAKE pT for x!!!
-
-        //        corr_rPt_formula = B*( pXB/ptX/B - pXY/ptX/Y);
-
-        double pYF = mapData[ "Nf_Py"       ];
-        double pYX = mapData[ "NxPy_Nx_Py"  ];
-        double ptY = mapData[ "NxPy_Py"     ];         // TAKE pT for x!!!
-
-        // April 2021:
-        double pFB = mapData[ "PfNb_Pf_Nb" ];
-        double pFY = mapData[ "Pf_Ny" ];
-        //        double ptB = mapData[ "NfPb_Pb"  ];
-        double ptF = mapData[ "PfNb_Pf"  ];
-
-
-
-        //        corr_rPt_formula = F*( pYF/ptY/F - pYX/ptY/X);
-        fillHistWithValue( "corr_rPt_formula", X/eSizeNum * ( pFB/ptF/B - pFY/ptF/Y) );
-
-
-        if(0)cout << " >> pYF=" << pYF << ", pFB=" << pFB
-                  << " >> ptY=" << ptY << ", ptF=" << ptF
-                  << " >> pYX=" << pYX << ", pFY=" << pFY
-                  << endl;
-
-
-        double eff = 1;
-        //        double eff = 0.8;
-
-        // direct:
-        //        double BoverY_vs_Px = mapData[ "Nb_OVER_Ny_vs_Px" ]; // TAKE pT for x!!!
-        double FoverX_vs_Pb = mapData[ "Nf_OVER_Nx_vs_Pb" ]; //"Nb_OVER_Ny_vs_Px" ]; // TAKE pT for x!!!
-        double BoverY_vs_Pf = mapData[ "Nb_OVER_Ny_vs_Pf" ];
-
-        //        corr_rPt_direct = B*( BoverY_vs_Px/ptX/ratioB - 1 );
-        //        corr_rPt_direct = F*( FoverX_vs_Pb/ptY/ratioF - 1 );
-        fillHistWithValue( "corr_rPt_direct", X/eSizeNum * ( BoverY_vs_Pf/ptF/ratioB - 1 ) );
-//        cout << " BoverY_vs_Pf = " << BoverY_vs_Pf << ", ratioB = " << ratioB << ", ptF = " << ptF << ", X/eSizeNum = " << X/eSizeNum << endl;
-
-        // new ratio-pt - April 2021: when pt is not averaged in each event
-        double _nEvents     = mapData[ "Nevents" ];
-        double _avPtAllEvF      = mapData[ "sumPtAllEvF" ]  / ( F*_nEvents );
-        //        double _avPtAllEvB     = mapData[ "sumPtAllEvB" ]  / ( B*_nEvents );
-//        double _avPtAllEvX      = mapData[ "sumPtAllEvX" ]  / ( X*_nEvents );
         {
-            // B/Y vs pT_F
-            double av_nB_PF = mapData[ "nB*PF" ] / _nEvents;
-            double av_nY_PF = mapData[ "nY*PF" ] / _nEvents;
-            double Nb_OVER_Ny_PF = mapData[ "Nb_OVER_Ny*PF" ];
-
-            //            corr_rSumPt_formula = F/eff*( av_nB_PF /B/F/_avPtAllEvF - av_nY_PF /Y/F/_avPtAllEvF );//- 1 );
-            //            corr_rSumPt_direct  = F/eff*( Nb_OVER_Ny_PF/F/ratioB/_avPtAllEvF - 1 );
-
             // B/Y vs pT_X
+            // direct
+//            double Nb_OVER_Ny_PX = mapData[ "Nb_OVER_Ny*PX" ];
+            double PxPy_avPx      = mapData[ "PxPy_avPx" ];
+            double Nb_OVER_Ny_vs_Px = mapData[ "Nb_OVER_Ny_vs_avPx" ];
+
+            fillHistWithValue( "corr_rPt_direct", X/eSizeNum * ( Nb_OVER_Ny_vs_Px/PxPy_avPx/ratioB - 1 ) );
+
+            // formula
             double nB_PX = mapData[ "nB*PX" ] / _nEvents;
             double nY_PX = mapData[ "nY*PX" ] / _nEvents;
-            double Nb_OVER_Ny_PX = mapData[ "Nb_OVER_Ny*PX" ];
-
-//            fillHistWithValue( "corr_rSumPt_formula", X/eSizeNum */*X/eff**/( nB_PX /B/X/_avPtAllEvX - nY_PX /Y/X/_avPtAllEvX ) );//- 1 );
-//            fillHistWithValue( "corr_rSumPt_direct", X/eSizeNum */*X/eff**/( Nb_OVER_Ny_PX/X/ratioB/_avPtAllEvX - 1 ) );
-
-
-            // new ratio-meanPt - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
-//            double _avSumPtInEvX      = mapData[ "sumPtAllEvX" ]  / _nEvents;
             double PX      = mapData[ "PX" ]  / _nEvents;
+
+            // new ratio-meanPt formula - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
+//            double _avSumPtInEvX      = mapData[ "sumPtAllEvX" ]  / _nEvents;
             double rPt_full_formula = X/eSizeNum * (  nB_PX /B/PX  + XY/X/Y - XB/X/B - nY_PX /Y/PX  ); // here even if wins are identical, +1/X-1/X cancels!
             if (identical)
             {
 //                double subtrX = identical ? 1/X : 0;
-                double X2 = mapData[ "Nx2" ];
                 double nX_PX = mapData[ "nX*PX" ] / _nEvents;
                 rPt_full_formula = X/eSizeNum * (  nB_PX /B/PX  + X2/X/X - XB/X/B - nX_PX /X/PX );
             }
             fillHistWithValue( "corr_rPt_full_formula", rPt_full_formula );
-
-
         }
 
 
 
 
-        // nn for X, Y:
+        // nu_dyn, sigma, avX, avY
         if(1)
         {
-            double X2 = mapData[ "Nx2" ];
-            double Y2 = mapData[ "Ny2" ];
-
-            double F2 = mapData[ "Nf2" ];
-            double B2 = mapData[ "Nb2" ];
-
-
             double numerator = XY - X * Y;
             double denominator_bCorr = X2 - X*X;
 
             fillHistWithValue( "avX", F );
             fillHistWithValue( "avY", B );
 
-
-            //bcorr
-            fillHistWithValue( "bcorr_XY", -1000 );
-            if ( denominator_bCorr != 0 )
-                fillHistWithValue( "bcorr_XY", numerator / denominator_bCorr );
-            else
-                if(0)cout << "!!!!! WARNING denominator_bCorr=" << denominator_bCorr
-                     << ", X2=" << X2 << ", X*X=" << X*X << endl;
-
-            if ( X != 0 && Y != 0 )
+            if ( F != 0 && B != 0 && X != 0 && Y != 0 )
             {
-                fillHistWithValue( "sigma_approx_FB", ( 2 - 2*( FB/F/B) ) / (1./F + 1./B) + 1. );
+                // FB
+                double nu_dyn_FB = ( F2 - F ) / F / F
+                        + ( B2 - B ) / B / B
+                        - 2*( FB/F/B);
+
+                fillHistWithValue( "nu_dyn_FB", nu_dyn_FB );
+                fillHistWithValue( "sigma_FB",  nu_dyn_FB / (1./F + 1./B) + 1. + (identical ? 1 : 0 ) );
 
                 // XY
                 double nu_dyn_XY = ( X2 - X ) / X / X
                         + ( Y2 - Y ) / Y / Y
                         - 2*( XY/X/Y);
                 fillHistWithValue( "nu_dyn_XY", nu_dyn_XY );
-                fillHistWithValue( "sigma_XY", nu_dyn_XY / (1./X + 1./Y) + 1. );
-                fillHistWithValue( "sigma_approx_XY", ( 2 - 2*( XY/X/Y) ) / (1./X + 1./Y) + 1. );
+                fillHistWithValue( "sigma_XY", nu_dyn_XY / (1./X + 1./Y) + 1.+ (identical ? 1 : 0 ) );
 
                 // FY
                 double nu_dyn_FY = ( F2 - F ) / F / F
                         + ( Y2 - Y ) / Y / Y
                         - 2*( FY/F/Y);
                 fillHistWithValue( "nu_dyn_FY", nu_dyn_FY );
-                fillHistWithValue( "sigma_FY", nu_dyn_FY / (1./F + 1./Y) + 1.);
-                fillHistWithValue( "sigma_approx_FY", ( 2 - 2*( FY/F/Y) ) / (1./F + 1./Y) + 1. );
+                fillHistWithValue( "sigma_FY", nu_dyn_FY / (1./F + 1./Y) + 1. );
 
                 // XB
                 double nu_dyn_XB = ( X2 - X ) / X / X
@@ -735,26 +646,12 @@ public:
                         - 2*( XB/X/B);
                 fillHistWithValue( "nu_dyn_XB", nu_dyn_XB );
                 fillHistWithValue( "sigma_XB", nu_dyn_XB / (1./X + 1./B) + 1. );
-                fillHistWithValue( "sigma_approx_XB", ( 2 - 2*( XB/X/B) ) / (1./X + 1./B) + 1. );
             }
         }
 
 
-
-
-        // ##### coeff ratio-sum pT (April 2021)
+        // ##### coeff avPt-avPt formula (new expansion, July 2022)
         {
-
-        }
-
-
-
-        // ##### coeff avPt-avPt_formula (new expansion, July 2022)
-        {
-//            double FB = mapData[ "Nf*Nb" ];
-//            double F = mapData[ "Nf" ];
-//            double B = mapData[ "Nb" ];
-
             double PF_PB = mapData[ "PF*PB" ] / mapData[ "Nevents" ];
             double nF_PB = mapData[ "nF*PB" ] / mapData[ "Nevents" ];
             double nB_PF = mapData[ "nB*PF" ] / mapData[ "Nevents" ];
@@ -763,11 +660,7 @@ public:
             double PB = mapData[ "PB" ] / mapData[ "Nevents" ];
 
 
-            double avPtavPt_formula = F/eSizeNum * ( PF_PB/PF/PB + FB/F/B - nF_PB/F/PB  - nB_PF/B/PF );
-//            double avPtavPt_formula =   (   FB/F/B - nF_PB/F/PB  - nB_PF/B/PF );
-//            double avPtavPt_formula =   (   FB/F/B   );
-//            double avPtavPt_formula = F/eSizeNum * (  nF_PB/F/PB  + nB_PF/B/PF );
-//            double avPtavPt_formula =   +10+( PF_PB/PF/PB   );
+            double avPtF_avPtB_formula = F/eSizeNum * ( PF_PB/PF/PB + FB/F/B - nF_PB/F/PB  - nB_PF/B/PF );
 
             if (identical)
             {
@@ -776,15 +669,22 @@ public:
                 double piF2 = mapData[ "piF2" ] / mapData[ "Nevents" ];
 
 //                double subtrX = identical ? 1/X : 0;
-                double F2 = mapData[ "Nf2" ];
                 // DODELAT' PF_PB !!!!!
-                avPtavPt_formula = F/eSizeNum * ( (PF2 - piF2)/PF/PF + F2/F/F  - nF_PF/F/PF  - nF_PF/F/PF     - 1/F + 1/F + 1/F );
+                avPtF_avPtB_formula = F/eSizeNum * ( (PF2 - piF2)/PF/PF + F2/F/F  - nF_PF/F/PF  - nF_PF/F/PF     - 1/F + 1/F + 1/F );
             }
 
-            histCalcObs->Fill( "R2_avPtavPt_formula", avPtavPt_formula );
+            fillHistWithValue( "avPtF_avPtB_formula", avPtF_avPtB_formula );
         }
 
+        // ##### coeff avPt-avPt direct
+        {
+            double Pf = mapData[ "PfPb_avPf" ] ;
+            double Pb = mapData[ "PfPb_avPb" ] ;
+            double Pf_Pb = mapData[ "PfPb_avPf_avPb" ];
 
+            fillHistWithValue( "avPtF_avPtB_direct", F/eSizeNum * ( Pf_Pb/(Pf * Pb) - 1 ) );
+//            cout << " >> Pf_Pb = " << Pf_Pb << ", Pf = " << Pf << ", Pb = " << Pb << endl;
+        }
 
 
 
@@ -793,41 +693,33 @@ public:
 
 
         // ##### dptdpt
-        //        {
-        //            double _nEvents     = mapData[ "Nevents" ];
-        //            double _avPtAllEvF     = mapData[ "sumPtAllEvF" ]  / ( F*_nEvents );
-        double _avPtAllEvB     = mapData[ "sumPtAllEvB" ]  / ( B*_nEvents );
-        if(0)cout << F << " "<< B << " " << _nEvents << " " << _avPtAllEvF << " " << _avPtAllEvB << endl;
-
-        double _piFpjB = mapData[ "piFpjB" ];
-        //        double _nF_sum_pB = mapData[ "nF*sum_pB" ];
-        //        double _nB_sum_pF = mapData[ "nB*sum_pF" ];
-        double _nF_sum_pB = mapData[ "nF*PB" ]; // /2; // /2 is TMP!!!
-        double _nB_sum_pF = mapData[ "nB*PF" ]; // /2;
-        //        cout << " >> " << _piFpjB << " "<< _nF_sum_pB << " " << _nB_sum_pF << endl;
-        //        cout << " >>>> " << ( _piFpjB - _nF_sum_pB*_avPtAllEvF - _nB_sum_pF*_avPtAllEvB)/ (FB*_nEvents) << endl;
-
-        // from /Volumes/OptibaySSD/ALICE_analysis/AliceTaskGetEventTreeIA/task_FB_and_DptDpt_analysis/results/_common_files/routine.h:169
-        histCalcObs->Fill( "coeff_dptdpt", (
-                               ( _piFpjB - _nF_sum_pB*_avPtAllEvF - _nB_sum_pF*_avPtAllEvB)/ (FB*_nEvents)
-                               + _avPtAllEvF*_avPtAllEvB
-                               ) / (_avPtAllEvF*_avPtAllEvB) );
-
-        //        }
-        // ### coeff ptpt with means in denom
+        if(0)
         {
-            double Pf = mapData[ "PfPb_Pf" ] ;
-            double Pb = mapData[ "PfPb_Pb" ] ;
-            double Pf_Pb = mapData[ "PfPb_Pf_Pb" ];
+            double _avPtAllEvF     = mapData[ "sumPtAllEvF" ]  / ( F*_nEvents );
+            double _avPtAllEvB     = mapData[ "sumPtAllEvB" ]  / ( B*_nEvents );
+            double _piFpjB = mapData[ "piFpjB" ];
+            //        double _nF_sum_pB = mapData[ "nF*sum_pB" ];
+            //        double _nB_sum_pF = mapData[ "nB*sum_pF" ];
+            double _nF_sum_pB = mapData[ "nF*PB" ]; // /2; // /2 is TMP!!!
+            double _nB_sum_pF = mapData[ "nB*PF" ]; // /2;
+            //        cout << " >> " << _piFpjB << " "<< _nF_sum_pB << " " << _nB_sum_pF << endl;
+            //        cout << " >>>> " << ( _piFpjB - _nF_sum_pB*_avPtAllEvF - _nB_sum_pF*_avPtAllEvB)/ (FB*_nEvents) << endl;
 
-            histCalcObs->Fill( "coeff_ptpt_with_means_in_denom", F/eSizeNum * ( Pf_Pb/(Pf * Pb) - 1 ) );
+            // from /Volumes/OptibaySSD/ALICE_analysis/AliceTaskGetEventTreeIA/task_FB_and_DptDpt_analysis/results/_common_files/routine.h:169
+            fillHistWithValue( "coeff_dptdpt", (
+                                   ( _piFpjB - _nF_sum_pB*_avPtAllEvF - _nB_sum_pF*_avPtAllEvB)/ (FB*_nEvents)
+                                   + _avPtAllEvF*_avPtAllEvB
+                                   ) / (_avPtAllEvF*_avPtAllEvB) );
         }
 
+        //        }
+
+
 
         // ### coeff ptpt with means in denom
-        {
+        if(0){
 
-            histCalcObs->Fill( "coeff_ptpt_CHECK_VV_formula",
+            fillHistWithValue( "coeff_ptpt_CHECK_VV_formula",
                                (mapData[ "Nf" ]
                                *mapData[ "Nb" ]
                     *mapData[ "PF*PB" ]
@@ -852,7 +744,11 @@ public:
         }
 
         // ### coeff ptpt BOZEK_2017_USING_QM17_RESULTS_1704.02777.pdf
+        if(0)
         {
+            double _avPtAllEvF     = mapData[ "sumPtAllEvF" ]  / ( F*_nEvents );
+            double _avPtAllEvB     = mapData[ "sumPtAllEvB" ]  / ( B*_nEvents );
+
             double Pf = mapData[ "PfPb_Pf" ] ;
             double Pb = mapData[ "PfPb_Pb" ] ;
             double Pf_Pb = mapData[ "PfPb_Pf_Pb" ];
@@ -873,12 +769,12 @@ public:
             //            double C_Bozek_F = pipjF_avPerEv/nEventsF*2 - 2*avPtAllEvF*secondTermFnew/nEventsF + avPtAllEvF*avPtAllEvF;
             //            double C_Bozek_B = pipjB_avPerEv/nEventsB*2 - 2*avPtAllEvB*secondTermBnew/nEventsB + avPtAllEvB*avPtAllEvB;
 
-            histCalcObs->Fill( "coeff_ptpt_BOZEK_2017", (Pf_Pb - Pf*Pb)/sqrt( C_Bozek_F_nPairs_OUTSIDE_sum * C_Bozek_B_nPairs_OUTSIDE_sum ) );
+            fillHistWithValue( "coeff_ptpt_BOZEK_2017", (Pf_Pb - Pf*Pb)/sqrt( C_Bozek_F_nPairs_OUTSIDE_sum * C_Bozek_B_nPairs_OUTSIDE_sum ) );
 
             //            if(0)cout <<  ">>> C_Bozek_B_nPairs_OUTSIDE_sum: " << _pipjB << " "<< _avPtAllEvB << " " << _avPtAllEvB << " " << nn_1B << ", coeff_ptpt_BOZEK_2017=" << coeff_ptpt_BOZEK_2017 << endl;
 
-            histCalcObs->Fill( "C_BOZEK_F", C_Bozek_F_nPairs_OUTSIDE_sum );
-            histCalcObs->Fill( "C_BOZEK_B", C_Bozek_B_nPairs_OUTSIDE_sum );
+            fillHistWithValue( "C_BOZEK_F", C_Bozek_F_nPairs_OUTSIDE_sum );
+            fillHistWithValue( "C_BOZEK_B", C_Bozek_B_nPairs_OUTSIDE_sum );
         }
 
 
