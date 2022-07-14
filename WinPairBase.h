@@ -1,3 +1,7 @@
+#ifndef _WinPairBase
+#define _WinPairBase
+
+
 #include "TH1.h"
 #include "TH1D.h"
 #include "TDirectory.h"
@@ -11,8 +15,6 @@ using namespace std;
 
 
 
-#ifndef _WinPairBase
-#define _WinPairBase
 
 
 
