@@ -139,8 +139,8 @@ public:
     double avF[3];
     double avB[3];
 
-    map<const char*,int> mapObs;   // helps checking which vars are not requested in array
-    bool firstFill; // to speed up (?) hist filling: skip if obs is not requested (but always try fill the first time because of the map usage)
+    map<const char*,int> mapObs;   // helps checking var duplicates
+//    bool firstFill; // to speed up (?) hist filling: skip if obs is not requested (but always try fill the first time because of the map usage)
 
 
     TH1D *histAccumulatedValues;   // //! accumulated values for observables
@@ -148,7 +148,7 @@ public:
 
     SimpleCalculations()
     {
-        firstFill = true;
+//        firstFill = true;
 //        eSep = -1000;
         histAccumulatedValues = 0x0;
 
@@ -203,13 +203,16 @@ public:
     // ###########
     void fillHistWithValue( const char *varName, double value )
     {
-        int varId = mapObs[varName];
-        if ( varId != 0 || firstFill ) // to avoid filling if no such obs name in array (== map returns zero)
-        {
-            histCalcObs->Fill( varId,   value );
-            if( firstFill )
-                firstFill = false;
-        }
+        // with mapObs, it was wrong! (corrupted logic..)
+//        int varId = mapObs[varName];
+//        if ( varId != 0 || firstFill ) // to avoid filling if no such obs name in array (== map returns zero)
+//        {
+//            cout << "varName = " << varName << ", varId = " << varId << endl;
+//            histCalcObs->Fill( varId,   value );
+        histCalcObs->Fill( varName,   value );
+//            if( firstFill )
+//                firstFill = false;
+//        }
     }
 
 
@@ -610,8 +613,8 @@ public:
         // nu_dyn, sigma, avX, avY
         if(1)
         {
-            double numerator = XY - X * Y;
-            double denominator_bCorr = X2 - X*X;
+//            double numerator = XY - X * Y;
+//            double denominator_bCorr = X2 - X*X;
 
             fillHistWithValue( "avX", F );
             fillHistWithValue( "avY", B );
@@ -622,16 +625,36 @@ public:
                 double nu_dyn_FB = ( F2 - F ) / F / F
                         + ( B2 - B ) / B / B
                         - 2*( FB/F/B);
-
+                if ( identical )
+                    nu_dyn_FB = 0;
                 fillHistWithValue( "nu_dyn_FB", nu_dyn_FB );
-                fillHistWithValue( "sigma_FB",  nu_dyn_FB / (1./F + 1./B) + 1. + (identical ? 1 : 0 ) );
+                fillHistWithValue( "sigma_FB",  nu_dyn_FB / (1./F + 1./B) + 1. );
+                if(0)cout << "F2 = " << F2
+                     << ", F = " << F
+                     << ", B2 = " << B2
+                     << ", B = " << B
+                     << ", FB = " << FB
+                     << ", sigmaFB = " << nu_dyn_FB / (1./F + 1./B) + 1.
+                     << endl;
+
+                           // << "( F2 - F ) / F / F = " << ( F2 - F ) / F / F
+////                     << ", ( B2 - B ) / B / B = " << ( B2 - B ) / B / B
+////                     << ", FB/F/B = " << FB/F/B
+//                     << "sigma_FB = " << nu_dyn_FB / (1./F + 1./B) + 1. << endl;
 
                 // XY
                 double nu_dyn_XY = ( X2 - X ) / X / X
                         + ( Y2 - Y ) / Y / Y
                         - 2*( XY/X/Y);
+                if ( identical )
+                    nu_dyn_XY = 0;
                 fillHistWithValue( "nu_dyn_XY", nu_dyn_XY );
-                fillHistWithValue( "sigma_XY", nu_dyn_XY / (1./X + 1./Y) + 1.+ (identical ? 1 : 0 ) );
+                fillHistWithValue( "sigma_XY", nu_dyn_XY / (1./X + 1./Y) + 1.  );
+
+//                cout << "sigma_XY = " << nu_dyn_XY / (1./X + 1./Y) + 1. << endl;
+
+
+
 
                 // FY
                 double nu_dyn_FY = ( F2 - F ) / F / F
@@ -797,6 +820,8 @@ public:
         //        cout << histCalcObs->GetName() << endl;
         //        cout << histCalcObs->GetXaxis()->FindBin( strBinName ) << endl;
         double y = histCalcObs->GetBinContent( histCalcObs->GetXaxis()->FindBin( strBinName ) );
+//        if( strBinName.CompareTo( "sigma_FB" ) )
+//            cout << "y = " << y << endl;
         double yerr = histCalcObs->GetBinError( histCalcObs->GetXaxis()->FindBin( strBinName ) );
         //        return histCalcObs->GetBinContent( 1 );
         gr->SetPoint( pointId, x, y );
