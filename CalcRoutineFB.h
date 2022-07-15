@@ -96,9 +96,8 @@ const char *obsNames[] =
     "corr_rr_FULL_ETA_DENOM_formula",
     "corr_rr_FULL_ETA_DENOM_direct",
 
-    "corr_rPt_formula",
+    "corr_rPt_formula",   // new ratio-meanPt - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
     "corr_rPt_direct",
-    "corr_rPt_full_formula",   // new ratio-meanPt - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
 
     // new ratio-pt - April 2021: when pt is not averaged in each event
     "corr_rSumPt_formula",
@@ -604,7 +603,7 @@ public:
                 double nX_PX = mapData[ "nX*PX" ] / _nEvents;
                 rPt_full_formula = X/eSizeNum * (  nB_PX /B/PX  + X2/X/X - XB/X/B - nX_PX /X/PX );
             }
-            fillHistWithValue( "corr_rPt_full_formula", rPt_full_formula );
+            fillHistWithValue( "corr_rPt_formula", rPt_full_formula );
         }
 
 
@@ -814,19 +813,19 @@ public:
         //        return histCalcObs->GetBinContent( 1 );
     }
 
-    void getValueWithError( TGraphErrors *gr, int pointId, double x, TString strBinName ) //char *strBinName )
-    {
-        //        cout << "histCalcObs: " << histCalcObs << endl;
-        //        cout << histCalcObs->GetName() << endl;
-        //        cout << histCalcObs->GetXaxis()->FindBin( strBinName ) << endl;
-        double y = histCalcObs->GetBinContent( histCalcObs->GetXaxis()->FindBin( strBinName ) );
-//        if( strBinName.CompareTo( "sigma_FB" ) )
-//            cout << "y = " << y << endl;
-        double yerr = histCalcObs->GetBinError( histCalcObs->GetXaxis()->FindBin( strBinName ) );
-        //        return histCalcObs->GetBinContent( 1 );
-        gr->SetPoint( pointId, x, y );
-        gr->SetPointError( pointId, 0, yerr );
-    }
+//    void getValueWithError( TGraphErrors *gr, int pointId, double x, TString strBinName ) //char *strBinName )
+//    {
+//        //        cout << "histCalcObs: " << histCalcObs << endl;
+//        //        cout << histCalcObs->GetName() << endl;
+//        //        cout << histCalcObs->GetXaxis()->FindBin( strBinName ) << endl;
+//        double y = histCalcObs->GetBinContent( histCalcObs->GetXaxis()->FindBin( strBinName ) );
+////        if( strBinName.CompareTo( "sigma_FB" ) )
+////            cout << "y = " << y << endl;
+//        double yerr = histCalcObs->GetBinError( histCalcObs->GetXaxis()->FindBin( strBinName ) );
+//        //        return histCalcObs->GetBinContent( 1 );
+//        gr->SetPoint( pointId, x, y );
+//        gr->SetPointError( pointId, 0, yerr );
+//    }
 };
 
 int SimpleCalculations::global_obs_hist_counter = 0;
@@ -852,7 +851,19 @@ struct CalcWithSubsamples
     TH3D *h3D;
     SimpleCalculations **wpObs;
 //    double eSep[MAX_N_WIN_PAIRS];
+    TGraphErrors *grVsEta[nObs];
 
+
+    TGraphErrors *getGraph( const char *strName )
+    {
+        if( !wpObs[0] )
+        {
+            cout << "AHTUNG!! wpObs[0] = 0!" << endl;
+            return 0x0;
+        }
+        int idObs = wpObs[0]->mapObs[strName];
+        return grVsEta[idObs];
+    }
 
     double takeEtaSep( TH3D *_h3D, int _iEta )
     {
@@ -887,9 +898,14 @@ struct CalcWithSubsamples
         cout << "##### nObs = " << nObs << endl;
         SimpleCalculations *wpSubsamples = new SimpleCalculations[nSubs];
 
-        for ( int iEta = 0; iEta < h3D->GetNbinsY(); iEta++ )
+        // create graphs per each observable
+        for( int iObs = 0; iObs < nObs; iObs++ )
+            grVsEta[iObs] = new TGraphErrors;
+
+
+        for ( int iEta = 0; iEta < nEta; iEta++ )
         {
-//            cout << "###### STARTING iEta = " << iEta << endl;
+            //            cout << "###### STARTING iEta = " << iEta << endl;
             wpObs[iEta] = new SimpleCalculations;
             // continue;
 
@@ -920,26 +936,29 @@ struct CalcWithSubsamples
 
 
             // subsampling for each observable:
-            for( int bin = 0; bin < nObs; bin++ )
+            for( int iObs = 0; iObs < nObs; iObs++ )
             {
                 // mean
-                double mean = wpObs[iEta]->histCalcObs->GetBinContent( bin+1);
+                double mean = wpObs[iEta]->histCalcObs->GetBinContent( iObs+1);
 
 
                 // stdDev:
                 double std_dev = 0;
                 for ( int iSub = 0; iSub < nSubs; iSub++)
                 {
-                    double value = wpSubsamples[iSub].histCalcObs->GetBinContent( bin+1);
+                    double value = wpSubsamples[iSub].histCalcObs->GetBinContent( iObs+1);
                     float diff = value - mean;
                     std_dev += diff*diff;
                 }
                 std_dev = sqrt(std_dev / nSubs / (nSubs-1) );
 
-                wpObs[iEta]->histCalcObs->SetBinError( bin+1, std_dev );
+                wpObs[iEta]->histCalcObs->SetBinError( iObs+1, std_dev );
 
                 //                cout << wpObs[iEta]->histCalcObs->GetXaxis()->GetBinLabel( bin+1 ) << " = " << mean << ", std_dev = " << std_dev << endl;
 
+                // add points to graphs:
+                grVsEta[iObs]->SetPoint( iEta, eSep, mean );
+                grVsEta[iObs]->SetPointError( iEta, 0, std_dev );
             }
         }
         delete [] wpSubsamples;
