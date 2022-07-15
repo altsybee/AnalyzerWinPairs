@@ -89,7 +89,8 @@ int read_output()
     //    TString fileName = "toy_output_fraction_K_fraction_fixed_0.2_SRC_OSonly_nPartGaus80_4_nEv500k.root";
     //    TString fileName = "toy_output_fraction_K_fraction_binomial_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
     //    TString fileName = "toy_output_fraction_K_fraction_fixed_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
-    TString fileName = "toy_output_gaus_500_10.root";
+//    TString fileName = "toy_output_gaus_500_10.root";
+    TString fileName = "output_toy.root";
     //    TString fileName = "toy_output_gaus_500_10_BEFORE_CHANGES.root";
     //    TString fileName = "toy_output_FIST.root";
     //    TString fileName = "output_heavy_ions_test_10k.root";
@@ -190,9 +191,7 @@ int read_output()
     const int N_AN_LEVELS = 3;//3;//3;//6;//3;
     //    SimpleCalculations *winPairs[nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins][nEtaBins][nWinPairWithSubsamples];
     //    SimpleCalculations *winPairs[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins][nEtaBins][nWinPairWithSubsamples];
-    TString strAnLevels[] = { "SIM", "REC", "CORRECTED" };
-    //    TString strAnLevels[] = { "SIM_FullEtaForDenom", "REC_FullEtaForDenom", "CORRECTED_FullEtaForDenom" };
-    //    TString strAnLevels[] = { "SIM", "REC", "CORRECTED", "SIM_FullEtaForDenom", "REC_FullEtaForDenom", "CORRECTED_FullEtaForDenom" };
+    TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
 
     TStopwatch timer;
     timer.Start();
@@ -204,6 +203,7 @@ int read_output()
 
     CalcWithSubsamples observables[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins];
     CalcWithSubsamples observables_FULL_ETA_DENOM[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins];
+    CalcWithSubsamples observables_FULL_ETA_NUM_AND_DENOM[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins];
     //    return 0;
 
 
@@ -230,16 +230,22 @@ int read_output()
                     for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
                         CalcWithSubsamples *calcObj = &observables[iAnLevel][iType][iCW][ cBin ][iPt];
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_WRAPPER_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_WRAPPER_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        //                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_SIM_FULL_ETA_WRAPPER_cBin%d", cBin) );
+                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eSize, ifIdent );
 
                         // FULL ETA DENOM:
                         calcObj = &observables_FULL_ETA_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_SIM_FULL_ETA_DENOM_WRAPPER_cBin%d", cBin) );
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_SIM_FULL_ETA_DENOM_WRAPPER_cBin%d", cBin) );
+                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eRange*2, ifIdent );
+
+
+                        // FULL ETA FOR both Num and Denom: to calc nu_dyn!
+                        calcObj = &observables_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
+                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_NUM_AND_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_FULL_ETA_NUM_AND_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+                        calcObj->calc( eRange*2, eRange*2, ifIdent );
                     }
             }
     cout << "##### End of reading win info from histograms." << endl;
@@ -281,7 +287,9 @@ int read_output()
 //    drawGraph( gr_nF[ 0 ][0][0][0], 20, kRed, "APz" );
 
 
+    // #####################################################
     // ### Ratio - Ratio correlations vs centrality:
+    // #####################################################
     if (0)
     {
 //        TCanvas *canv_ratio_ratio = new TCanvas("canv_ratio_ratio","canv_ratio_ratio",120,55,800,600);
@@ -358,13 +366,16 @@ int read_output()
 //    TGraphErrors *gr4 = gr_corr_rr_formula_VS_ETA[ /*2*/0 ][4][0][0];
 
 
-    TGraphErrors *gr0 = observables[0][0][0][0][0].getGraph( "corr_rr_formula" ); // [iAnLevel][iType][iCW][cBin][ptBinForAn]
-    TGraphErrors *gr1 = observables[0][1][0][0][0].getGraph( "corr_rr_formula" );
-    TGraphErrors *gr2 = observables[0][2][0][0][0].getGraph( "corr_rr_formula" );
-    TGraphErrors *gr3 = observables[0][3][0][0][0].getGraph( "corr_rr_formula" );
-    TGraphErrors *gr4 = observables[0][4][0][0][0].getGraph( "corr_rr_formula" );
+    TGraphErrors *gr0_corr_rr_formula = observables[0][0][0][0][0].getGraph( "corr_rr_formula" ); // [iAnLevel][iType][iCW][cBin][ptBinForAn]
+    TGraphErrors *gr1_corr_rr_formula = observables[0][1][0][0][0].getGraph( "corr_rr_formula" );
+    TGraphErrors *gr2_corr_rr_formula = observables[0][2][0][0][0].getGraph( "corr_rr_formula" );
+    TGraphErrors *gr3_corr_rr_formula = observables[0][3][0][0][0].getGraph( "corr_rr_formula" );
+    TGraphErrors *gr4_corr_rr_formula = observables[0][4][0][0][0].getGraph( "corr_rr_formula" );
 
 
+    double factor_n_to_N = (2*eRange)/eSize;
+    cout << ">>>>>> Integral rr = " << observables[0][0][0][0][0].getIntegral( "corr_rr_formula" ) /factor_n_to_N /factor_n_to_N << endl;
+    cout << ">>>>>> observables_FULL_ETA_NUM_AND_DENOM: Integral rr = " << observables_FULL_ETA_NUM_AND_DENOM[0][0][0][0][0].getIntegral( "corr_rr_formula" ) << endl;
 
 
 
@@ -383,26 +394,25 @@ int read_output()
 
     //    multiplyPointsByFactor( gr0_FullEtaInDenom, 1./0.2, true );
 
-    gr0->GetYaxis()->SetRangeUser(0,2);
-    gr0->SetTitle( ";#Delta#eta;#nu_{FB} #times #LTdN_{#pi^{+}}/d#eta#GT" );
-    tuneGraphAxisLabels( gr0 );
+    gr0_corr_rr_formula->GetYaxis()->SetRangeUser(0,2);
+    gr0_corr_rr_formula->SetTitle( ";#Delta#eta;#nu_{FB} #times #LTdN_{#pi^{+}}/d#eta#GT" );
+    tuneGraphAxisLabels( gr0_corr_rr_formula );
 
-    drawGraph( gr0, 27, kGreen+1, "APz" );
-    drawGraph( gr1, 20, kRed, "Pz" );
-    drawGraph( gr2, 24, kRed+1, "Pz" );
-    //    drawGraph( gr0_FullEtaInDenom, 29, kRed+2, "Pz" );
-
-    drawGraph( gr3, 21, kBlue, "Pz" );
-    drawGraph( gr4, 25, kBlue+1, "Pz" );
+    drawGraph( gr0_corr_rr_formula, 27, kGreen+1,   "APz" );
+    drawGraph( gr1_corr_rr_formula, 20, kRed,       "Pz" );
+    drawGraph( gr2_corr_rr_formula, 24, kRed+2,     "Pz" );
+    drawGraph( gr3_corr_rr_formula, 21, kBlue,      "Pz" );
+    drawGraph( gr4_corr_rr_formula, 25, kBlue+2,    "Pz" );
 
 
-    TLegend *leg_nuFB_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
+    TLegend *leg_nuFB_vs_eta = new TLegend(0.34,0.55,0.94,0.82);
     tuneLegend( leg_nuFB_vs_eta );
-    leg_nuFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, formula", "p");
-    leg_nuFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, formula", "p");
-    leg_nuFB_vs_eta->AddEntry( gr2, "K#minus/#pi#minus, K#minus/#pi#minus, formula", "p");
-    leg_nuFB_vs_eta->AddEntry( gr3, "K+/#pi+, K#minus/#pi#minus, formula", "p");
-    leg_nuFB_vs_eta->AddEntry( gr4, "K#minus/#pi#minus, K+/#pi+, formula", "p");
+    leg_nuFB_vs_eta->SetNColumns(2);
+    leg_nuFB_vs_eta->AddEntry( gr0_corr_rr_formula, "K/#pi, K/#pi, formula", "p");
+    leg_nuFB_vs_eta->AddEntry( gr1_corr_rr_formula, "K+/#pi+, K+/#pi+, formula", "p");
+    leg_nuFB_vs_eta->AddEntry( gr2_corr_rr_formula, "K#minus/#pi#minus, K#minus/#pi#minus, formula", "p");
+    leg_nuFB_vs_eta->AddEntry( gr3_corr_rr_formula, "K+/#pi+, K#minus/#pi#minus, formula", "p");
+    leg_nuFB_vs_eta->AddEntry( gr4_corr_rr_formula, "K#minus/#pi#minus, K+/#pi+, formula", "p");
     //    leg_nuFB_vs_eta->AddEntry( gr0, "gen K/#pi, K/#pi, formula", "p");
     //    leg_nuFB_vs_eta->AddEntry( gr1, "rec K/#pi, K/#pi, formula", "p");
     //    leg_nuFB_vs_eta->AddEntry( gr2, "corrected K/#pi, K/#pi, formula", "p");
@@ -488,8 +498,8 @@ int read_output()
 
 
 
-    gr0->Fit("pol0");
-    gr0->GetFunction("pol0")->Draw("same");
+    gr0_corr_rr_formula->Fit("pol0");
+    gr0_corr_rr_formula->GetFunction("pol0")->Draw("same");
 
 
     // direct:
@@ -500,9 +510,11 @@ int read_output()
 //    gr1 = gr_corr_rr_direct_VS_ETA[ 0 ][1][0][0];
 //    gr2 = gr_corr_rr_direct_VS_ETA[ 0 ][2][0][0];
 
-    gr0 = observables[0][0][0][0][0].getGraph( "corr_rr_direct" );
-    gr1 = observables[0][1][0][0][0].getGraph( "corr_rr_direct" );
-    gr2 = observables[0][2][0][0][0].getGraph( "corr_rr_direct" );
+    TGraphErrors *gr0_corr_rr_direct = observables[0][0][0][0][0].getGraph( "corr_rr_direct" );
+    TGraphErrors *gr1_corr_rr_direct = observables[0][1][0][0][0].getGraph( "corr_rr_direct" );
+    TGraphErrors *gr2_corr_rr_direct = observables[0][2][0][0][0].getGraph( "corr_rr_direct" );
+    TGraphErrors *gr3_corr_rr_direct = observables[0][3][0][0][0].getGraph( "corr_rr_direct" );
+    TGraphErrors *gr4_corr_rr_direct = observables[0][4][0][0][0].getGraph( "corr_rr_direct" );
 
     //    gr1 = gr_corr_rr_direct_VS_ETA[ 1 ][0][0][0];
     //    gr2 = gr_corr_rr_direct_VS_ETA[ 2 ][0][0][0];
@@ -517,76 +529,41 @@ int read_output()
     //    multiplyPointsByFactor( gr2, 1./0.1, true );
 
 
-    gr0->SetFillColor(kRed);
-    gr0->SetFillStyle(3005);
-    gr1->SetFillColor(kBlue);
-    gr1->SetFillStyle(3005);
-    gr2->SetFillColor(kMagenta);
-    gr2->SetFillStyle(3005);
+    gr0_corr_rr_direct->SetFillColor( kGreen+1 );
+    gr1_corr_rr_direct->SetFillColor( kRed );
+    gr2_corr_rr_direct->SetFillColor( kRed+2 );
+    gr3_corr_rr_direct->SetFillColor( kBlue );
+    gr4_corr_rr_direct->SetFillColor( kBlue+2 );
 
-    drawGraph( gr0, 1, kRed, "le3" );
-    drawGraph( gr1, 1, kBlue, "le3" );
-    drawGraph( gr2, 1, kMagenta, "le3" );
-
-
-    // #### now FULL DENOM:
-//    TGraphErrors *gr0_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][0][0][0];
-//    TGraphErrors *gr1_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][1][0][0];
-//    TGraphErrors *gr2_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][2][0][0];
-//    TGraphErrors *gr3_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][3][0][0]; // !!! Note OS!
-//    TGraphErrors *gr4_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][4][0][0]; // !!! Note OS!
-
-    TGraphErrors *gr0_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraph( "corr_rr_formula" );
-    TGraphErrors *gr1_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][1][0][0][0].getGraph( "corr_rr_formula" );
-    TGraphErrors *gr2_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][2][0][0][0].getGraph( "corr_rr_formula" );
-    TGraphErrors *gr3_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][3][0][0][0].getGraph( "corr_rr_formula" );
-    TGraphErrors *gr4_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][4][0][0][0].getGraph( "corr_rr_formula" );
+    gr0_corr_rr_direct->SetFillStyle(3005);
+    gr1_corr_rr_direct->SetFillStyle(3005);
+    gr2_corr_rr_direct->SetFillStyle(3005);
+    gr3_corr_rr_direct->SetFillStyle(3005);
+    gr4_corr_rr_direct->SetFillStyle(3005);
 
 
-    shiftPointX( gr0_rr_formula_fullDenom, 0.04 );
-    shiftPointX( gr1_rr_formula_fullDenom, 0.04 );
-    shiftPointX( gr2_rr_formula_fullDenom, 0.04 );
-    shiftPointX( gr3_rr_formula_fullDenom, 0.04 );
-    shiftPointX( gr4_rr_formula_fullDenom, 0.04 );
+    drawGraph( gr0_corr_rr_direct, 1, kGreen+1, "le3" );
+    drawGraph( gr1_corr_rr_direct, 1, kRed, "le3" );
+    drawGraph( gr2_corr_rr_direct, 1, kRed+2, "le3" );
+    drawGraph( gr3_corr_rr_direct, 1, kBlue, "le3" );
+    drawGraph( gr4_corr_rr_direct, 1, kBlue+2, "le3" );
 
-    drawGraph( gr0_rr_formula_fullDenom, 24, kGreen+1, "Pz", 1.5 );
-    drawGraph( gr1_rr_formula_fullDenom, 24, kRed, "Pz", 1.5 );
-    drawGraph( gr2_rr_formula_fullDenom, 24, kRed+1, "Pz", 1.5 );
-    drawGraph( gr3_rr_formula_fullDenom, 24, kBlue, "Pz", 1.5 );
-    drawGraph( gr4_rr_formula_fullDenom, 24, kBlue+1, "Pz", 1.5 );
+    leg_nuFB_vs_eta->AddEntry( gr0_corr_rr_direct, "K/#pi, K/#pi, direct", "lf");
+    leg_nuFB_vs_eta->AddEntry( gr1_corr_rr_direct, "K+/#pi+, K+/#pi+, direct", "lf");
+    leg_nuFB_vs_eta->AddEntry( gr2_corr_rr_direct, "K+/#pi+, K#minus/#pi#minus, direct", "lf");
+    leg_nuFB_vs_eta->AddEntry( gr3_corr_rr_direct, "K+/#pi+, K#minus/#pi#minus, direct", "lf");
+    leg_nuFB_vs_eta->AddEntry( gr4_corr_rr_direct, "K#minus/#pi#minus, K+/#pi+, direct", "lf");
 
 
-    // #### now FULL DENOM:
-    TGraphErrors *gr0_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraph( "corr_rr_direct" );
-    TGraphErrors *gr1_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][1][0][0][0].getGraph( "corr_rr_direct" );
-    TGraphErrors *gr2_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][2][0][0][0].getGraph( "corr_rr_direct" );
-    TGraphErrors *gr3_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][3][0][0][0].getGraph( "corr_rr_direct" );  // !!! Note OS!
-    TGraphErrors *gr4_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][4][0][0][0].getGraph( "corr_rr_direct" );  // !!! Note OS!
 
-    shiftPointX( gr0_rr_direct_fullDenom, 0.04 );
-    shiftPointX( gr1_rr_direct_fullDenom, 0.04 );
-    shiftPointX( gr2_rr_direct_fullDenom, 0.04 );
-    shiftPointX( gr3_rr_direct_fullDenom, 0.04 );
-    shiftPointX( gr4_rr_direct_fullDenom, 0.04 );
 
-    drawGraph( gr0_rr_direct_fullDenom, 21, kGreen+1, "L", 0.8 );
-    drawGraph( gr1_rr_direct_fullDenom, 21, kRed, "L", 0.8 );
-    drawGraph( gr2_rr_direct_fullDenom, 21, kRed+1, "L", 0.8 );
-    drawGraph( gr3_rr_direct_fullDenom, 21, kBlue, "L", 0.8 );
-    drawGraph( gr4_rr_direct_fullDenom, 21, kBlue+1, "L", 0.8 );
 
-    gPad->SetGrid();
-
-    leg_nuFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, direct", "lf");
-    leg_nuFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, direct", "lf");
-    leg_nuFB_vs_eta->AddEntry( gr2, "K+/#pi+, K#minus/#pi#minus, direct", "lf");
     //    leg_nuFB_vs_eta->AddEntry( gr0, "gen K/#pi, K/#pi, direct", "lf");
     //    leg_nuFB_vs_eta->AddEntry( gr0, "gen K/#pi, K/#pi, direct", "lf");
     //    leg_nuFB_vs_eta->AddEntry( gr1, "gen K/#pi, K/#pi, direct", "lf");
     //    leg_nuFB_vs_eta->AddEntry( gr1, "rec K/#pi, K/#pi, direct", "lf");
     //    leg_nuFB_vs_eta->AddEntry( gr2, "corrected K/#pi, K/#pi, direct", "lf");
 
-    leg_nuFB_vs_eta->Draw();
 
     //    return 0;
 
@@ -639,6 +616,76 @@ int read_output()
 
 
 
+    // #### now FULL DENOM formula:
+//    TGraphErrors *gr0_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][0][0][0];
+//    TGraphErrors *gr1_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][1][0][0];
+//    TGraphErrors *gr2_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][2][0][0];
+//    TGraphErrors *gr3_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][3][0][0]; // !!! Note OS!
+//    TGraphErrors *gr4_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][4][0][0]; // !!! Note OS!
+
+    TGraphErrors *gr0_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" );
+    TGraphErrors *gr1_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][1][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" );
+    TGraphErrors *gr2_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][2][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" );
+    TGraphErrors *gr3_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][3][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" ); // !!! Note OS!
+    TGraphErrors *gr4_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][4][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" ); // !!! Note OS!
+
+
+    shiftPointX( gr0_rr_formula_fullDenom, 0.04 );
+    shiftPointX( gr1_rr_formula_fullDenom, 0.04 );
+    shiftPointX( gr2_rr_formula_fullDenom, 0.04 );
+    shiftPointX( gr3_rr_formula_fullDenom, 0.04 );
+    shiftPointX( gr4_rr_formula_fullDenom, 0.04 );
+
+    drawGraph( gr0_rr_formula_fullDenom, 30, kGreen+1, "Pz", 1.5 );
+    drawGraph( gr1_rr_formula_fullDenom, 30, kRed, "Pz", 1.5 );
+    drawGraph( gr2_rr_formula_fullDenom, 30, kRed+2, "Pz", 1.5 );
+    drawGraph( gr3_rr_formula_fullDenom, 30, kBlue, "Pz", 1.5 );
+    drawGraph( gr4_rr_formula_fullDenom, 30, kBlue+2, "Pz", 1.5 );
+
+
+    // #### now FULL DENOM direct:
+    TGraphErrors *gr0_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );
+    TGraphErrors *gr1_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][1][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );
+    TGraphErrors *gr2_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][2][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );
+    TGraphErrors *gr3_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][3][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );  // !!! Note OS!
+    TGraphErrors *gr4_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][4][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );  // !!! Note OS!
+
+//    shiftPointX( gr0_rr_direct_fullDenom, 0.04 );
+//    shiftPointX( gr1_rr_direct_fullDenom, 0.04 );
+//    shiftPointX( gr2_rr_direct_fullDenom, 0.04 );
+//    shiftPointX( gr3_rr_direct_fullDenom, 0.04 );
+//    shiftPointX( gr4_rr_direct_fullDenom, 0.04 );
+
+//    drawGraph( gr0_rr_direct_fullDenom, 21, kGreen+1, "L", 0.8 );
+//    drawGraph( gr1_rr_direct_fullDenom, 21, kRed, "L", 0.8 );
+//    drawGraph( gr2_rr_direct_fullDenom, 21, kRed+1, "L", 0.8 );
+//    drawGraph( gr3_rr_direct_fullDenom, 21, kBlue, "L", 0.8 );
+//    drawGraph( gr4_rr_direct_fullDenom, 21, kBlue+1, "L", 0.8 );
+
+    gr0_rr_direct_fullDenom->SetFillColor( kGreen+1 );
+    gr1_rr_direct_fullDenom->SetFillColor( kRed );
+    gr2_rr_direct_fullDenom->SetFillColor( kRed+2 );
+    gr3_rr_direct_fullDenom->SetFillColor( kBlue );
+    gr4_rr_direct_fullDenom->SetFillColor( kBlue+2 );
+
+    gr0_rr_direct_fullDenom->SetLineStyle(2);
+    gr1_rr_direct_fullDenom->SetLineStyle(2);
+    gr2_rr_direct_fullDenom->SetLineStyle(2);
+    gr3_rr_direct_fullDenom->SetLineStyle(2);
+    gr4_rr_direct_fullDenom->SetLineStyle(2);
+
+
+    drawGraph( gr0_rr_direct_fullDenom, 1, kGreen+1, "l" );
+    drawGraph( gr1_rr_direct_fullDenom, 1, kRed, "l" );
+    drawGraph( gr2_rr_direct_fullDenom, 1, kRed+2, "l" );
+    drawGraph( gr3_rr_direct_fullDenom, 1, kBlue, "l" );
+    drawGraph( gr4_rr_direct_fullDenom, 1, kBlue+2, "l" );
+
+
+    gPad->SetGrid();
+    leg_nuFB_vs_eta->Draw();
+
+
 
 
     // #######################################
@@ -657,22 +704,22 @@ int read_output()
     //    gr2 = gr_SIGMA_FY_VS_ETA[ 0 ][0][0];
     //    gr3 = gr_SIGMA_XB_VS_ETA[ 0 ][0][0];
 
-    gr0 = observables[0][1][0][0][0].getGraph( "sigma_FB" );  //  gr_SIGMA_VS_ETA   [0][ 3 ][0][0];
-    gr1 = observables[0][1][0][0][0].getGraph( "sigma_XY" );  //  gr_SIGMA_XY_VS_ETA[0][ 3 ][0][0];
-    gr2 = observables[0][1][0][0][0].getGraph( "sigma_FY" );  //  gr_SIGMA_FY_VS_ETA[0][ 3 ][0][0];
-    gr3 = observables[0][1][0][0][0].getGraph( "sigma_XB" );  //  gr_SIGMA_XB_VS_ETA[0][ 3 ][0][0];
+    TGraphErrors *gr_sigma_FB = observables[0][1][0][0][0].getGraph( "sigma_FB" );  //  gr_SIGMA_VS_ETA   [0][ 3 ][0][0];
+    TGraphErrors *gr_sigma_XY = observables[0][1][0][0][0].getGraph( "sigma_XY" );  //  gr_SIGMA_XY_VS_ETA[0][ 3 ][0][0];
+    TGraphErrors *gr_sigma_FY = observables[0][1][0][0][0].getGraph( "sigma_FY" );  //  gr_SIGMA_FY_VS_ETA[0][ 3 ][0][0];
+    TGraphErrors *gr_sigma_XB = observables[0][1][0][0][0].getGraph( "sigma_XB" );  //  gr_SIGMA_XB_VS_ETA[0][ 3 ][0][0];
 
 
 
 
-    tuneGraphAxisLabels( gr0 );
-    gr0->GetYaxis()->SetRangeUser(0.88, 1.2);
-    gr0->SetTitle( ";#Delta#eta;#Sigma_{FB}" );
+    tuneGraphAxisLabels( gr_sigma_FB );
+    gr_sigma_FB->GetYaxis()->SetRangeUser(0.88, 1.2);
+    gr_sigma_FB->SetTitle( ";#Delta#eta;#Sigma_{FB}" );
 
-    drawGraph( gr0, 20, kRed, "APz" );
-    drawGraph( gr1, 24, kBlue, "Pz" );
-    drawGraph( gr2, 25, kMagenta, "Pz" );
-    drawGraph( gr3, 5, kGray+2, "Pz" );
+    drawGraph( gr_sigma_FB, 20, kRed, "APz" );
+    drawGraph( gr_sigma_XY, 24, kBlue, "Pz" );
+    drawGraph( gr_sigma_FY, 25, kMagenta, "Pz" );
+    drawGraph( gr_sigma_XB, 5, kGray+2, "Pz" );
 
 
     TLegend *leg_SIGMAFB_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
@@ -680,14 +727,15 @@ int read_output()
     //    leg_SIGMAFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, formula", "p");
     //    leg_SIGMAFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, formula", "p");
     //    leg_SIGMAFB_vs_eta->AddEntry( gr2, "K+/#pi+, K#minus/#pi#minus, formula", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr0, "FB", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr1, "XY", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr2, "FY", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr3, "XB", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_FB, "FB", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_XY, "XY", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_FY, "FY", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_XB, "XB", "p");
     leg_SIGMAFB_vs_eta->Draw();
 
 
     gPad->SetGrid();
+
 
     //    return 0;
 

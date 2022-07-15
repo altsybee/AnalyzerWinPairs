@@ -229,7 +229,7 @@ double table5_par_n[] = {
 
 
 
-const int nSubsamples = 15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//20;//5;//3;//15;//8;//30;
+const int nSubsamples = 3;//15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//20;//5;//3;//15;//8;//30;
 
 
 
@@ -317,13 +317,17 @@ WinPairWrapper winPairWrapper_GEN[nPartTypes][nCW][ nCentrBins ][nPtBins];
 WinPairWrapper winPairWrapper_REC[nPartTypes][nCW][ nCentrBins ][nPtBins];
 WinPairWrapper winPairWrapper_CORRECTED[nPartTypes][nCW][ nCentrBins ][nPtBins];
 
-WinPairWrapper winPairWrapper_FullEtaForDenom_GEN[nPartTypes][nCW][ nCentrBins ][nPtBins];
-WinPairWrapper winPairWrapper_FullEtaForDenom_REC[nPartTypes][nCW][ nCentrBins ][nPtBins];
-WinPairWrapper winPairWrapper_FullEtaForDenom_CORRECTED[nPartTypes][nCW][ nCentrBins ][nPtBins];
+WinPairWrapper winPairWrapper_GEN_FULL_ETA_DENOM[nPartTypes][nCW][ nCentrBins ][nPtBins];
+WinPairWrapper winPairWrapper_REC_FULL_ETA_DENOM[nPartTypes][nCW][ nCentrBins ][nPtBins];
+WinPairWrapper winPairWrapper_CORRECTED_FULL_ETA_DENOM[nPartTypes][nCW][ nCentrBins ][nPtBins];
+
+WinPairWrapper winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[nPartTypes][nCW][ nCentrBins ][nPtBins];
+WinPairWrapper winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[nPartTypes][nCW][ nCentrBins ][nPtBins];
+WinPairWrapper winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[nPartTypes][nCW][ nCentrBins ][nPtBins];
 
 
 // ########################
-void toy_model( int _nEv =  5e4 //250000
+void toy_model( int _nEv =  25e3 //250000
         //        int start_with_file_id = 0 //200;
         //        //        int max_files_to_read = 200 //200;
         //        , int max_file_id_to_read = 1 //200;
@@ -453,8 +457,7 @@ void toy_model( int _nEv =  5e4 //250000
                         double eFmin = etaWins[iEta][2];
                         double eFmax = etaWins[iEta][3];
 
-                        // SIM
-
+                        // GEN
                         winPairWrapper_GEN[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
                                                                            , eBmin,  eBmax,  eFmin, eFmax, ptmin[iPt], ptmax[iPt]
                                                                               );
@@ -469,46 +472,61 @@ void toy_model( int _nEv =  5e4 //250000
 
                         // ##### FULL ETA FOR DENOM:
                         // SIM
-                        winPairWrapper_FullEtaForDenom_GEN[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
+                        winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
                                                                            , eBmin,  eBmax,  eFmin, eFmax, ptmin[iPt], ptmax[iPt]
                                                                               , true, -0.8, 0.8
                                                                               );
                         // REC
-                        winPairWrapper_FullEtaForDenom_REC[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
+                        winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
                                                                            , eBmin,  eBmax,  eFmin, eFmax, ptmin[iPt], ptmax[iPt]
                                                                               , true, -0.8, 0.8
                                                                               );
                         // CORRECTED
-                        winPairWrapper_FullEtaForDenom_CORRECTED[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
+                        winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
                                                                            , eBmin,  eBmax,  eFmin, eFmax, ptmin[iPt], ptmax[iPt]
                                                                               , true, -0.8, 0.8
                                                                               );
                     } // end of eta wins loop
 
-                    winPairWrapper_GEN[iType][iCW][cBin][iPt].setHistAllWins( "SIM_WRAPPER", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
+                    winPairWrapper_GEN[iType][iCW][cBin][iPt].setHistAllWins( "GEN", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN[iType][iCW][cBin][iPt].hAllWins );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN[iType][iCW][cBin][iPt].hDeltaEta );
 
-                    winPairWrapper_REC[iType][iCW][cBin][iPt].setHistAllWins( "REC_WRAPPER", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
+                    winPairWrapper_REC[iType][iCW][cBin][iPt].setHistAllWins( "REC", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hAllWins );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hDeltaEta );
 
-                    winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED_WRAPPER", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
+                    winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].hAllWins );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].hDeltaEta );
 
                     // ##### FULL ETA FOR DENOM:
-                    winPairWrapper_FullEtaForDenom_GEN[iType][iCW][cBin][iPt].setHistAllWins( "SIM_FULL_ETA_DENOM_WRAPPER", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_FullEtaForDenom_GEN[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_FullEtaForDenom_GEN[iType][iCW][cBin][iPt].hDeltaEta );
+                    winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "GEN_FULL_ETA_DENOM", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDeltaEta );
 
-                    winPairWrapper_FullEtaForDenom_REC[iType][iCW][cBin][iPt].setHistAllWins( "REC_FULL_ETA_DENOM_WRAPPER", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_FullEtaForDenom_REC[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_FullEtaForDenom_REC[iType][iCW][cBin][iPt].hDeltaEta );
+                    winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "REC_FULL_ETA_DENOM", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDeltaEta );
 
-                    winPairWrapper_FullEtaForDenom_CORRECTED[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED_FULL_ETA_DENOM_WRAPPER", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_FullEtaForDenom_CORRECTED[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_FullEtaForDenom_CORRECTED[iType][iCW][cBin][iPt].hDeltaEta );
+                    winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED_FULL_ETA_DENOM", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDeltaEta );
+
+
+                    // ##### FULL ETA FOR both Num and Denom: to calc nu_dyn!
+                    winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], -0.8,  0.8,  -0.8, 0.8, ptmin[iPt], ptmax[iPt] );
+                    winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "GEN_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, varNamesRequested, nVars );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].hAllWins );
+
+                    winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], -0.8,  0.8,  -0.8, 0.8, ptmin[iPt], ptmax[iPt] );
+                    winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "REC_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, varNamesRequested, nVars );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].hAllWins );
+
+                    winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], -0.8,  0.8,  -0.8, 0.8, ptmin[iPt], ptmax[iPt] );
+                    winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, varNamesRequested, nVars );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].hAllWins );
+
 
 
                 } // end of pT loop
@@ -1111,7 +1129,8 @@ void toy_model( int _nEv =  5e4 //250000
                         //                                winPairs_FullEtaForDenom_GEN[subsampleId][iType][iCW][ cBinId[iCW] ][iPt][iEta].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
                         //                        }
                         winPairWrapper_GEN[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
-                        winPairWrapper_FullEtaForDenom_GEN[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
+                        winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
+                        winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
 
                     }
 
@@ -1182,7 +1201,8 @@ void toy_model( int _nEv =  5e4 //250000
                         //                                winPairs_FullEtaForDenom_REC[subsampleId][iType][iCW][ cBinId[iCW] ][iPt][iEta].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
                         //                        }
                         winPairWrapper_REC[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
-                        winPairWrapper_FullEtaForDenom_REC[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
+                        winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
+                        winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, /*weight*/1.0 );
                     }
 
 
@@ -1245,7 +1265,8 @@ void toy_model( int _nEv =  5e4 //250000
                         //                                winPairs_FullEtaForDenom_CORRECTED[subsampleId][iType][iCW][ cBinId[iCW] ][iPt][iEta].addTrack( pdg, eta, /*phi,*/ pt, charge, weight );
                         //                        }
                         winPairWrapper_CORRECTED[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, weight );
-                        winPairWrapper_FullEtaForDenom_CORRECTED[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, weight );
+                        winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, weight );
+                        winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, /*phi,*/ pt, charge, weight );
                     }
 
 
@@ -1278,9 +1299,13 @@ void toy_model( int _nEv =  5e4 //250000
                     winPairWrapper_REC[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
                     winPairWrapper_CORRECTED[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
 
-                    winPairWrapper_FullEtaForDenom_GEN[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
-                    winPairWrapper_FullEtaForDenom_REC[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
-                    winPairWrapper_FullEtaForDenom_CORRECTED[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
+                    winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
+                    winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
+                    winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
+
+                    winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
+                    winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
+                    winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId); //copy_hist_data(subsampleId);
                 }
 
 
@@ -1338,8 +1363,8 @@ void toy_model( int _nEv =  5e4 //250000
 
     // ### write output
 //    TString strOutputDir = "output";
-    TString strOutputDir = "./";
-    TString strOutFileName = "toy_output.root";
+    TString strOutputDir = ".";
+    TString strOutFileName = "output_toy.root";
     //    TString strOutFileName = "toy_output_gaus_500_50.root";
     //    TString strOutFileName = "toy_output_no_collectivity.root";
     //    TString strOutFileName = "toy_output_collectivity_prop_to_Nch.root";
@@ -1415,7 +1440,7 @@ void toy_model( int _nEv =  5e4 //250000
             //                    }
         }
 
-    histEff->Write();
+    //histEff->Write();
 
     fileOutput->Close();
 

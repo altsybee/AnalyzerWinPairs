@@ -852,21 +852,34 @@ struct CalcWithSubsamples
     SimpleCalculations **wpObs;
 //    double eSep[MAX_N_WIN_PAIRS];
     TGraphErrors *grVsEta[nObs];
+    double integrals[nObs];
 
 
     TGraphErrors *getGraph( const char *strName )
     {
         if( !wpObs[0] )
         {
-            cout << "AHTUNG!! wpObs[0] = 0!" << endl;
+            cout << "AHTUNG!! in getGraph(): wpObs[0] = 0!" << endl;
             return 0x0;
         }
         int idObs = wpObs[0]->mapObs[strName];
         return grVsEta[idObs];
     }
 
-    double takeEtaSep( TH3D *_h3D, int _iEta )
+    double getIntegral( const char *strName )
     {
+        if( !wpObs[0] )
+        {
+            cout << "AHTUNG!! in getIntegral: wpObs[0] = 0!" << endl;
+            return 0x0;
+        }
+        int idObs = wpObs[0]->mapObs[strName];
+        return integrals[idObs];
+    }
+
+    double takeEtaSep( TH3D *_h3D, int _iEta ) //, double &eSize )
+    {
+//        eSize = 0;
         TString strEtaBin = _h3D->GetYaxis()->GetBinLabel( _iEta + 1 );
 //        cout << "strEtaBin: " << strEtaBin << endl;
 
@@ -879,6 +892,7 @@ struct CalcWithSubsamples
 //                    eBounds[k] = round( eBounds[k]*100 ) / 100;
                 cout << "eBounds[" << k << "] = " << eBounds[k]  << endl;
             }
+//            eSize = eBounds[1] - eBounds[0];
             double eBpos = ( eBounds[0] + eBounds[1] )/2;
             double eFpos = ( eBounds[2] + eBounds[3] )/2;
             return round( (eFpos - eBpos)*100 ) / 100;
@@ -900,9 +914,13 @@ struct CalcWithSubsamples
 
         // create graphs per each observable
         for( int iObs = 0; iObs < nObs; iObs++ )
+        {
             grVsEta[iObs] = new TGraphErrors;
+            integrals[iObs] = 0;
+        }
 
 
+        cout << "nEta = " << nEta << ", eSizeNum = " << eSizeNum << ", eSizeDenom = " << eSizeDenom << endl;
         for ( int iEta = 0; iEta < nEta; iEta++ )
         {
             //            cout << "###### STARTING iEta = " << iEta << endl;
@@ -959,6 +977,8 @@ struct CalcWithSubsamples
                 // add points to graphs:
                 grVsEta[iObs]->SetPoint( iEta, eSep, mean );
                 grVsEta[iObs]->SetPointError( iEta, 0, std_dev );
+
+                integrals[iObs] += mean; //*eSizeNum;
             }
         }
         delete [] wpSubsamples;

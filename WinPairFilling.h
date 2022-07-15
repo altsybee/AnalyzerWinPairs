@@ -397,6 +397,7 @@ public:
     {
         currentSubsampleId = subId;
 
+//        cout << "in finishEvent: " << nEta << endl;
         for( int wpId = 0; wpId < nEta; wpId++ )
         {
             currentWinId = wpId;
