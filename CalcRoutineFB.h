@@ -6,6 +6,7 @@
 #include "TH1.h"
 #include "TH1D.h"
 #include "TH3D.h"
+#include "THn.h"
 #include "TDirectory.h"
 #include "TString.h"
 #include "TGraphErrors.h"
@@ -289,10 +290,10 @@ public:
     }
 
     // ###########
-    void finalCalc( double eSep, bool if_Identical_FB_XY, double eSizeNum, double eSizeDenom )
+    void finalCalc( double eSep, double phiSep, bool if_Identical_FB_XY, double eSizeNum, double eSizeDenom )
     {
         // we assume that eSep=0 means windows are completely overlapped!
-        bool identical = ( eSep==0 && if_Identical_FB_XY );
+        bool identical = ( eSep==0 && phiSep==0 && if_Identical_FB_XY );
 //        cout << "finalCalc: " << eSep << endl;
 
         histCalcObs->Reset();
@@ -849,11 +850,17 @@ bool ifIdenticalParticlesFB( int *_pTypes, int *_pCharges )
 struct CalcWithSubsamples
 {
     TH3D *h3D;
+    THnD *hnD;
     SimpleCalculations **wpObs;
 //    double eSep[MAX_N_WIN_PAIRS];
     TGraphErrors *grVsEta[nObs];
     double integrals[nObs];
 
+    CalcWithSubsamples()
+    {
+        h3D = 0x0;
+        hnD = 0x0;
+    }
 
     TGraphErrors *getGraph( const char *strName )
     {
@@ -877,16 +884,32 @@ struct CalcWithSubsamples
         return integrals[idObs];
     }
 
-    double takeEtaSep( TH3D *_h3D, int _iEta ) //, double &eSize )
+    void takeEtaSep( /*TH3D *_h3D,*/ int _iEta, double &_etaSep, double &_phiSep ) //, double &eSize )
     {
+        _etaSep = -1000;
+        _phiSep = -1000;
 //        eSize = 0;
-        TString strEtaBin = _h3D->GetYaxis()->GetBinLabel( _iEta + 1 );
-//        cout << "strEtaBin: " << strEtaBin << endl;
 
-        if ( strEtaBin.Contains("eB") ) // i.e. we do pair-by-pair hist3D
+//        cout << "h3D->GetYaxis()->GetBinLabel( _iEta + 1 ) = " << h3D->GetYaxis()->GetBinLabel( _iEta + 1 ) << endl;
+        TString strEtaBin;
+        if ( h3D )
+            strEtaBin = h3D->GetYaxis()->GetBinLabel( _iEta + 1 );
+//        else if ( hnD )
+//            strEtaBin = hnD->GetAxis(1)->GetBinLabel( _iEta + 1 );
+
+
+        cout << "strEtaBin: " << strEtaBin << endl;
+
+        if ( strEtaBin.Contains("etaB") ) // i.e. we do pair-by-pair hist3D
         {
             float eBounds[4];
-            sscanf( strEtaBin.Data(), "eB_%f_%f_eF_%f_%f", &eBounds[0], &eBounds[1], &eBounds[2], &eBounds[3] );
+            float phiBounds[4];
+//            sscanf( strEtaBin.Data(), "eB_%f_%f_eF_%f_%f", &eBounds[0], &eBounds[1], &eBounds[2], &eBounds[3] );
+            sscanf( strEtaBin.Data(), "etaB_%f_%f_phiB_%f_%f_etaF_%f_%f_phiF_%f_%f"
+                    , &eBounds[0], &eBounds[1], &phiBounds[0], &phiBounds[1]
+                    , &eBounds[2], &eBounds[3], &phiBounds[2], &phiBounds[3] );
+
+
             if(0)for ( int k = 0; k < 4; k++ )
             {
 //                    eBounds[k] = round( eBounds[k]*100 ) / 100;
@@ -895,19 +918,45 @@ struct CalcWithSubsamples
 //            eSize = eBounds[1] - eBounds[0];
             double eBpos = ( eBounds[0] + eBounds[1] )/2;
             double eFpos = ( eBounds[2] + eBounds[3] )/2;
-            return round( (eFpos - eBpos)*100 ) / 100;
+            _etaSep = round( (eFpos - eBpos)*100 ) / 100;
+
+            double phiBpos = ( phiBounds[0] + phiBounds[1] )/2;
+            double phiFpos = ( phiBounds[2] + phiBounds[3] )/2;
+            _phiSep = round( (phiFpos - phiBpos)*100 ) / 100;
         }
-        else
-            return round( _h3D->GetYaxis()->GetBinCenter( _iEta+1 ) *100 ) / 100;
+        else // if dEta-dPhi
+        {
+            float dEta, dPhi;
+//            sscanf( strEtaBin.Data(), "dEta_%f_dPhi_%f", &dEta, &dPhi );
+            dEta = h3D->GetYaxis()->GetBinCenter();
+            _etaSep = round( dEta *100 ) / 100;
+            _phiSep = round( dPhi *100 ) / 100;
+            cout << "_etaSep = " << _etaSep << ", _phiSep = " << _phiSep << endl;
+        }
     }
 
     void calc(  double eSizeNum, double eSizeDenom, bool if_Identical_FB_XY )
     {
-        int nEta = h3D->GetNbinsY();
-        int nSubs = h3D->GetNbinsZ();
-        //        int nObs = h3D->GetNbinsX();
+        cout << "hnD = " << hnD << endl;
 
-        wpObs = new SimpleCalculations*[nEta];
+        int nWins = 0;
+        int nSubs = 0;
+
+        if(h3D)
+        {
+            nWins = h3D->GetNbinsY();
+            nSubs = h3D->GetNbinsZ();
+            //        int nObs = h3D->GetNbinsX();
+        }
+        else if (hnD)
+        {
+            nWins = hnD->GetAxis(1)->GetNbins();
+            nSubs = hnD->GetAxis(3)->GetNbins();
+        }
+
+
+
+        wpObs = new SimpleCalculations*[nWins];
 
         cout << "##### nObs = " << nObs << endl;
         SimpleCalculations *wpSubsamples = new SimpleCalculations[nSubs];
@@ -920,36 +969,52 @@ struct CalcWithSubsamples
         }
 
 
-        cout << "nEta = " << nEta << ", eSizeNum = " << eSizeNum << ", eSizeDenom = " << eSizeDenom << endl;
-        for ( int iEta = 0; iEta < nEta; iEta++ )
+        cout << "nWins = " << nWins << ", eSizeNum = " << eSizeNum << ", eSizeDenom = " << eSizeDenom << endl;
+        for ( int iWin = 0; iWin < nWins; iWin++ )
         {
-            //            cout << "###### STARTING iEta = " << iEta << endl;
-            wpObs[iEta] = new SimpleCalculations;
+            //            cout << "###### STARTING iWin = " << iWin << endl;
+            wpObs[iWin] = new SimpleCalculations;
             // continue;
 
 
             // mean values
-            wpObs[iEta]->histAccumulatedValues = h3D->ProjectionX( "_px", iEta+1, iEta+1, 1, nSubs ); // project all subsamples on axis
+            if( h3D )
+                wpObs[iWin]->histAccumulatedValues = h3D->ProjectionX( "_px", iWin+1, iWin+1, 1, nSubs ); // project all subsamples on axis
+            else if ( hnD )
+            {
+                hnD->GetAxis(1)->SetRange( iWin+1, iWin+1 );
+                hnD->GetAxis(2)->SetRange( 1, nSubs );
+                wpObs[iWin]->histAccumulatedValues = hnD->Projection( 0 ); // project all subsamples on axis
+            }
 
             // find out eSep:
-            double eSep = takeEtaSep( h3D, iEta );
+            double eSep, phiSep;
+            takeEtaSep( /*h3D,*/ iWin, eSep, phiSep );
 //            cout << "eSep = " << eSep << endl;
 
-            wpObs[iEta]->finalCalc( eSep, if_Identical_FB_XY, eSizeNum, eSizeDenom );
+            wpObs[iWin]->finalCalc( eSep, phiSep, if_Identical_FB_XY, eSizeNum, eSizeDenom );
+            delete wpObs[iWin]->histAccumulatedValues;
 
-
-            //            cout << "wpObs[iEta].getValue( corr_rr_formula): " << wpObs[iEta]->getValue( "corr_rr_formula")  << endl;
+            //            cout << "wpObs[iWin].getValue( corr_rr_formula): " << wpObs[iWin]->getValue( "corr_rr_formula")  << endl;
 
             // subsamples
             for ( int iSub = 0; iSub < nSubs; iSub++ )
             {
-                //                cout << "iSub=" << iSub << ", iType=" << iType << ", iCW=" << iCW << ", iEta=" << iEta << endl;
-                //                cout << "iSub=" << iSub << ", iEta=" << iEta << endl;
+                //                cout << "iSub=" << iSub << ", iType=" << iType << ", iCW=" << iCW << ", iWin=" << iWin << endl;
+                //                cout << "iSub=" << iSub << ", iWin=" << iWin << endl;
 
                 SimpleCalculations *wp = &wpSubsamples[iSub];
 
-                wp->histAccumulatedValues = h3D->ProjectionX( "_px", iEta+1, iEta+1, iSub+1, iSub+1 );
-                wp->finalCalc( eSep, if_Identical_FB_XY, eSizeNum, eSizeDenom );
+                if( h3D )
+                    wp->histAccumulatedValues = h3D->ProjectionX( "_px", iWin+1, iWin+1, iSub+1, iSub+1 );
+                else if ( hnD )
+                {
+                    hnD->GetAxis(1)->SetRange( iWin+1, iWin+1 );
+                    hnD->GetAxis(2)->SetRange( iSub+1, iSub+1 );
+                    wp->histAccumulatedValues = hnD->Projection( 0 ); // project all subsamples on axis
+                }
+                wp->finalCalc( eSep, phiSep, if_Identical_FB_XY, eSizeNum, eSizeDenom );
+                delete wp->histAccumulatedValues;
             } // end of subsamples
 
 
@@ -957,7 +1022,7 @@ struct CalcWithSubsamples
             for( int iObs = 0; iObs < nObs; iObs++ )
             {
                 // mean
-                double mean = wpObs[iEta]->histCalcObs->GetBinContent( iObs+1);
+                double mean = wpObs[iWin]->histCalcObs->GetBinContent( iObs+1);
 
 
                 // stdDev:
@@ -970,13 +1035,13 @@ struct CalcWithSubsamples
                 }
                 std_dev = sqrt(std_dev / nSubs / (nSubs-1) );
 
-                wpObs[iEta]->histCalcObs->SetBinError( iObs+1, std_dev );
+                wpObs[iWin]->histCalcObs->SetBinError( iObs+1, std_dev );
 
-                //                cout << wpObs[iEta]->histCalcObs->GetXaxis()->GetBinLabel( bin+1 ) << " = " << mean << ", std_dev = " << std_dev << endl;
+                //                cout << wpObs[iWin]->histCalcObs->GetXaxis()->GetBinLabel( bin+1 ) << " = " << mean << ", std_dev = " << std_dev << endl;
 
                 // add points to graphs:
-                grVsEta[iObs]->SetPoint( iEta, eSep, mean );
-                grVsEta[iObs]->SetPointError( iEta, 0, std_dev );
+                grVsEta[iObs]->SetPoint( iWin, eSep, mean );
+                grVsEta[iObs]->SetPointError( iWin, 0, std_dev );
 
                 integrals[iObs] += mean; //*eSizeNum;
             }

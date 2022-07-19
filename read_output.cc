@@ -91,6 +91,7 @@ int read_output()
     //    TString fileName = "toy_output_fraction_K_fraction_fixed_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
 //    TString fileName = "toy_output_gaus_500_10.root";
     TString fileName = "output_toy.root";
+//    TString fileName = "before_phi_output_toy.root";
     //    TString fileName = "toy_output_gaus_500_10_BEFORE_CHANGES.root";
     //    TString fileName = "toy_output_FIST.root";
     //    TString fileName = "output_heavy_ions_test_10k.root";
@@ -183,14 +184,7 @@ int read_output()
 
 
 
-
-
-
-
-
-    const int N_AN_LEVELS = 3;//3;//3;//6;//3;
-    //    SimpleCalculations *winPairs[nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins][nEtaBins][nWinPairWithSubsamples];
-    //    SimpleCalculations *winPairs[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins][nEtaBins][nWinPairWithSubsamples];
+    const int N_AN_LEVELS = 3;
     TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
 
     TStopwatch timer;
@@ -212,13 +206,11 @@ int read_output()
             for ( int iCW = 0; iCW < nCW; iCW++)
             {
                 //                fIn->cd( Form( "cBinWidth_%.1f", cBinWidths[iCW] ) );
-
                 TString strPID = Form( "pid_%d_%d_%d_%d_charge_%d_%d_%d_%d",
                                        arrPartTypes[iType][0], arrPartTypes[iType][1], arrPartTypes[iType][2], arrPartTypes[iType][3],
                         arrCharges[iType][0], arrCharges[iType][1], arrCharges[iType][2], arrCharges[iType][3] );
 
                 fOutputWinPairsLists[iType] = new TList();
-                //        fOutputWinPairsLists[iType] = (TList*)fList->FindObject("histForAnalysis_"+strPID );
                 fOutputWinPairsLists[iType] = (TList*)gDirectory->Get("list_PIDcorr_"+strPID );
                 cout << "taking list " << strPID << ": " << fOutputWinPairsLists[iType] << endl;
 //                fOutputWinPairsLists[iType]->ls();
@@ -230,14 +222,16 @@ int read_output()
                     for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
                         CalcWithSubsamples *calcObj = &observables[iAnLevel][iType][iCW][ cBin ][iPt];
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
 //                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+                        calcObj->hnD = (THnD*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eSize, ifIdent );
 
                         // FULL ETA DENOM:
                         calcObj = &observables_FULL_ETA_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
 //                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+                        calcObj->hnD = (THnD*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eRange*2, ifIdent );
 
 
@@ -250,8 +244,8 @@ int read_output()
             }
     cout << "##### End of reading win info from histograms." << endl;
 
-    const int nEtaBins = observables[0][0][0][ 0 ][0].h3D->GetYaxis()->GetNbins();
-    cout << "nEtaBins = " << nEtaBins << endl;
+//    const int nEtaBins = observables[0][0][0][ 0 ][0].h3D->GetYaxis()->GetNbins();
+//    cout << "nEtaBins = " << nEtaBins << endl;
 //    return 0;
 
 
@@ -262,8 +256,9 @@ int read_output()
 
     printf("End of calc: RealTime=%f seconds, CpuTime=%f seconds\n",rtime,ctime);
 
-
     //    return 0;
+
+
 
     // ##### DRAWING:
     TStopwatch timer2;
@@ -272,14 +267,6 @@ int read_output()
     //    int pTypeForAn = 1;
 //    int ptBinForAn = 0;//1;//0;//1;
 
-
-
-    cout << "END OF EXTRACTING INFO AND CALC" << endl;
-
-
-
-
-    //    int type = 1;
 
     // QA: nF vs centrality:
     TCanvas *canv_nF = new TCanvas("canv_nF","canv_nF",0,0,800,600);

@@ -6,6 +6,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
+#include "THn.h"
 
 #include "TDirectory.h"
 #include "TString.h"
@@ -15,6 +16,7 @@
 #include <iostream>
 #include <map>
 //#include <unordered_map>
+#include <array>
 #include <string>
 //#include <bits/stdc++.h>
 
@@ -85,7 +87,7 @@ public:
     }
 
 
-    void addTrack( int pid, double eta, double pt, int charge, double weight = 1.0 )
+    void addTrack( int pid, double eta, double phi, double pt, int charge, double weight = 1.0 )
     {
         int pidAbs = abs(pid);
 
@@ -94,14 +96,14 @@ public:
 
         // ##### backward window:
         // B
-        if ( eta > eWin[0] && eta < eWin[1] )
+        if ( eta > eWin[0] && eta < eWin[1] && phi > phiWin[0] && phi < phiWin[1] )
             if ( partTypes[1]==0 || pidAbs == partTypes[1] )
                 if ( partCharges[1]==0 || charge == partCharges[1] )
                 {
                     //                    arr_pB[_nB] = pt;
                     //                    _nB++;
                     //                    _ptB += pt;
-                    arr_pB[_int_counter_nB++] = pt *weight;
+//  !!!! commented to speed up!   arr_pB[_int_counter_nB++] = pt *weight;
                     _nB += 1*weight;
                     _ptB += pt *weight;
 
@@ -109,8 +111,8 @@ public:
                 }
 
         // Y
-        if ( (!fullEtaForDenom && eta > eWin[0] && eta < eWin[1])
-             || (fullEtaForDenom && eta > etaForDenomMin && eta < etaForDenomMax) )
+        if ( (!fullEtaForDenom && eta > eWin[0] && eta < eWin[1] && phi > phiWin[0] && phi < phiWin[1] )
+             || (fullEtaForDenom && eta > etaForDenomMin && eta < etaForDenomMax ) )  // and full phi (2pi)
             if ( partTypes[3]==0 || pidAbs == partTypes[3] )
                 if ( partCharges[3]==0 || charge == partCharges[3] )
                 {
@@ -125,14 +127,14 @@ public:
 
         // ##### forward window:
         // F
-        if ( eta > eWin[2] && eta < eWin[3] )
+        if ( eta > eWin[2] && eta < eWin[3] && phi > phiWin[2] && phi < phiWin[3]  )
             if ( partTypes[0]==0 || pidAbs == partTypes[0] )
                 if ( partCharges[0]==0 || charge == partCharges[0] )
                 {
                     //                    arr_pF[_nF] = pt;
                     //                    _nF++;
                     //                    _ptF += pt;
-                    arr_pF[_int_counter_nF++] = pt *weight;
+     //  !!!! commented to speed up!                arr_pF[_int_counter_nF++] = pt *weight;
                     _nF += 1*weight ;
                     _ptF += pt *weight;
 
@@ -143,8 +145,8 @@ public:
                     _ptF2  += pt*pt *weight*weight;
                 }
         // X
-        if ( (!fullEtaForDenom && eta > eWin[2] && eta < eWin[3] )
-             || (fullEtaForDenom && eta > etaForDenomMin && eta < etaForDenomMax) )
+        if ( (!fullEtaForDenom && eta > eWin[2] && eta < eWin[3] && phi > phiWin[2] && phi < phiWin[3] )
+             || (fullEtaForDenom && eta > etaForDenomMin && eta < etaForDenomMax) )  // and full phi (2pi)
             if ( partTypes[2]==0 || pidAbs == partTypes[2] )
                 if ( partCharges[2]==0 || charge == partCharges[2] )
                 {
@@ -228,7 +230,7 @@ public:
 
 
 
-const int MAX_N_WIN_PAIRS = 500;//150;
+const int MAX_N_WIN_PAIRS = 4096;//150;
 
 // ####################################################################################################################
 // class which collects all window pairs and performs filling of TH3D histogram with e-by-e calculated values
@@ -241,54 +243,73 @@ public:
     double eSep[MAX_N_WIN_PAIRS];
     double eFsize[MAX_N_WIN_PAIRS];
     double eBsize[MAX_N_WIN_PAIRS];
-    int nEta;
+    double phiSep[MAX_N_WIN_PAIRS];
+    double phiFsize[MAX_N_WIN_PAIRS];
+    double phiBsize[MAX_N_WIN_PAIRS];
+    int nUnique_dEta;
+    int nUnique_dPhi;
+
+    int nWPs;
     TH3D *hAllWins; //!
-    TH3D *hDeltaEta; //!
+    TH3D *hDetaDphi; //!
+//    THnD *hDeltaEta; //!
     TString strAnLevel;
 
     // some vars to make flexible hist filling (i.e. don't fill if bin name is not in varNames array):
     int currentSubsampleId;
     int currentWinId;
-    double currentDeltaEta;
+//    double currentDeltaEta;
+//    double currentDeltaPhi;
+    int currentDetaDphiPairId;
 
     map<const char*,int> mapVar;   // helps checking which vars are not requested in varNames array
+//    map<double*, int> map_DetaDphi_bin;  // correspondance between dEta-dPhi bins and binId in TH3D (y axis)
+    map< array<int, 2>, int> map_DetaDphi_bin;  // correspondance between dEta-dPhi bins and binId in TH3D (y axis)
+//    map< int, int> map_DetaDphi_bin;  // correspondance between dEta-dPhi bins and binId in TH3D (y axis)
 
     // ############
     WinPairWrapper()
     {
-        nEta = 0;
+        nWPs = 0;
     }
 
     // ############
     void addWinPair( //const char* strPrefix,
                      int *_pTypes, int *_pCharges
-                     , double _eMinB, double _eMaxB, double _eMinF, double _eMaxF, double _ptMin, double _ptMax
+                     , double *_eWins  //double _eMinB, double _eMaxB, double _eMinF, double _eMaxF
+                     , double *_phiWins
+                     , double _ptMin, double _ptMax
                      , bool _fullEtaForDenom = false, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8 )
     {
-        if ( nEta >= MAX_N_WIN_PAIRS )
+        if ( nWPs >= MAX_N_WIN_PAIRS )
         {
-            cout << "AHTUNG!!! nEta >= MAX_N_WIN_PAIRS" << endl;
+            cout << "AHTUNG!!! nWPs >= MAX_N_WIN_PAIRS" << endl;
             int aa;
             cin >> aa;
         }
-        int iEta = nEta;
+        int iWin = nWPs;
         WinPairFilling *_wp = new WinPairFilling;
-        wp[iEta] = _wp;
+        wp[iWin] = _wp;
         _wp->setParticleTypes( _pTypes, _pCharges );
-        _wp->setWindows( _eMinB, _eMaxB, _eMinF, _eMaxF, _ptMin, _ptMax, _fullEtaForDenom, _etaForDenomMin, _etaForDenomMax );
+        _wp->setWindows( /*_eMinB, _eMaxB, _eMinF, _eMaxF,*/_eWins, _phiWins, _ptMin, _ptMax, _fullEtaForDenom, _etaForDenomMin, _etaForDenomMax );
         _wp->init( 1500 );
 
 //        double eBsize = _eMaxB-_eMinB;
 //        double eFsize = _eMaxF-_eMinF;
-        double eBpos = ( _eMaxB + _eMinB )/2;
-        double eFpos = ( _eMaxF + _eMinF )/2;
+        double eBpos = ( _eWins[1] + _eWins[0] )/2;
+        double eFpos = ( _eWins[3] + _eWins[2] )/2;
 
-        eSep[nEta] = round( (eFpos - eBpos)*100 ) / 100;
-        eFsize[nEta] = round( (_eMaxF - _eMinF)*100 ) / 100;
-        eBsize[nEta] = round( (_eMaxB - _eMinB)*100 ) / 100;
+        eSep[iWin] = round( (eFpos - eBpos)*100 ) / 100;
+        eFsize[iWin] = round( (_eWins[3] - _eWins[2])*100 ) / 100;
+        eBsize[iWin] = round( (_eWins[1] - _eWins[0])*100 ) / 100;
 
+        double phiBpos = ( _phiWins[1] + _phiWins[0] )/2;
+        double phiFpos = ( _phiWins[3] + _phiWins[2] )/2;
+        phiSep[iWin] = round( (phiFpos - phiBpos)*100 ) / 100;
+        phiFsize[iWin] = round( (_phiWins[3] - _phiWins[2])*100 ) / 100;
+        phiBsize[iWin] = round( (_phiWins[3] - _phiWins[2])*100 ) / 100;
 
-        nEta++;
+        nWPs++;
     }
 
 
@@ -296,7 +317,7 @@ public:
     // ############
     void setHistAllWins( const char* strPrefix, int cBin, int nSub, const char* _varNames[], int _nVars )
     {
-        if ( nEta == 0 )
+        if ( nWPs == 0 )
         {
             cout << "AHTUNG!!! No win pairs!" << endl;
             int tmpA;
@@ -305,7 +326,7 @@ public:
 
         strAnLevel = Form("%s", strPrefix);
 
-        int nWins = nEta;
+//        int nWPs = nEta;
 
         TString strHistName = Form("hAllWins_%s_cBin%d", strAnLevel.Data(), cBin);
 
@@ -314,37 +335,68 @@ public:
         hAllWins = new TH3D( strHistName, strHistName
                              //, nBinsX, -0.5, nBinsX-0.5
                              , _nVars, -0.5, _nVars-0.5
-                             , nWins, -0.5, nWins-0.5
+                             , nWPs, -0.5, nWPs-0.5
                              , nSub, -0.5, nSub-0.5
                              );
 
         //
         // count unique dEta-s:
         map <double, int> _mapUnique_dEta;
-        for( int i=0; i < nEta; i++)
+        for( int i=0; i < nWPs; i++)
             _mapUnique_dEta[ eSep[i] ]++;
-        int nUnique_dEta = _mapUnique_dEta.size();
+        nUnique_dEta = _mapUnique_dEta.size();
+
+        // count unique dEta & dPhi-s:
+        map <double, int> _mapUnique_dPhi;
+        for( int i=0; i < nWPs; i++)
+            _mapUnique_dPhi[ phiSep[i] ]++;
+        nUnique_dPhi = _mapUnique_dPhi.size();
 
         // QA:
         if(0)
         {
-            for( int i=0; i<nEta; i++)
-                cout << "i = " << i << ", etaSep = " << eSep[i] << ": nWins = " << _mapUnique_dEta[ eSep[i] ] << endl;
+            for( int i=0; i<nWPs; i++)
+                cout << "i = " << i << ", etaSep = " << eSep[i] << ": nWPs = " << _mapUnique_dEta[ eSep[i] ] << endl;
+
+            for( int i=0; i<nWPs; i++)
+                cout << "i = " << i << ", phiSep = " << phiSep[i] << ": nWPs = " << _mapUnique_dPhi[ phiSep[i] ] << endl;
 
             int aa;
             cin >> aa;
         }
-
         // find max dEta:
-        double min_dEta = *min_element(eSep, eSep+nEta);
-        double max_dEta = *max_element(eSep, eSep+nEta);
-        TString str_dEta_HistName = Form("hDeltaEta_%s_cBin%d", strAnLevel.Data(), cBin);
-        hDeltaEta = new TH3D( str_dEta_HistName, str_dEta_HistName
+        double min_dEta = *min_element(eSep, eSep+nWPs);
+        double max_dEta = *max_element(eSep, eSep+nWPs);
+        double etaStep = ( max_dEta-min_dEta + eFsize[0] ) / nUnique_dEta;
+
+        // find max dPhi:
+        double min_dPhi = *min_element(phiSep, phiSep+nWPs);
+        double max_dPhi = *max_element(phiSep, phiSep+nWPs);
+        double phiStep = ( max_dPhi-min_dPhi + phiFsize[0] ) / nUnique_dPhi;
+
+
+
+        TString str_dEta_dPhi_HistName = Form("hDetaDphi_%s_cBin%d", strAnLevel.Data(), cBin);
+        hDetaDphi = new TH3D( str_dEta_dPhi_HistName, str_dEta_dPhi_HistName
                              , _nVars, -0.5, _nVars-0.5
-                             , nUnique_dEta, min_dEta - eFsize[0]/2, max_dEta + eFsize[0]/2
+//                             , nUnique_dEta, min_dEta - eFsize[0]/2, max_dEta + eFsize[0]/2
+                             , nUnique_dEta*nUnique_dPhi, -0.5, nUnique_dEta*nUnique_dPhi-0.5
                              , nSub, -0.5, nSub-0.5
                              );
+
+//        int arr_nBins[] = { _nVars, nUnique_dEta, nUnique_dPhi, nSub };
+//        double arr_mins[] = { -0.5,        min_dEta - eFsize[0]/2,     min_dPhi - phiFsize[0]/2, -0.5 };
+//        double arr_maxs[] = { _nVars-0.5,  max_dEta + eFsize[0]/2,     max_dPhi + phiFsize[0]/2, nSub-0.5 };
+
+//        hDeltaEta = new THnD( str_dEta_HistName, str_dEta_HistName, 4
+//                             , arr_nBins
+//                             , arr_mins
+//                             , arr_maxs
+//                             );
+
+
         cout << "nUnique_dEta = " << nUnique_dEta << ", min_dEta = " << min_dEta << ", max_dEta = " << max_dEta << endl;
+        cout << "nUnique_dPhi = " << nUnique_dPhi << endl;
 
 
         // set labels x and prepare a map with vars
@@ -352,7 +404,8 @@ public:
         {
             mapVar.insert( pair<const char*,int>( _varNames[i], i ) );
             hAllWins->GetXaxis()->SetBinLabel( i+1, _varNames[i] ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
-            hDeltaEta->GetXaxis()->SetBinLabel( i+1, _varNames[i] ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+            hDetaDphi->GetXaxis()->SetBinLabel( i+1, _varNames[i] ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+//            hDeltaEta->GetAxis(0)->SetBinLabel( i+1, _varNames[i] ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
         }
 //        cout << "check mapVar size: " << mapVar.size() << endl;
         // check for duplicate vars:
@@ -364,17 +417,58 @@ public:
         }
 
         // set labels y for hAllWins
-        for( int winId = 0; winId < nWins; winId++ )
-            hAllWins->GetYaxis()->SetBinLabel( winId+1, Form("eB_%.2f_%.2f_eF_%.2f_%.2f", wp[winId]->eWin[0], wp[winId]->eWin[1], wp[winId]->eWin[2], wp[winId]->eWin[3] ) );
-    }
+        for( int winId = 0; winId < nWPs; winId++ )
+            hAllWins->GetYaxis()->SetBinLabel( winId+1, Form("etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                    , wp[winId]->eWin[0], wp[winId]->eWin[1],    wp[winId]->phiWin[0], wp[winId]->phiWin[1]
+                    , wp[winId]->eWin[2], wp[winId]->eWin[3],    wp[winId]->phiWin[2], wp[winId]->phiWin[3]
+                    ) );
 
+        // set labels y for hDetaDphi
+        int kWin = 0;
+        for( int i = 0; i < nUnique_dEta; i++ )
+            for( int j = 0; j < nUnique_dPhi; j++ )
+            {
+//                double pair_DetaDphi[] = { etaStep*i, phiStep*j };
+//                int pair_DetaDphi[] = { (int)(etaStep*i *100), (int)(phiStep*j *100) }; // *100 to convert to int - to be stable wrt to double keys!
+                array<int, 2> pair_DetaDphi = { (int)round(  (min_dEta + etaStep*i)*100 ), (int)round( (min_dPhi + phiStep*j) *100 ) };
+//                int pair_DetaDphi = (int)(  (min_dEta + etaStep*i) * 100) *10000 + (int)(  (min_dPhi + phiStep*j) * 100);
+                map_DetaDphi_bin[ pair_DetaDphi ] = kWin;
+//                cout << "etaStep*i = " << min_dEta + etaStep*i << ", phiStep*j = " << min_dPhi + phiStep*j << ", pair_DetaDphi = " << pair_DetaDphi << ", map: " << map_DetaDphi_bin[ pair_DetaDphi ] << endl;
+                hDetaDphi->GetYaxis()->SetBinLabel( kWin+1, Form("dEta_%.2f_dPhi_%.2f", min_dEta + etaStep*i, min_dPhi + phiStep*j ) );
+
+
+//                cout << "min_dEta + etaStep*i, min_dPhi + phiStep*j: " << min_dEta + etaStep*i << " " << min_dPhi + phiStep*j << endl;
+
+                kWin++;
+            }
+        cout << "N unique dEta dPhi = " << kWin << ", check map size: = " << map_DetaDphi_bin.size() << endl;
+    }
+    
 
     // ############
-    void addTrack( int pid, double eta, double pt, int charge, double weight = 1.0 )
+    void addTrack( int pid, double eta, double phi, double pt, int charge, double weight = 1.0 )
     {
         //        return;
-        for( int eWin = 0; eWin < nEta; eWin++ )
-            wp[eWin]->addTrack( pid, eta, /*phi,*/ pt, charge, weight );
+        for( int eWin = 0; eWin < nWPs; eWin++ )
+            wp[eWin]->addTrack( pid, eta, phi, pt, charge, weight );
+
+        // if (Forward pid... charge..)
+        // {
+        //      histF_n->Fill(eta, phi, weight);
+        //      histF_pt->Fill(eta, phi, weight);
+        // }
+        //
+        // if (Backward pid... charge..)
+        // {
+        //      histB_n->Fill(eta, phi, weight);
+        //      histB_pt->Fill(eta, phi, weight);
+        // }
+//        _w_wMinus1_F += weight*(weight-1);
+//        _w_wMinus1_PF += weight*(weight-1)*pt;
+////                    _w_wMinus1_PF2 += weight*(weight-1)*pt*pt;
+
+//        _ptF2  += pt*pt *weight*weight;
+
     }
 
 
@@ -386,7 +480,7 @@ public:
         if( varId != 0 || forceFilling ) // because if varName is not in the varNames array, map will add a new key-value pair with value = 0.
         {
             hAllWins->Fill(  varId, currentWinId, currentSubsampleId, value  );
-            hDeltaEta->Fill(  varId, currentDeltaEta, currentSubsampleId, value  );
+            hDetaDphi->Fill(  varId, currentDetaDphiPairId, currentSubsampleId, value  );
         }
         // here we are forcing filling "Nevents" (varId==0) by hand
     }
@@ -397,12 +491,21 @@ public:
     {
         currentSubsampleId = subId;
 
+        int sizeOfMap = map_DetaDphi_bin.size();
 //        cout << "in finishEvent: " << nEta << endl;
-        for( int wpId = 0; wpId < nEta; wpId++ )
+        for( int wpId = 0; wpId < nWPs; wpId++ ) // loop over win pairs
         {
             currentWinId = wpId;
-            currentDeltaEta = eSep[wpId];
-//            varCounter = 0;
+
+            array<int, 2> pair_DetaDphi = { (int)round(  eSep[wpId]*100 ), (int)round( phiSep[wpId] *100 ) };
+            currentDetaDphiPairId = map_DetaDphi_bin[ pair_DetaDphi ];
+
+            if ( currentDetaDphiPairId >= sizeOfMap )
+                cout << "AHTUNG!!! currentDetaDphiPairId > map_DetaDphi_bin.size() !" << endl;
+
+//            cout << "check map size: = " << map_DetaDphi_bin.size() << endl;
+//            int aa;
+//            cin >> aa;
 
             //
             WinPairFilling *w = wp[wpId];
@@ -693,9 +796,9 @@ public:
 
 
             w->resetEvent();
-        } // end of loop over eta wins
+        } // end of loop over win pairs
 
-    }   // end of finishEvent( int subId )
+    }   // end of finishEvent
 
 
 

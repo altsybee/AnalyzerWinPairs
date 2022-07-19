@@ -25,6 +25,7 @@ struct WinPairBase
 public:
     // acceptance of the windows:
     double eWin[4]; // eta for B (min, max), F (min, max),
+    double phiWin[4]; // phi for B (min, max), F (min, max),
     double ptWin[2];
     int partTypes[4];   // F,B, X,Y  // 0 - NO PID SELECTION
     int partCharges[4]; // F,B, X,Y  // 0 - NO CHARGE SELECTION
@@ -62,13 +63,18 @@ public:
         }
     }
 
-    void setWindows( double _eMinB, double _eMaxB, double _eMinF, double _eMaxF, double _ptMin, double _ptMax
+    void setWindows( /*double _eMinB, double _eMaxB, double _eMinF, double _eMaxF,*/ double *_eWins, double *_phiWins, double _ptMin, double _ptMax
                      , bool _fullEtaForDenom = false, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8 )
     {
-        eWin[0] = _eMinB;
-        eWin[1] = _eMaxB;
-        eWin[2] = _eMinF;
-        eWin[3] = _eMaxF;
+        eWin[0] = _eWins[0]; //_eMinB;
+        eWin[1] = _eWins[1]; //_eMaxB;
+        eWin[2] = _eWins[2]; //_eMinF;
+        eWin[3] = _eWins[3]; //_eMaxF;
+
+        phiWin[0] = _phiWins[0];
+        phiWin[1] = _phiWins[1];
+        phiWin[2] = _phiWins[2];
+        phiWin[3] = _phiWins[3];
 
         ptWin[0] = _ptMin;
         ptWin[1] = _ptMax;
