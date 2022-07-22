@@ -26,79 +26,79 @@
 
 
 
-// #########################
-// ##### available vars:
-const char *varNamesRequested[] = {
-    "Nevents"    ,
-    "f_Nevents",
-    "x_Nevents"  ,
-    "fb_Nevents" ,
-    "xy_Nevents" ,
-    "fy_Nevents" ,
+//// #########################
+//// ##### available vars:
+//const char *varNamesRequested[] = {
+//    "Nevents"    ,
+//    "f_Nevents",
+//    "x_Nevents"  ,
+//    "fb_Nevents" ,
+//    "xy_Nevents" ,
+//    "fy_Nevents" ,
 
-    // ##### ratio-ratio correlations by approx. formula:
-    "Nf*Nb" ,
-    "Nx*Ny" ,
-    "Nf*Ny" ,
-    "Nb*Nx" ,
+//    // ##### ratio-ratio correlations by approx. formula:
+//    "Nf*Nb" ,
+//    "Nx*Ny" ,
+//    "Nf*Ny" ,
+//    "Nb*Nx" ,
 
-    "Nf"    ,
-    "Nb"    ,
-    "Nx"    ,
-    "Ny"    ,
+//    "Nf"    ,
+//    "Nb"    ,
+//    "Nx"    ,
+//    "Ny"    ,
 
-    "Nf2",
-    "Nb2",
-    "Nx2",
-    "Ny2",
+//    "Nf2",
+//    "Nb2",
+//    "Nx2",
+//    "Ny2",
 
-    // ratio-ratio correlations by direct formula:
-    "Nf_OVER_Nx_vs_Nb_OVER_Ny"  ,
-    "Nf_OVER_Nx"                ,
-    "Nb_OVER_Ny"                ,
-
-
-    // ##### for r-Pt
-    "Nb_OVER_Ny_vs_avPx",
-    "PfNb_Pf"           ,
-    //    "sumPtAllEvX"      , // replaced by "PX"
-    "nY*PX"            ,
-    "nB*PX"            ,
-
-    // ##### for pt-pt FB
-    "PfPb_avPf_avPb",
-    "PfPb_avPf",
-    "PfPb_avPb",
-    "PF" ,
-    "PB" ,
-    "PF*PB" ,
-    "nF*PB" ,
-    "nB*PF" ,
-
-    "nF*PF", // for same-window case
-
-    // ##### for pt-pt XY
-    "PxPy_avPx_avPy" ,
-    "PxPy_avPx" ,
-    "PxPy_avPy" ,
-    "PX" ,
-    "PY" ,
-    "PX*PY" ,
-    "nX*PY" ,
-    //    "nY*PX" ,  // added above!
-
-    "nX*PX", // for same-window case
-
-    "PF2" ,
-    "PX2" ,
-
-    // for corrections:
-    "piF2" ,
-    "piX2" ,
+//    // ratio-ratio correlations by direct formula:
+//    "Nf_OVER_Nx_vs_Nb_OVER_Ny"  ,
+//    "Nf_OVER_Nx"                ,
+//    "Nb_OVER_Ny"                ,
 
 
-};
-const int nVars = sizeof(varNamesRequested)/sizeof(*varNamesRequested);
+//    // ##### for r-Pt
+//    "Nb_OVER_Ny_vs_avPx",
+//    "PfNb_Pf"           ,
+//    //    "sumPtAllEvX"      , // replaced by "PX"
+//    "nY*PX"            ,
+//    "nB*PX"            ,
+
+//    // ##### for pt-pt FB
+//    "PfPb_avPf_avPb",
+//    "PfPb_avPf",
+//    "PfPb_avPb",
+//    "PF" ,
+//    "PB" ,
+//    "PF*PB" ,
+//    "nF*PB" ,
+//    "nB*PF" ,
+
+//    "nF*PF", // for same-window case
+
+//    // ##### for pt-pt XY
+//    "PxPy_avPx_avPy" ,
+//    "PxPy_avPx" ,
+//    "PxPy_avPy" ,
+//    "PX" ,
+//    "PY" ,
+//    "PX*PY" ,
+//    "nX*PY" ,
+//    //    "nY*PX" ,  // added above!
+
+//    "nX*PX", // for same-window case
+
+//    "PF2" ,
+//    "PX2" ,
+
+//    // for corrections:
+//    "piF2" ,
+//    "piX2" ,
+
+
+//};
+//const int nVars = sizeof(varNamesRequested)/sizeof(*varNamesRequested);
 
 
 
@@ -244,18 +244,18 @@ const double eRange = 0.8; //1.0;//1.4;//1.6;//0.8;
 //const double eStep = 0.2;
 //const double eSize = 0.2;//4;
 //const double eStep = 0.2;
-const double eSize = 0.2;//4;
-const double eStep = 0.2;
+//const double eSize = 0.2;//4;
+//const double eStep = 0.2;
 
 
 
 
 //const int nPhiWins = 16;
 //const int nEtaBins = /*2**/nPhiWins;//23; //(eRange-eSize) / eStep + 2;//1;
-int nEtaBins = (eRange-eSize) / eStep + 1 + 0.0000001  ;//2;//1;
-//const int nEtaBins = 1;
-//const int nEtaBins = /* +1 - for full eta! */ 1 + (eRange-eSize) / eStep + 1 + 0.0000001;//2;//1;
-int nPhiBins = 1;
+//int nEtaWP = (eRange-eSize) / eStep + 1 + 0.0000001  ;//2;//1;
+//const int nEtaWP = 1;
+//const int nEtaWP = /* +1 - for full eta! */ 1 + (eRange-eSize) / eStep + 1 + 0.0000001;//2;//1;
+//int nPhiWP = 1;
 
 
 
@@ -328,16 +328,7 @@ WinPairWrapper winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[nPartTypes][nCW][
 
 
 // ########################
-void toy_model( int _nEv =  3e2 //250000
-        //        int start_with_file_id = 0 //200;
-        //        //        int max_files_to_read = 200 //200;
-        //        , int max_file_id_to_read = 1 //200;
-        //        , const char * strDirInputDST = "/eos/nica/mpd/sim/data/models/Smash/AuAu/11.0GeV-mb/AuAu-11.0GeV-mp09-20-pwg1-10000ev/"
-        //        , const char * strOutputDir = "/lhep/users/altsybee/analysis_IA/kine_SMASH_analysis/test_dir/"
-        //        , const char * strSystemEnergy = "AuAu_11.0"
-
-        //        , const char * strFileWithBoundaries = "" // /lhep/users/altsybee/analysis_IA/kine_SMASH_analysis/results_Smash_2020_10_15/class_boundaries.root"
-
+void toy_model( int _nEv =  25000 //25000 //3e2 //250000
         )
 {
 
@@ -388,71 +379,27 @@ void toy_model( int _nEv =  3e2 //250000
 
 
 
-    // SET ETA WIN PAIRS BY HAND:
-    double etaWins[300][4];
-    if(1)
-    {
-        int winId = 0;
-        // just all possible win pairs:
-        int nSteps = round( 2*eRange / eSize );
-        for ( int i = 0; i < nSteps; i++ )
-        {
-            for ( int j = 0; j < nSteps; j++ )
-            {
-                //                const double sep = 0.1*(iSep+1);
-                etaWins[winId][0] = -0.8 + i*eSize;
-                etaWins[winId][1] = -0.8 + i*eSize + eSize;
-                etaWins[winId][2] = -0.8 + j*eSize;
-                etaWins[winId][3] = -0.8 + j*eSize + eSize;
 
-                cout << etaWins[winId][0] << " "<< etaWins[winId][1] << " "<< etaWins[winId][2] << " "<< etaWins[winId][3] << endl;
-                winId++;
-            }
-        }
+//    cout << "### nVars = " << nVars << endl;
 
-        nEtaBins = winId;
-    }
+    double eRange[] = { -0.8, 0.8 };
+    double ptRange[] = { 0., 100 };
 
 
-    // SET PHI WIN PAIRS BY HAND:
-    double phiWins[300][4];
-    if(1)
-    {
-        int winId = 0;
-        // just all possible win pairs:
-        int nPhiSteps = 4;//8;
-        const double phiSize = TMath::TwoPi() / nPhiSteps;
-        for ( int i = 0; i < nPhiSteps; i++ )
-        {
-            for ( int j = 0; j < nPhiSteps; j++ )
-            {
-                phiWins[winId][0] = i*phiSize;
-                phiWins[winId][1] = i*phiSize + phiSize;
-                phiWins[winId][2] = j*phiSize;
-                phiWins[winId][3] = j*phiSize + phiSize;
-
-                cout << phiWins[winId][0] << " "<< phiWins[winId][1] << " "<< phiWins[winId][2] << " "<< phiWins[winId][3] << endl;
-                winId++;
-            }
-        }
-
-        nPhiBins = winId;
-    }
-    else  // just one full 2pi window
-    {
-        phiWins[0][0] = 0;    phiWins[0][1] = TMath::TwoPi();     phiWins[0][2] = 0;     phiWins[0][3] = TMath::TwoPi();
-        nPhiBins = 1;
-    }
-
-    //    return 0;
+    const int nEtaBins = 8;
+    const int nPhiBins = 1;//8;//8;
 
 
-    cout << "nEtaBins = " << nEtaBins << endl;
-    //    cout << "(eRange-eSize) / eStep + 1 = " << (eRange-eSize) / eStep + 1 << endl;
-    //        return;
+    bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
 
 
-    cout << "### nVars = " << nVars << endl;
+    TH2I *histAccMap = new TH2I( "histAccMap", "histAccMap;#eta;#varphi", nEtaBins, eRange[0], eRange[1], nPhiBins, 0, TMath::TwoPi() );
+    for( int e1 = 0; e1 < nEtaBins; e1++ )
+        for( int p1 = 0; p1 < nPhiBins; p1++ )
+           histAccMap->SetBinContent( e1+1, p1+1, 1 );
+
+    histAccMap->Fill( -0.6, 4.8, -1 );
+    histAccMap->Fill( 0.2, 2.5, -1 );
 
 
     // ### FB:
@@ -461,91 +408,56 @@ void toy_model( int _nEv =  3e2 //250000
             for ( int cBin = 0; cBin < /*nCentrBins[iCW]*/nCentrBins; ++cBin )
                 for ( int iPt = 0; iPt < nPtBins; ++iPt )
                 {
-                    for ( int iEta = 0; iEta < nEtaBins; ++iEta )
-                    {
-                        //                        double eBmin = -eRange+iEta*eStep;
-                        //                        double eBmax = -eRange+eSize+iEta*eStep;
-                        //                        double eFmin = eRange-eSize-iEta*eStep;
-                        //                        double eFmax = eRange-iEta*eStep;
+                    winPairWrapper_GEN[iType][iCW][cBin][iPt].setup( "GEN", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos );
+                    if ( whichHistos[0] )       fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN[iType][iCW][cBin][iPt].hAllWins );
+                    if ( whichHistos[1] )      fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN[iType][iCW][cBin][iPt].hDetaDphi );
+                    if ( whichHistos[2] )    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN[iType][iCW][cBin][iPt].hAllEtaDphi );
 
-                        double eBmin = etaWins[iEta][0];
-                        double eBmax = etaWins[iEta][1];
-                        double eFmin = etaWins[iEta][2];
-                        double eFmax = etaWins[iEta][3];
+                    winPairWrapper_REC[iType][iCW][cBin][iPt].setup( "REC", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos );
+                    if ( whichHistos[0] )       fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hAllWins );
+                    if ( whichHistos[1] )      fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hDetaDphi );
+                    if ( whichHistos[2] )    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hAllEtaDphi );
+                    // TEST ACC MAP!!
+                    winPairWrapper_REC[iType][iCW][cBin][iPt].hAccMap = histAccMap;
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hAccMap );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].QA_hist_n[0] );
+                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].QA_hist_pt[0] );
 
-                        for ( int iPhi = 0; iPhi < nPhiBins; ++iPhi )
-                        {
-                            // GEN
-                            winPairWrapper_GEN[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
-                                                                                  , etaWins[iEta], phiWins[iPhi], ptmin[iPt], ptmax[iPt]
-                                                                                  );
-                            // REC
-                            winPairWrapper_REC[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
-                                                                                  , etaWins[iEta], phiWins[iPhi], ptmin[iPt], ptmax[iPt]
-                                                                                  );
-                            // CORRECTED
-                            winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
-                                                                                        , etaWins[iEta], phiWins[iPhi], ptmin[iPt], ptmax[iPt]
-                                                                                        );
-
-                            // ##### FULL ETA FOR DENOM:
-                            // SIM
-                            winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
-                                                                                                 , etaWins[iEta], phiWins[iPhi], ptmin[iPt], ptmax[iPt]
-                                                                                                 , true, -0.8, 0.8
-                                                                                                 );
-                            // REC
-                            winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
-                                                                                                 , etaWins[iEta], phiWins[iPhi], ptmin[iPt], ptmax[iPt]
-                                                                                                 , true, -0.8, 0.8
-                                                                                                 );
-                            // CORRECTED
-                            winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType]
-                                                                                                       , etaWins[iEta], phiWins[iPhi], ptmin[iPt], ptmax[iPt]
-                                                                                                       , true, -0.8, 0.8
-                                                                                                       );
-                        } // end of phi wins loop
-                    } // end of eta wins loop
-
-                    winPairWrapper_GEN[iType][iCW][cBin][iPt].setHistAllWins( "GEN", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN[iType][iCW][cBin][iPt].hDetaDphi );
-
-                    winPairWrapper_REC[iType][iCW][cBin][iPt].setHistAllWins( "REC", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC[iType][iCW][cBin][iPt].hDetaDphi );
-
-                    winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].hDetaDphi );
+                    winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].setup( "CORRECTED", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos );
+                    if ( whichHistos[0] )       fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].hAllWins );
+                    if ( whichHistos[1] )      fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].hDetaDphi );
+                    if ( whichHistos[2] )    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED[iType][iCW][cBin][iPt].hAllEtaDphi );
 
                     // ##### FULL ETA FOR DENOM:
-                    winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "GEN_FULL_ETA_DENOM", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDetaDphi );
+                    winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setup( "GEN_FULL_ETA_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, true );
+                    if ( whichHistos[0] )       fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
+                    if ( whichHistos[1] )      fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDetaDphi );
+                    if ( whichHistos[2] )    fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllEtaDphi );
 
-                    winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "REC_FULL_ETA_DENOM", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDetaDphi );
+                    winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setup( "REC_FULL_ETA_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, true );
+                    if ( whichHistos[0] )       fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
+                    if ( whichHistos[1] )      fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDetaDphi );
+                    if ( whichHistos[2] )    fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllEtaDphi );
 
-                    winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED_FULL_ETA_DENOM", cBin, nSubsamples, varNamesRequested, nVars );//, nEtaBins, nSubsamples );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
-                    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDetaDphi );
+                    winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].setup( "CORRECTED_FULL_ETA_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, true );
+                    if ( whichHistos[0] )       fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllWins );
+                    if ( whichHistos[1] )      fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hDetaDphi );
+                    if ( whichHistos[2] )    fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_DENOM[iType][iCW][cBin][iPt].hAllEtaDphi );
 
 
                     // ##### FULL ETA FOR both Num and Denom: to calc nu_dyn!
-                    double etaFullWin[] = { -0.8,  0.8,  -0.8, 0.8 }; // B-B, F-F
-                    double phiFullWin[] = { 0, TMath::TwoPi(), 0, TMath::TwoPi() };
-                    winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], etaFullWin, phiFullWin, ptmin[iPt], ptmax[iPt] );
-                    winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "GEN_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, varNamesRequested, nVars );
+//                    double etaFullWin[] = { -0.8,  0.8,  -0.8, 0.8 }; // B-B, F-F
+//                    double phiFullWin[] = { 0, TMath::TwoPi(), 0, TMath::TwoPi() };
+//                    winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], etaFullWin, phiFullWin, ptmin[iPt], ptmax[iPt] );
+                    winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setup( "GEN_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], 1, 1, eRange, ptRange, whichHistos, true );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_GEN_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].hAllWins );
 
-                    winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], etaFullWin, phiFullWin, ptmin[iPt], ptmax[iPt] );
-                    winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "REC_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, varNamesRequested, nVars );
+//                    winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], etaFullWin, phiFullWin, ptmin[iPt], ptmax[iPt] );
+                    winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setup( "REC_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], 1, 1, eRange, ptRange, whichHistos, true );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_REC_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].hAllWins );
 
-                    winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], etaFullWin, phiFullWin, ptmin[iPt], ptmax[iPt] );
-                    winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setHistAllWins( "CORRECTED_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, varNamesRequested, nVars );
+//                    winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].addWinPair( arrPartTypes[iType], arrCharges[iType], etaFullWin, phiFullWin, ptmin[iPt], ptmax[iPt] );
+                    winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].setup( "CORRECTED_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], 1, 1, eRange, ptRange, whichHistos, true );
                     fOutputWinPairsLists[iType]->Add( winPairWrapper_CORRECTED_FULL_ETA_NUM_AND_DENOM[iType][iCW][cBin][iPt].hAllWins );
 
 

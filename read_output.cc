@@ -202,6 +202,8 @@ int read_output()
 
 
     for ( int iAnLevel = 0; iAnLevel < N_AN_LEVELS; ++iAnLevel )
+    {
+        cout << ">>>>>> DO " << strAnLevels[iAnLevel] << "..." << endl;
         for ( int iType = 0; iType < nPartTypes; iType++)
             for ( int iCW = 0; iCW < nCW; iCW++)
             {
@@ -222,26 +224,24 @@ int read_output()
                     for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
                         CalcWithSubsamples *calcObj = &observables[iAnLevel][iType][iCW][ cBin ][iPt];
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->hnD = (THnD*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eSize, ifIdent );
 
                         // FULL ETA DENOM:
                         calcObj = &observables_FULL_ETA_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->hnD = (THnD*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eRange*2, ifIdent );
 
 
                         // FULL ETA FOR both Num and Denom: to calc nu_dyn!
                         calcObj = &observables_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
                         calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_NUM_AND_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDeltaEta_%s_FULL_ETA_NUM_AND_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eRange*2, eRange*2, ifIdent );
                     }
             }
+    }
     cout << "##### End of reading win info from histograms." << endl;
 
 //    const int nEtaBins = observables[0][0][0][ 0 ][0].h3D->GetYaxis()->GetNbins();
