@@ -240,7 +240,7 @@ public:
     }
 
     void setup( const char* strPrefix, int cBin, int nSub,
-                int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake
+                int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *outputList
                 , bool _fullAcceptanceForDenom = false //, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8
             )
     {
@@ -269,9 +269,9 @@ public:
         etaMin = _etaRange[0];
         etaMax = _etaRange[1];
 
-        flagHistAllWins = whichHistosToTake[0];
-        flagHistDetaDphi = whichHistosToTake[1];
-        flagHistAllEtaDphi = whichHistosToTake[2];
+        flagHistAllWins     = whichHistosToTake[0];
+        flagHistDetaDphi    = whichHistosToTake[1];
+        flagHistAllEtaDphi  = whichHistosToTake[2];
 
 
         //        double eBpos = ( _eWins[1] + _eWins[0] )/2;
@@ -476,6 +476,12 @@ public:
                 }
             }
         }
+
+
+        if ( flagHistAllWins    )  outputList->Add( hAllWins );
+        if ( flagHistDetaDphi   )  outputList->Add( hDetaDphi );
+        if ( flagHistAllEtaDphi )  outputList->Add( hAllEtaDphi );
+
 
     }
     

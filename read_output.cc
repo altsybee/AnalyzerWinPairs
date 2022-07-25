@@ -184,8 +184,8 @@ int read_output()
 
 
 
-    const int N_AN_LEVELS = 3;
     TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
+    const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
     TStopwatch timer;
     timer.Start();
@@ -224,21 +224,22 @@ int read_output()
                     for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
                         CalcWithSubsamples *calcObj = &observables[iAnLevel][iType][iCW][ cBin ][iPt];
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eSize, ifIdent );
 
                         // FULL ETA DENOM:
                         calcObj = &observables_FULL_ETA_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
+                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
                         calcObj->calc( eSize, eRange*2, ifIdent );
 
 
                         // FULL ETA FOR both Num and Denom: to calc nu_dyn!
                         calcObj = &observables_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
                         calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_NUM_AND_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->calc( eRange*2, eRange*2, ifIdent );
+                        if(calcObj->h3D)
+                            calcObj->calc( eRange*2, eRange*2, ifIdent );
                     }
             }
     }
@@ -675,6 +676,44 @@ int read_output()
 
 
 
+    // ############## ratio_ratio BIS
+    TCanvas *canv_ratio_ratio_VS_ETA_bis = new TCanvas("canv_ratio_ratio_VS_ETA_bis","canv_ratio_ratio_VS_ETA_bis",170,95,800,600);
+    tuneCanvas( canv_ratio_ratio_VS_ETA );
+
+    drawGraph( gr0_corr_rr_formula, 27, kGreen+1,   "APz" );
+    drawGraph( gr1_corr_rr_formula, 20, kRed,       "Pz" );
+//    drawGraph( gr2_corr_rr_formula, 24, kRed+2,     "Pz" );
+    drawGraph( gr3_corr_rr_formula, 21, kBlue,      "Pz" );
+//    drawGraph( gr4_corr_rr_formula, 25, kBlue+2,    "Pz" );
+
+    drawGraph( gr0_corr_rr_direct, 1, kGreen+1, "le3" );
+    drawGraph( gr1_corr_rr_direct, 1, kRed, "le3" );
+//    drawGraph( gr2_corr_rr_direct, 1, kRed+2, "le3" );
+    drawGraph( gr3_corr_rr_direct, 1, kBlue, "le3" );
+//    drawGraph( gr4_corr_rr_direct, 1, kBlue+2, "le3" );
+
+
+    drawGraph( gr0_rr_REC, 24, kGreen+1,   "Pz", 1.5 );
+    drawGraph( gr1_rr_REC, 24, kRed,       "Pz", 1.5 );
+//    drawGraph( gr2_rr_REC, 24, kRed+1,     "Pz", 1.5 );
+    drawGraph( gr3_rr_REC, 24, kBlue,      "Pz", 1.5 );
+//    drawGraph( gr4_rr_REC, 24, kBlue+1,    "Pz", 1.5 );
+
+
+    drawGraph( gr0_rr_CORR, 25, kGreen+1,   "Pz", 1.5 );
+    drawGraph( gr1_rr_CORR, 25, kRed,       "Pz", 1.5 );
+//    drawGraph( gr2_rr_CORR, 25, kRed+1,     "Pz", 1.5 );
+    drawGraph( gr3_rr_CORR, 25, kBlue,      "Pz", 1.5 );
+//    drawGraph( gr4_rr_CORR, 25, kBlue+1,    "Pz", 1.5 );
+
+
+    drawGraph( gr0_rr_formula_fullDenom, 30, kGreen+1, "Pz", 1.5 );
+    drawGraph( gr1_rr_formula_fullDenom, 30, kRed, "Pz", 1.5 );
+//    drawGraph( gr2_rr_formula_fullDenom, 30, kRed+2, "Pz", 1.5 );
+    drawGraph( gr3_rr_formula_fullDenom, 30, kBlue, "Pz", 1.5 );
+//    drawGraph( gr4_rr_formula_fullDenom, 30, kBlue+2, "Pz", 1.5 );
+
+
     // #######################################
     // ### Sigma correlations:
     // VS ETA:
@@ -1010,6 +1049,17 @@ int read_output()
 
     printf("End of drawing: RealTime=%f seconds, CpuTime=%f seconds\n",rtime2,ctime2);
 
+
+
+
+
+    // ###### Draw Graph 2D
+    TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas("canv_ratio_ratio_VS_ETA_Graph2D","canv_ratio_ratio_VS_ETA_Graph2D",140,75,800,600);
+    TGraph2D *gr2D_0_rr_GEN = observables[0][0][0][0][0].getGraph2D( "corr_rr_formula" );
+    gr2D_0_rr_GEN->Draw("surf1");
+    gr2D_0_rr_GEN->SetMarkerStyle(24);
+    gr2D_0_rr_GEN->SetMarkerColor( kRed );
+    gr2D_0_rr_GEN->Draw("same P");
 
 
     return 0;

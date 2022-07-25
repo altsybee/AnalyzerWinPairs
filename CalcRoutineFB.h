@@ -9,6 +9,7 @@
 #include "TDirectory.h"
 #include "TString.h"
 #include "TGraphErrors.h"
+#include "TGraph2D.h"
 
 #include <iostream>
 #include <string>
@@ -122,6 +123,8 @@ struct CalcWithSubsamples
     double currenPhiSep;
 
     TGraphErrors *grVsEta[nObs];
+    TGraph2D *gr2D_dEta_dPhi[nObs];
+//    TH2D *hist2D_dEta_dPhi[nObs];
     double integrals[nObs];
 
     int nVars;
@@ -144,6 +147,12 @@ struct CalcWithSubsamples
     {
         int idObs = mapObsIdByName[strName];
         return grVsEta[idObs];
+    }
+
+    TGraph2D *getGraph2D( const char *strName )
+    {
+        int idObs = mapObsIdByName[strName];
+        return gr2D_dEta_dPhi[idObs];
     }
 
     double getIntegral( const char *strName )
@@ -244,6 +253,12 @@ struct CalcWithSubsamples
         {
             grVsEta[iObs] = new TGraphErrors;
             integrals[iObs] = 0;
+
+            gr2D_dEta_dPhi[iObs] = new TGraph2D;
+
+
+//            TString strHist2Dname = Form( "hist2D_dEta_dPhi_%d", iObs );
+//            hist2D_dEta_dPhi[iObs] = new TH2D( strHist2Dname, strHist2Dname,  );
         }
 
 
@@ -315,6 +330,10 @@ struct CalcWithSubsamples
                 // add points to graphs:
                 grVsEta[iObs]->SetPoint( iWin, currenEtaSep, mean );
                 grVsEta[iObs]->SetPointError( iWin, 0, std_dev );
+
+                gr2D_dEta_dPhi[iObs]->SetPoint( iWin, currenEtaSep, currenPhiSep, mean );
+//                cout << " gr2D_dEta_dPhi[iObs]->GetN() = " << gr2D_dEta_dPhi[iObs]->GetN() << endl;
+//                cout << "iWin = " << iWin << ", obs = " << obsNames[iObs] << ", currenEtaSep = " << currenEtaSep << ", currenPhiSep = " << currenPhiSep << ", mean = " << mean << endl;
 
                 integrals[iObs] += mean; //*eSizeNum;
             }
