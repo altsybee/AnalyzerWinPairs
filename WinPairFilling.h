@@ -27,72 +27,72 @@ using namespace std;
 // ##### available vars:
 enum vars
 {
-    _Nevents_    ,
+    _Nevents_    ,   // 1D var
     _f_Nevents_,
     _x_Nevents_  ,
     _fb_Nevents_ ,
     _xy_Nevents_ ,
-    _fy_Nevents_ ,
+//    _fy_Nevents_ ,
 
     // ##### ratio-ratio correlations by approx. formula:
-    _Nf_Nb_ ,
-    _Nx_Ny_ ,
-    _Nf_Ny_ ,
-    _Nb_Nx_ ,
+    _Nf_Nb_ ,       // "pure" 2D var
+    _Nx_Ny_ ,       // "pure" 2D var
+    _Nf_Ny_ ,       // "pure" 2D var
+    _Nb_Nx_ ,       // "pure" 2D var
 
-    _Nf_    ,
-    _Nb_    ,
-    _Nx_    ,
-    _Ny_    ,
+    _Nf_    ,   // 1D var
+    _Nb_    ,   // 1D var
+    _Nx_    ,   // 1D var
+    _Ny_    ,   // 1D var
 
-    _Nf2_   ,
-    _Nb2_   ,
-    _Nx2_   ,
-    _Ny2_   ,
+    _Nf2_   ,   // 1D var
+    _Nb2_   ,   // 1D var
+    _Nx2_   ,   // 1D var
+    _Ny2_   ,   // 1D var
 
     // ratio-ratio correlations by direct formula:
     _Nf_OVER_Nx_vs_Nb_OVER_Ny_  ,
-    _Nf_OVER_Nx_                ,
-    _Nb_OVER_Ny_                ,
+    _Nf_OVER_Nx_                ,   // 1D var
+    _Nb_OVER_Ny_                ,   // 1D var
 
 
     // ##### for r-Pt
     _Nb_OVER_Ny_vs_avPx_,
 //    _PfNb_Pf_           ,
     //    sumPtAllEvX      , // replaced by PX
-    _nY_PX_            ,
-    _nB_PX_            ,
+    _nY_PX_            ,       // "pure" 2D var
+    _nB_PX_            ,       // "pure" 2D var
 
     // ##### for pt-pt FB
     _PfPb_avPf_avPb_,
     _PfPb_avPf_,
     _PfPb_avPb_,
-    _PF_ ,
-    _PB_ ,
-    _PF_PB_ ,
-    _nF_PB_ ,
-    _nB_PF_ ,
+    _PF_ ,   // 1D var
+    _PB_ ,   // 1D var
+    _PF_PB_ ,       // "pure" 2D var
+    _nF_PB_ ,       // "pure" 2D var
+    _nB_PF_ ,       // "pure" 2D var
 
-    _nF_PF_, // for same-window case
+    _nF_PF_, // for same-window case    // 1D var
 
     // ##### for pt-pt XY
     _PxPy_avPx_avPy_ ,
     _PxPy_avPx_ ,
     _PxPy_avPy_ ,
-    _PX_ ,
-    _PY_ ,
-    _PX_PY_ ,
-    _nX_PY_ ,
+    _PX_ ,   // 1D var
+    _PY_ ,   // 1D var
+    _PX_PY_ ,       // "pure" 2D var
+    _nX_PY_ ,       // "pure" 2D var
     //    nY_PX ,  // added above!
 
-    _nX_PX_, // for same-window case
+    _nX_PX_, // for same-window case   // 1D var
 
-    _PF2_ ,
-    _PX2_ ,
+    _PF2_ ,   // 1D var
+    _PX2_ ,   // 1D var
 
     // for corrections:
-    _piF2_ ,
-    _piX2_ ,
+    _piF2_ ,   // 1D var
+    _piX2_ ,   // 1D var
 
     // total number of vars:
     _nVars_
@@ -112,7 +112,7 @@ const char* enumToStr(int e) //throw()
     case _x_Nevents_    :              return "x_Nevents"  ;
     case _fb_Nevents_   :              return "fb_Nevents" ;
     case _xy_Nevents_   :              return "xy_Nevents" ;
-    case _fy_Nevents_   :              return "fy_Nevents" ;
+//    case _fy_Nevents_   :              return "fy_Nevents" ;
     case _Nf_Nb_  :                    return "Nf*Nb" ;
     case _Nx_Ny_  :                    return "Nx*Ny" ;
     case _Nf_Ny_  :                    return "Nf*Ny" ;
@@ -192,14 +192,14 @@ public:
 
 
     // e-by-e histograms:
-    TH2D *hist_n[4];
-    TH2D *hist_pt[4];
-    TH2D *hist_w_wMinus1[4];
-    TH2D *hist_w_wMinus1_pt[4];
-    TH2D *hist_pt2[4];
+    TH2D *hist_n[4]; //!
+    TH2D *hist_pt[4];  //!
+    TH2D *hist_w_wMinus1[4];  //!
+    TH2D *hist_w_wMinus1_pt[4];  //!
+    TH2D *hist_pt2[4];  //!
 
-    TH2D *QA_hist_n[4];
-    TH2D *QA_hist_pt[4];
+    TH2D *QA_hist_n[4];  //!
+    TH2D *QA_hist_pt[4];  //!
 
 
     //    int nWPs;
@@ -215,7 +215,7 @@ public:
     TH2I *hAccMap; //!
 //    TH3D *hSPEC_DetaDphi; //!
     //    THnD *hDeltaEta; //!
-    TString strAnLevel;
+//    TString strAnLevel;
 
     // some vars to make flexible hist filling (i.e. don't fill if bin name is not in varNames array):
     int currentSubsampleId;
@@ -223,6 +223,8 @@ public:
     int currentDetaDphiPairId;
     int currentEtaWinsDphiPairId;
 
+
+//    TString strListName;
 
     // ############
     WinPairWrapper()
@@ -237,13 +239,21 @@ public:
 
 
         hAccMap = 0x0;
+
+        nEtaWins = 0;
+        nPhiWins = 0;
     }
 
+    ~WinPairWrapper() {}
+
     void setup( const char* strPrefix, int cBin, int nSub,
-                int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *outputList
+                int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *_outputList
                 , bool _fullAcceptanceForDenom = false //, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8
             )
     {
+//        strListName = _outputList->GetName();
+//        cout << "TList name: " << strListName << endl;
+
         nEtaWins = _nEtaWins;
         nPhiWins = _nPhiWins;
 
@@ -300,7 +310,7 @@ public:
         //            cin >> tmpA;
         //        }
 
-        strAnLevel = Form("%s", strPrefix);
+        TString strAnLevel = Form("%s", strPrefix);
 
         TString strPID = Form( "pid_%d_%d_%d_%d_charge_%d_%d_%d_%d",
                                partTypes[0], partTypes[1], partTypes[2], partTypes[3],
@@ -335,6 +345,16 @@ public:
             strHistName = Form( "%s_hist_pt2_pt_%s_cBin%d_", strPID.Data(), strAnLevel.Data(), cBin) + strWinLabels[i];
             hist_pt2[i] = new TH2D( strHistName, strHistName,           _nEtaBins, etaMin, etaMax,   _nPhiBins, 0, TMath::TwoPi() );
         }
+
+        cout << " >>> etaMin = " << etaMin << ", etaMax = " << etaMax << endl;
+
+        if(0)for( int e1 = 0; e1 < nEtaWins; e1++ )
+            for( int p1 = 0; p1 < nPhiWins; p1++ )
+            {
+                cout <<  "   >> F: eBin=" << hist_n[0]->GetXaxis()->GetBinCenter(e1+1)
+                     <<  "   pBin=" << hist_n[0]->GetYaxis()->GetBinCenter(p1+1) << endl;
+            }
+
 
         double etaStep  = ( etaMax - etaMin ) / nEtaWins;
         double min_dEta = -( etaMax - etaMin ) + etaStep;
@@ -478,27 +498,35 @@ public:
         }
 
 
-        if ( flagHistAllWins    )  outputList->Add( hAllWins );
-        if ( flagHistDetaDphi   )  outputList->Add( hDetaDphi );
-        if ( flagHistAllEtaDphi )  outputList->Add( hAllEtaDphi );
+        if ( flagHistAllWins    )  _outputList->Add( hAllWins );
+        if ( flagHistDetaDphi   )  _outputList->Add( hDetaDphi );
+        if ( flagHistAllEtaDphi )  _outputList->Add( hAllEtaDphi );
 
 
+//        cout << "end of setup: nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
     }
     
 
     // ############
     void addTrack( int pid, double eta, double phi, double pt, int charge, double weight = 1.0 )
     {
+        // cout << "in addTrack: nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
+        // cout << "TList name: " << strListName << endl;
+//        cout << "pid = " << pid << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
         if ( pt < ptWin[0] || pt > ptWin[1] )
             return;
 
         int pidAbs = abs(pid);
+
+//        cout << "pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+
 
         // ##### backward window:
         // B
         if ( partTypes[1]==0 || pidAbs == partTypes[1] )
             if ( partCharges[1]==0 || charge == partCharges[1] )
             {
+//                cout << ">>>>> B: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[1]->Fill( eta, phi, weight );
                 hist_pt[1]->Fill( eta, phi, pt*weight );
 
@@ -510,17 +538,23 @@ public:
         if ( partTypes[3]==0 || pidAbs == partTypes[3] )
             if ( partCharges[3]==0 || charge == partCharges[3] )
             {
+//                cout << ">>>>> Y: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[3]->Fill( eta, phi, weight );
+//                cout << "hist_n[3]->GetEntries() = " << hist_n[3]->GetEntries() << endl;
                 hist_pt[3]->Fill( eta, phi, pt*weight );
 
                 hist_w_wMinus1[3]->Fill( eta, phi, weight*(weight-1) );
             }
+
+//        int aa;
+//        cin >> aa;
 
         // ##### forward window:
         // F
         if ( partTypes[0]==0 || pidAbs == partTypes[0] )
             if ( partCharges[0]==0 || charge == partCharges[0] )
             {
+//                cout << ">>>>> F: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[0]->Fill( eta, phi, weight );
                 hist_pt[0]->Fill( eta, phi, pt*weight );
 
@@ -532,6 +566,7 @@ public:
         if ( partTypes[2]==0 || pidAbs == partTypes[2] )
             if ( partCharges[2]==0 || charge == partCharges[2] )
             {
+//                cout << ">>>>> X: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[2]->Fill( eta, phi, weight );
                 hist_pt[2]->Fill( eta, phi, pt*weight );
 
@@ -539,6 +574,9 @@ public:
                 hist_w_wMinus1_pt[2]->Fill( eta, phi, weight*(weight-1)*pt );
                 hist_pt2[2]->Fill( eta, phi, pt*pt *weight*weight );
             }
+
+//        int aa;
+//        cin >> aa;
     }
 
 
@@ -597,6 +635,43 @@ public:
         //            }
         //        }
 
+//         cout << "in finishEvent(): nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
+        // cout << "TList name: " << strListName << endl;
+        //
+        // cout << "finishEvent():   hist_n[0]->GetEntries() = " << hist_n[0]->GetEntries() << ", integral: " << hist_n[0]->Integral() << endl;
+        // cout << "finishEvent():   hist_n[1]->GetEntries() = " << hist_n[1]->GetEntries() << ", integral: " << hist_n[1]->Integral()<< endl;
+        // cout << "finishEvent():   hist_n[2]->GetEntries() = " << hist_n[2]->GetEntries() << ", integral: " << hist_n[2]->Integral()<< endl;
+        // cout << "finishEvent():   hist_n[3]->GetEntries() = " << hist_n[3]->GetEntries() << ", integral: " << hist_n[3]->Integral()<< endl;
+
+//        int aa;
+//        cin >> aa;
+
+
+        if(0)for( int e1 = 0; e1 < nEtaWins; e1++ )
+            for( int p1 = 0; p1 < nPhiWins; p1++ )
+            {
+                cout <<  "   >> F: eBin=" << hist_n[0]->GetXaxis()->GetBinCenter(e1+1)
+                     <<  "   pBin=" << hist_n[0]->GetYaxis()->GetBinCenter(p1+1)
+                     << "  bin content: " << hist_n[0]->GetBinContent(e1+1, p1+1) << "    ";
+                cout <<  "   >> B: eBin=" << hist_n[1]->GetXaxis()->GetBinCenter(e1+1)
+                     <<  "   pBin=" << hist_n[1]->GetYaxis()->GetBinCenter(p1+1)
+                     << "  bin content: " << hist_n[1]->GetBinContent(e1+1, p1+1) << "    ";
+                cout <<  "   >> X: eBin=" << hist_n[2]->GetXaxis()->GetBinCenter(e1+1)
+                     <<  "   pBin=" << hist_n[2]->GetYaxis()->GetBinCenter(p1+1)
+                     << "  bin content: " << hist_n[2]->GetBinContent(e1+1, p1+1) << "    ";
+                cout <<  "   >> Y: eBin=" << hist_n[3]->GetXaxis()->GetBinCenter(e1+1)
+                     <<  "   pBin=" << hist_n[3]->GetYaxis()->GetBinCenter(p1+1)
+                     << "  bin content: " << hist_n[3]->GetBinContent(e1+1, p1+1) << endl;
+
+            }
+
+
+//        cout << endl;
+
+//        int aa;
+//        cin >> aa;
+
+
         // fill TH3D with win pairs info
         int wpId = 0;
         for( int e1 = 0; e1 < nEtaWins; e1++ )
@@ -648,6 +723,7 @@ public:
                         // check if we take this bin or not!
                         if( hAccMap && ( !hAccMap->GetBinContent( e1+1, p1+1 ) || !hAccMap->GetBinContent( e2+1, p2+1 ) ) )
                         {
+                            cout << "hAccMap CHECK!!!" << endl;
                             wpId++;   // IMPORTANT!!!
                             continue;
                         }
@@ -721,6 +797,7 @@ public:
                         if ( nY > 0 ) { meanPtY = ptY / nY; }
 
 
+//                        cout << " >>> nF = " << nF << ", nB = " << nB << ", ptF = " << ptF << ", ptB = " << ptB << endl;
 
                         fillHistWithValue( _Nevents_, 1 );//, true ); // last argument - forcing filling the 0th bin of the hist
 
@@ -1015,6 +1092,7 @@ public:
     }   // end of finishEvent
 
 
+//    ClassDef(WinPairWrapper, 1);
 
 };
 

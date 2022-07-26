@@ -153,7 +153,7 @@ const int nSubsamples = 3;//15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//2
 
 
 const int nEtaBins = 8;
-const int nPhiBins = 8;//8;//8;
+const int nPhiBins = 1;//8;//8;
 
 double eRange[] = { -0.8, 0.8 };
 
