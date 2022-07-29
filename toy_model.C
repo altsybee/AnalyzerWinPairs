@@ -152,8 +152,8 @@ double table5_par_n[] = {
 const int nSubsamples = 3;//10;//3;//15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//20;//5;//3;//15;//8;//30;
 
 
-const int nEtaBins = 8;
-const int nPhiBins = 8;//8;//8;
+const int nEtaBins = 6;//8;
+const int nPhiBins = 6;//8;//8;//8;
 
 double eRange[] = { -0.8, 0.8 };
 
@@ -207,12 +207,13 @@ const double cBinWidths[] = { 100 }; // in %
 
 
 
-//TString strAnLevels[] = { "GEN", "REC" };//, "CORRECTED" };
-TString strAnLevels[] = { "REC" };
+TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
+//TString strAnLevels[] = { "REC" };
 const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
 
-bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
+//bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
+bool whichHistos[] = { false, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
 
 
 
@@ -223,7 +224,7 @@ WinPairWrapper winPairWrapper_FULL_ETA_NUM_AND_DENOM[N_AN_LEVELS][nPartTypes][nC
 
 
 // ########################
-void toy_model( int _nEv = 5e3 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
+void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
         )
 {
 
@@ -288,12 +289,14 @@ void toy_model( int _nEv = 5e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
 
 
     TH2I *histAccMap = new TH2I( "histAccMap", "histAccMap;#eta;#varphi", nEtaBins, eRange[0], eRange[1], nPhiBins, 0, TMath::TwoPi() );
-    for( int e1 = 0; e1 < /*nEtaBins*/6; e1++ )
+    for( int e1 = 0; e1 < nEtaBins; e1++ )
         for( int p1 = 0; p1 < nPhiBins; p1++ )
-            histAccMap->SetBinContent( e1+1, p1+1, 1 );
+//            histAccMap->SetBinContent( e1+1, p1+1, 1 );
+            histAccMap->SetBinContent( e1+1, p1+1, gRandom->Uniform() > 0.4 ? 1 : 0 );
 
 //    histAccMap->Fill( -0.6, 4.8, -1 );
 //    histAccMap->Fill( 0.2, 2.5, -1 );
+
 
 
     // ### FB:
@@ -304,7 +307,7 @@ void toy_model( int _nEv = 5e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
                     for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
                         winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel], cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType] );
-                        if ( strAnLevels[iAnLevel].Contains( "REC" ) )//iAnLevel == 1 ) // TEST ACC MAP FOR RECO!!
+                        if ( strAnLevels[iAnLevel].Contains( "REC" ) || strAnLevels[iAnLevel].Contains( "CORRECTED" ) )   //iAnLevel == 1 ) // TEST ACC MAP FOR RECO!!
                         {
                             winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].hAccMap = histAccMap;
                             fOutputWinPairsLists[iType]->Add( winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].hAccMap );
@@ -944,7 +947,7 @@ void toy_model( int _nEv = 5e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
             //                 )
             if(1) // "toy" efficiency
             {
-                if( pdg == 211 ) // pi
+                if( fabs(pdg) == 211 ) // pi
                 {
                     if (    (pt < 0.3 && randForEff > 0.43)
                             || ( (pt > 0.3 && pt < 0.5) && randForEff > 0.81 )
@@ -1013,7 +1016,7 @@ void toy_model( int _nEv = 5e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
             //                weight = 1./0.85;
             if(1) // "toy" efficiency correction
             {
-                if( pdg == 211 ) // pi
+                if( fabs(pdg) == 211 ) // pi
                 {
                     if ( pt < 0.3 )
                         weight = 1./0.43;

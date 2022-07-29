@@ -91,16 +91,16 @@ const char *obsNames[] =
     "corr_rPt_direct",
 
     // new ratio-pt - April 2021: when pt is not averaged in each event
-    "corr_rSumPt_formula",
-    "corr_rSumPt_direct",
+//    "corr_rSumPt_formula",
+//    "corr_rSumPt_direct",
 
 
     //
-    "coeff_dptdpt",
-    "coeff_ptpt_CHECK_VV_formula",
-    "coeff_ptpt_BOZEK_2017",
-    "C_BOZEK_F",
-    "C_BOZEK_B",
+//    "coeff_dptdpt",
+//    "coeff_ptpt_CHECK_VV_formula",
+//    "coeff_ptpt_BOZEK_2017",
+//    "C_BOZEK_F",
+//    "C_BOZEK_B",
 };
 const int nObs = sizeof(obsNames)/sizeof(*obsNames); // number of observables
 
@@ -133,23 +133,15 @@ struct CalcWithSubsamples
     map<string, int> mapVarIdByNameSingleWin;
     map<string, int> mapVarIdByNameWinPairs;
 
-
-    //    TH2D **h2D_QA_FsingleWinInfo;
-    //    TH2D *h2D_QA_FsingleWinInfo[70][70];
-
     // current status vars:
-    //    TH1D *currentVarFullSingleWinHist;
-    //    TH1D *currentVarFullWinPairsHist;
     int currentWinPairId;
+    int currentDetaDphiPairId;
+    int currentEtaWinsDphiPairId;
+
+
     int currentSubId;
     double currenEtaSep;
     double currenPhiSep;
-
-    double currenEtaBinPosF;
-    double currenEtaBinPosB;
-
-    //    double *arr_Fwins_for_dEta_dPhi;
-    //    double *arr_Bwins_for_dEta_dPhi;
 
     int nEtaWins;
     int nPhiWins;
@@ -182,10 +174,6 @@ struct CalcWithSubsamples
     bool if_Identical_FB_XY;
     double pSizeNum;
 
-    double minEtaSep;
-    double maxEtaSep;
-
-
     bool QA_FLAG;
 
 
@@ -193,8 +181,6 @@ struct CalcWithSubsamples
     {
         h3D_singleWinInfo = 0x0;
         h3D_winPairInfo = 0x0;
-        minEtaSep = 0;
-        maxEtaSep = 0;
 
         QA_FLAG = false;
     }
@@ -305,39 +291,13 @@ struct CalcWithSubsamples
             double eFpos = ( eBounds[2] + eBounds[3] )/2;
             _etaSep = round( (eFpos - eBpos)*100 ) / 100;  // ="1 - 2"
             _phiSep = dPhi;
-
-
-            currenEtaBinPosF = eFpos;
-            currenEtaBinPosB = eBpos;
-
-            //            // single wins:
-            //            TString strBinF = Form( "eta_%.2f_%.2f_phi_%.2f_%.2f", eBounds[2], eBounds[3], phiBounds[2], phiBounds[3] );
-            //            TString strBinB = Form( "eta_%.2f_%.2f_phi_%.2f_%.2f", eBounds[0], eBounds[1], phiBounds[0], phiBounds[1] );
-            ////            cout << "strBinF = " << strBinF << ", strBinB = " << strBinB << endl;
-            //            current_winIdF = h3D_singleWinInfo->GetYaxis()->FindBin( strBinF.Data() ) - 1;
-            //            current_winIdB = h3D_singleWinInfo->GetYaxis()->FindBin( strBinB.Data() ) - 1;
-
         }
-
-
-
-
-
-
-
-
-
 
         if ( _etaSep < -999 ) { cout << "AHTUNG!!!  _etaSep < -999!" << endl; int aa; cin>>aa; }
         if ( _phiSep < -999 ) { cout << "AHTUNG!!!  _phiSep < -999!" << endl; int aa; cin>>aa; }
 
         currenEtaSep = _etaSep;
         currenPhiSep = _phiSep;
-
-        if ( _etaSep < minEtaSep )
-            minEtaSep = _etaSep;
-        if ( _etaSep > maxEtaSep )
-            maxEtaSep = _etaSep;
     }
 
 
@@ -359,19 +319,6 @@ struct CalcWithSubsamples
         nEtaWins = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "nEtaWins" ) );
         nPhiWins = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "nPhiWins" ) );
 
-        //        arr_Fwins_for_dEta_dPhi = new double[ nEtaWins*nPhiWins ];
-        //        arr_Bwins_for_dEta_dPhi = new double[ nEtaWins*nPhiWins ];
-
-
-        //        hMetaInfo->Fill( "nEtaWins", nEtaWins );
-        //        hMetaInfo->Fill( "nPhiWins", nPhiWins );
-        //        hMetaInfo->Fill( "etaRangeMin",  _etaRange[0] );
-        //        hMetaInfo->Fill( "etaRangeMax",  _etaRange[1] );
-        //        hMetaInfo->Fill( "etaSize",   etaSize );
-        //        hMetaInfo->Fill( "phiSize", phiSize );
-        //        hMetaInfo->Fill( "ptMin", _ptRange[0] );
-        //        hMetaInfo->Fill( "ptMax", _ptRange[1] );
-        //        hMetaInfo->Fill( "fullAcceptanceForDenom", _fullAcceptanceForDenom );
 
         // create graphs per each observable
         for( int iObs = 0; iObs < nObs; iObs++ )
@@ -381,9 +328,6 @@ struct CalcWithSubsamples
             integrals[iObs] = 0;
 
             gr2D_dEta_dPhi[iObs] = new TGraph2D;
-
-            //            TString strHist2Dname = Form( "hist2D_dEta_dPhi_%d", iObs );
-            //            hist2D_dEta_dPhi[iObs] = new TH2D( strHist2Dname, strHist2Dname,  );
         }
 
 
@@ -418,20 +362,6 @@ struct CalcWithSubsamples
 
         createBinNameBinIdMap();
 
-
-
-
-        //        // for QA!
-        ////        h2D_QA_FsingleWinInfo = new TH2D*[ nWinPairs ];
-        //        for( int wpId = 0; wpId < nWinPairs; wpId++ )
-        //        {
-        //            TString strHistName = h3D_winPairInfo->GetYaxis()->GetBinLabel( wpId+1 );    //Form( "%s", h3D_winPairInfo->GetYaxis()->GetBinLabel( j+1 ) );
-        //            for( int i = 0; i < 20; i++ )
-        //                h2D_QA_FsingleWinInfo[wpId][i] = new TH2D( strHistName+Form( "_pair_%d", i ), strHistName,  nEtaWins, eRangeMin, eRangeMax,   nPhiWins, 0, TMath::TwoPi() );
-        //        }
-
-
-
         // !!! check for empty bins:
         if(0)for( int i = 0; i < nVars2D; i++ )
             for( int j = 0; j < nWinPairs; j++ )
@@ -445,9 +375,6 @@ struct CalcWithSubsamples
                     }
 
                 }
-
-
-
 
 
         // calculated observables
@@ -464,9 +391,6 @@ struct CalcWithSubsamples
             mapObsIdByName.insert( pair<string, int>( obsNames[i], i ) );
             histCalcObs->GetXaxis()->SetBinLabel( i+1, obsNames[i] );
         }
-
-
-
 
         // loop over win pairs:
         for ( int iWinPair = 0; iWinPair < nWinPairs; iWinPair++ )
@@ -488,19 +412,13 @@ struct CalcWithSubsamples
             //            current_pWinId = iWinPair % nEtaWins;
 
 
-
-            //            TH1D *histVarValuesSingleWin = h3D_singleWinInfo->ProjectionX( "_px_SingleWin", iWinPair+1, iWinPair+1, 1, nSubs ); // project all subsamples on axis
-            //            currentVarFullSingleWinHist = histVarValuesSingleWin;
-
-
-            //            TH1D *histVarValuesWP = h3D_winPairInfo->ProjectionX( "_px_WP", iWinPair+1, iWinPair+1, 1, nSubs ); // project all subsamples on axis
-            //            currentVarFullWinPairsHist = histVarValuesWP;
-
             currentWinPairId = iWinPair;
             currentSubId = nSubs; // i.e. calc for sum of all subsamples
 
             if( DO_GLOBAL_QA )
                 cout << "##### WIN PAIR " << h3D_winPairInfo->GetYaxis()->GetBinLabel( currentWinPairId+1 ) << endl;
+//            if ( valueByNameWP( "Nf*Nb" ) < 0.00001 )
+//                continue;
             bool isGoodCalc = finalCalc(); // in case of holes in the acceptance - win pair will be skipped
             if ( !isGoodCalc )
                 continue;
@@ -551,24 +469,26 @@ struct CalcWithSubsamples
 
                 integrals[iObs] += mean; //*eSizeNum;
             }
+
+//            int aa;
+//            cin >> aa;
         }  // end of loop over win pairs
 
 
 
 
         // fill 2D hist
+        TH1::AddDirectory(kFALSE); // to suppress Warning in <TFile::Append>: Replacing existing TH1, suggested in https://root-forum.cern.ch/t/switching-off-warning-in-tfile-append-replacing-existing-th1/32041
         if(1)for( int iObs = 0; iObs < nObs; iObs++ )
         {
-            double minEdge = minEtaSep - eSizeNum/2;
-            double maxEdge = maxEtaSep + eSizeNum/2;
-            int nEtaBins = (maxEdge - minEdge) / eSizeNum;
-
-            int nPhiBins = TMath::TwoPi() / pSizeNum;
+            double minEdge = -(eRangeMax-eRangeMin) + eSizeNum - eSizeNum/2;
+            double maxEdge = (eRangeMax-eRangeMin) - eSizeNum + eSizeNum/2;
+//            cout << "minEdge = " << minEdge << ", maxEdge = " << maxEdge << endl;
 
 
             TString strHist2D = Form("h2D_dEta_dPhi_%s", obsNames[iObs]);
-            h2D_dEta_dPhi[iObs] = new TH2D( strHist2D, ";#Delta#eta;#Delta#varphi", nEtaBins, minEdge, maxEdge, 2*nPhiBins-1, -TMath::TwoPi(), TMath::TwoPi() );
-            h2D_dEta_dPhi_binCounts[iObs] = new TH2D( strHist2D+"_binCounts", ";#Delta#eta;#Delta#varphi", nEtaBins, minEdge, maxEdge, 2*nPhiBins-1, -TMath::TwoPi(), TMath::TwoPi() );
+            h2D_dEta_dPhi[iObs] = new TH2D( strHist2D, ";#Delta#eta;#Delta#varphi", 2*nEtaWins-1, minEdge, maxEdge, 2*nPhiWins-1, -TMath::TwoPi(), TMath::TwoPi() );
+            h2D_dEta_dPhi_binCounts[iObs] = new TH2D( strHist2D+"_binCounts", ";#Delta#eta;#Delta#varphi", 2*nEtaWins-1, minEdge, maxEdge, 2*nPhiWins-1, -TMath::TwoPi(), TMath::TwoPi() );
 
             TH2D *hist = h2D_dEta_dPhi[iObs];
             TH2D *histCounts = h2D_dEta_dPhi_binCounts[iObs];
@@ -688,74 +608,62 @@ struct CalcWithSubsamples
             //            cout << "nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
 
             value = 0;
+
+            int nDphiWP = 2*nPhiWins-1;
+
             int counterWinsQA = 0;
-            for( int wpId1 = 0; wpId1 < nEtaWins*nPhiWins; wpId1++ ) // 1==Backward
-            {
-                int eW1 = wpId1 / nPhiWins;
-                int pW1 = wpId1 % nPhiWins;
-                double center_e1 = eRangeMin + eSizeNum*(eW1+0.5);
-                double center_p1 = 0 + TMath::TwoPi()/nPhiWins*(pW1+0.5);
 
-                //                cout << ">> eW1 = " << eW1 << ", pW1 = " << pW1 << endl;
-
-                for( int wpId2 = 0; wpId2 < nEtaWins*nPhiWins; wpId2++ ) // 2==Backward
+//            int wpId = 0;
+            for( int e1 = 0; e1 < nEtaWins; e1++ )  // 1==Forward
+                for( int p1 = 0; p1 < nPhiWins; p1++ )
                 {
-                    int eW2 = wpId2 / nPhiWins;
-                    int pW2 = wpId2 % nPhiWins;
-                    double center_e2 = eRangeMin + eSizeNum*(eW2+0.5);
-                    double center_p2 = 0 + TMath::TwoPi()/nPhiWins*(pW2+0.5);
+                    int thisWinIdF = e1*nPhiWins + p1;
 
-                    double thisPhiSep = round( (center_p1 - center_p2) *100 ) / 100;   // ="F - B"
-
-                    // #####
-                    if ( whichInputHist == 1 )
-                    {
-//                        double thisEtaSep = round( (center_e1 - center_e2) *100 ) / 100;    // ="F - B"
-                        double thisEtaSep = round( (center_e1 - center_e2) *100 ) / 100;    // ="F - B"
-                        //                    cout << "eW2 = " << eW2 << ", pW2 = " << pW2 << endl;
-                        //                    cout << "thisEtaSep = " << thisEtaSep << ", thisPhiSep = " << thisPhiSep << endl;
-                        if ( fabs( currenEtaSep - thisEtaSep ) < 0.001 && fabs( currenPhiSep - thisPhiSep ) < 0.001 )
+                    for( int e2 = 0; e2 < nEtaWins; e2++ )  // 2==Backward
+                        for( int p2 = 0; p2 < nPhiWins; p2++ )
                         {
-                            //                        cout << "MATCH!" << endl;
-                            int winId = whichWin==0 ? wpId1 : wpId2;
-                            if ( currentSubId < nSubs )
-                                value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, currentSubId+1 );
-                            else // i.e. we calc now the full hist (=sum of all subsamples)
-                            {
-                                for( int subId = 0; subId < h3D_singleWinInfo->GetNbinsZ(); subId++ )
-                                    value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, subId+1 );
-                                if( QA_FLAG )
-                                    cout << "  >> B: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( wpId2+1 )
-                                         << "  >> F: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( wpId1+1 ) << endl;
+                            int thisWinIdB = e2*nPhiWins + p2;
 
-                            }
-                            counterWinsQA++;
-                        }
-                    }
-                    // #####
-                    else if ( whichInputHist == 2 )
-                    {
-                        if ( fabs( currenEtaBinPosF - center_e1 ) < 0.001 && fabs( currenEtaBinPosB - center_e2 ) < 0.001
-                             && fabs( currenPhiSep - thisPhiSep ) < 0.001 )
-                        {
-                            //                        cout << "MATCH!" << endl;
-                            int winId = whichWin==0 ? wpId1 : wpId2;
-                            if ( currentSubId < nSubs )
-                                value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, currentSubId+1 );
-                            else // i.e. we calc now the full hist (=sum of all subsamples)
-                            {
-                                for( int subId = 0; subId < h3D_singleWinInfo->GetNbinsZ(); subId++ )
-                                    value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, subId+1 );
-                                if( QA_FLAG )
-                                    cout << "  >> B: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( wpId2+1 )
-                                         << "  >> F: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( wpId1+1 ) << endl;
+                            // currentWinPairId = wpId;
 
+                            // winId for dEta-dPhi:
+                            int id_dEta = nEtaWins-1 + e1-e2;
+                            int id_dPhi = nPhiWins-1 + p1-p2;
+
+                            bool flagTake = false;
+
+                            if ( whichInputHist == 1 )
+                            {
+                                int thistDetaDphiPairId = nDphiWP*id_dEta + id_dPhi;
+                                if ( thistDetaDphiPairId == currentWinPairId )
+                                    flagTake = true;
                             }
-                            counterWinsQA++;
+                            else if ( whichInputHist == 2 )
+                            {
+                                int thistEtaWinsDphiPairId = nDphiWP*(nEtaWins*e1+e2) + id_dPhi;
+                                if ( thistEtaWinsDphiPairId == currentWinPairId )
+                                    flagTake = true;
+                            }
+
+                            if ( flagTake )
+                            {
+                                int winId = whichWin==0 ? thisWinIdF : thisWinIdB;
+                                if ( currentSubId < nSubs )
+                                    value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, currentSubId+1 );
+                                else // i.e. we calc now the full hist (=sum of all subsamples)
+                                {
+                                    for( int subId = 0; subId < h3D_singleWinInfo->GetNbinsZ(); subId++ )
+                                        value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, subId+1 );
+                                    if( QA_FLAG )
+                                        cout << "  >> B: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( thisWinIdB+1 )
+                                             << "  >> F: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( thisWinIdF+1 ) << endl;
+                                }
+                            }
                         }
-                    }
                 }
-            }
+
+
+
             if (0) // value == 0 )
             {
                 cout << "valueByNameSW(): value == 0!    counterWinsQA = " << counterWinsQA << ", binName = " << binName << endl;
@@ -830,34 +738,52 @@ struct CalcWithSubsamples
 
 
         // ##############################
-        // now calc the observables
-
-        double _nEvents     = valueByNameSW(  0, "Nevents" ); // take e.g. from F win
-        if ( _nEvents < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
+        // get n Events for F-, B-only, and for both FB - to deal with Acceptance Gaps!
+        double _nEventsAccFB = valueByNameWP( "Nevents_twoWins_Acceptance" );
+        if ( _nEventsAccFB < 0.0001 ) // GAP IN ACCEPTANCE (one of the two wins is zero), skip the rest
             return false;
+
+        double _nEventsF     = valueByNameSW(  0, "Nevents" ); // take e.g. from F win
+        if ( _nEventsF < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
+        {
+            cout << "check _nEventsF < 0.0001: never should appear!.." << endl;
+            return false;
+        }
         double _nEventsB     = valueByNameSW(  1, "Nevents" );
         if ( _nEventsB < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
+        {
+            cout << "check _nEventsB < 0.0001: never should appear!.." << endl;
             return false;
+        }
 
-        double FB = valueByNameWP( "Nf*Nb" ) / _nEvents;
-        double XY = valueByNameWP( "Nx*Ny" ) / _nEvents;
-        double FY = valueByNameWP( "Nf*Ny" ) / _nEvents;
-        double XB = valueByNameWP( "Nb*Nx" ) / _nEvents;
+        // ##############################
+        // now calc the observables
+
+        double FB = valueByNameWP( "Nf*Nb" ) / _nEventsAccFB;
+        double XY = valueByNameWP( "Nx*Ny" ) / _nEventsAccFB;
+        double FY = valueByNameWP( "Nf*Ny" ) / _nEventsAccFB;
+        double XB = valueByNameWP( "Nb*Nx" ) / _nEventsAccFB;
 
         if( DO_GLOBAL_QA )
             QA_FLAG = true;
-        double F = valueByNameSW(  0,   "Nf" )  / _nEvents;
+        double F = valueByNameSW(  0,   "Nf" )  / _nEventsF;
         QA_FLAG = false;
-        double B = valueByNameSW(  1,   "Nb" )  / _nEvents;
-        double X = valueByNameSW(  0,   "Nx" )  / _nEvents;
-        double Y = valueByNameSW(  1,   "Ny" )  / _nEvents;
+        double B = valueByNameSW(  1,   "Nb" )  / _nEventsB;
+        double X = valueByNameSW(  0,   "Nx" )  / _nEventsF;
+        double Y = valueByNameSW(  1,   "Ny" )  / _nEventsB;
 
-        double F2 = valueByNameSW(  0,  "Nf2" ) / _nEvents;
-        double X2 = valueByNameSW(  1,  "Nx2" ) / _nEvents;
-        double B2 = valueByNameSW(  0,  "Nb2" ) / _nEvents;
-        double Y2 = valueByNameSW(  1,  "Ny2" ) / _nEvents;
+        double F2 = valueByNameSW(  0,  "Nf2" ) / _nEventsF;
+        double B2 = valueByNameSW(  1,  "Nb2" ) / _nEventsB;
+        double X2 = valueByNameSW(  0,  "Nx2" ) / _nEventsF;
+        double Y2 = valueByNameSW(  1,  "Ny2" ) / _nEventsB;
 
-
+//        if( _nEventsAccFB != _nEventsF || _nEventsF != _nEventsB || _nEventsAccFB != _nEventsB )
+            if(0) cout << "currentWinPairId = " << currentWinPairId << ", F = " << F << ", B = " << B << ", X = " << X << ", Y = " << Y
+                  << ", F2 = " << F2 << ", B2 = " << B2 << ", X2 = " << X2 << ", Y2 = " << Y2 << ", FY = " << FY << ", XB = " << XB
+                  << ", _nEventsF = " << _nEventsF << ", _nEventsB = " << _nEventsB << ", _nEventsAccFB = " << _nEventsAccFB
+                  << endl;
+                    int aa;
+        //            cin >> aa;
 
         // ###########
         // ##### R2:
@@ -895,7 +821,7 @@ struct CalcWithSubsamples
             if(0)cout << "corr_rr_formula = " << corr_rr_formula
                       << ", F = " << F << ", X = " << X << ", Y = " << Y
                       << ", F2 = " << F2 << ", X2 = " << X2 << ", FY = " << FY << ", XB = " << XB
-                      << ", _nEvents = " << _nEvents
+                      << ", _nEventsAccFB = " << _nEventsAccFB
                       << endl;
             //            int aa;
             //            cin >> aa;
@@ -936,9 +862,9 @@ struct CalcWithSubsamples
             fillHistWithValue( "corr_rPt_direct", X/eSizeNum * ( Nb_OVER_Ny_vs_Px/PxPy_avPx/ratioB - 1 ) );
 
             // formula
-            double nB_PX = valueByNameWP(  "nB*PX" ) / _nEvents;
-            double nY_PX = valueByNameWP(  "nY*PX" ) / _nEvents;
-            double PX      = valueByNameSW(  0,  "PX" )  / _nEvents;
+            double nB_PX = valueByNameWP(  "nB*PX" ) / _nEventsAccFB;
+            double nY_PX = valueByNameWP(  "nY*PX" ) / _nEventsAccFB;
+            double PX      = valueByNameSW(  0,  "PX" )  / _nEventsF;
 
             // new ratio-meanPt formula - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
             //            double _avSumPtInEvX      = getValueByName(  "sumPtAllEvX" )  / _nEvents;
@@ -946,7 +872,7 @@ struct CalcWithSubsamples
             if (identical)
             {
                 //                double subtrX = identical ? 1/X : 0;
-                double nX_PX = valueByNameSW(  0,  "nX*PX" ) / _nEvents;
+                double nX_PX = valueByNameSW(  0,  "nX*PX" ) / _nEventsF;
                 rPt_full_formula = X/eSizeNum * (  nB_PX /B/PX  + X2/X/X - XB/X/B - nX_PX /X/PX );
             }
             fillHistWithValue( "corr_rPt_formula", rPt_full_formula );
@@ -1028,21 +954,21 @@ struct CalcWithSubsamples
 
         // ##### coeff avPt-avPt formula (new expansion, July 2022)
         {
-            double PF_PB = valueByNameWP(  "PF*PB" ) / _nEvents;
-            double nF_PB = valueByNameWP(  "nF*PB" ) / _nEvents;
-            double nB_PF = valueByNameWP(  "nB*PF" ) / _nEvents;
+            double PF_PB = valueByNameWP(  "PF*PB" ) / _nEventsAccFB;
+            double nF_PB = valueByNameWP(  "nF*PB" ) / _nEventsAccFB;
+            double nB_PF = valueByNameWP(  "nB*PF" ) / _nEventsAccFB;
 
-            double PF = valueByNameSW(  0,  "PF" ) / _nEvents;
-            double PB = valueByNameSW(  1,  "PB" ) / _nEvents;
+            double PF = valueByNameSW(  0,  "PF" ) / _nEventsF;
+            double PB = valueByNameSW(  1,  "PB" ) / _nEventsB;
 
 
             double avPtF_avPtB_formula = F/eSizeNum * ( PF_PB/PF/PB + FB/F/B - nF_PB/F/PB  - nB_PF/B/PF );
 
             if (identical)
             {
-                double PF2 =    valueByNameSW(  0,  "PF2" ) / _nEvents;
-                double nF_PF =  valueByNameSW(  0,  "nF*PF" ) / _nEvents;
-                double piF2 =   valueByNameSW(  0,  "piF2" ) / _nEvents;
+                double PF2 =    valueByNameSW(  0,  "PF2" ) / _nEventsF;
+                double nF_PF =  valueByNameSW(  0,  "nF*PF" ) / _nEventsF;
+                double piF2 =   valueByNameSW(  0,  "piF2" ) / _nEventsF;
 
                 //                double subtrX = identical ? 1/X : 0;
                 // DODELAT' PF_PB !!!!!
@@ -1071,15 +997,15 @@ struct CalcWithSubsamples
         // ##### dptdpt
         if(0)
         {
-            double _avPtAllEvF     = valueByNameSW(  0,  "sumPtAllEvF" )  / ( F*_nEvents );
-            double _avPtAllEvB     = valueByNameSW(  0,  "sumPtAllEvB" )  / ( B*_nEvents );
+            double _avPtAllEvF     = valueByNameSW(  0,  "sumPtAllEvF" )  / ( F*_nEventsF );
+            double _avPtAllEvB     = valueByNameSW(  0,  "sumPtAllEvB" )  / ( B*_nEventsB );
             double _piFpjB = valueByNameWP(  "piFpjB" );
             double _nF_sum_pB = valueByNameWP(  "nF*PB" ); // /2; // /2 is TMP!!!
             double _nB_sum_pF = valueByNameWP(  "nB*PF" ); // /2;
 
             // from /Volumes/OptibaySSD/ALICE_analysis/AliceTaskGetEventTreeIA/task_FB_and_DptDpt_analysis/results/_common_files/routine.h:169
             fillHistWithValue( "coeff_dptdpt", (
-                                   ( _piFpjB - _nF_sum_pB*_avPtAllEvF - _nB_sum_pF*_avPtAllEvB)/ (FB*_nEvents)
+                                   ( _piFpjB - _nF_sum_pB*_avPtAllEvF - _nB_sum_pF*_avPtAllEvB)/ (FB*_nEventsAccFB)
                                    + _avPtAllEvF*_avPtAllEvB
                                    ) / (_avPtAllEvF*_avPtAllEvB) );
         }
@@ -1118,8 +1044,8 @@ struct CalcWithSubsamples
         // ### coeff ptpt BOZEK_2017_USING_QM17_RESULTS_1704.02777.pdf
         if(0)
         {
-            double _avPtAllEvF     = valueByNameSW(  0,  "sumPtAllEvF" )  / ( F*_nEvents );
-            double _avPtAllEvB     = valueByNameSW(  1,  "sumPtAllEvB" )  / ( B*_nEvents );
+            double _avPtAllEvF     = valueByNameSW(  0,  "sumPtAllEvF" )  / ( F*_nEventsF );
+            double _avPtAllEvB     = valueByNameSW(  1,  "sumPtAllEvB" )  / ( B*_nEventsB );
 
             double Pf = valueByNameWP(  "PfPb_Pf" ) ;
             double Pb = valueByNameWP(  "PfPb_Pb" ) ;

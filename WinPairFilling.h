@@ -69,6 +69,7 @@ enum vars_1D
 // ##### available vars:
 enum vars_2D
 {
+    _Nevents_twoWinsAcceptance_    ,   // 1D var
 //    _x_Nevents_  ,
     _fb_Nevents_ ,
     _xy_Nevents_ ,
@@ -239,6 +240,7 @@ const char* enum2D_toStr(int e) //throw()
     {
 //    case _f_Nevents_    :              return "f_Nevents";
 //    case _x_Nevents_    :              return "x_Nevents"  ;
+    case _Nevents_twoWinsAcceptance_:  return "Nevents_twoWins_Acceptance" ;
     case _fb_Nevents_   :              return "fb_Nevents" ;
     case _xy_Nevents_   :              return "xy_Nevents" ;
 //    case _fy_Nevents_   :              return "fy_Nevents" ;
@@ -1165,6 +1167,7 @@ public:
 //                        cout << " >>> nF = " << nF << ", nB = " << nB << ", ptF = " << ptF << ", ptB = " << ptB << endl;
 
 //                        fillHistWithValue( _Nevents_, 1 );//, true ); // last argument - forcing filling the 0th bin of the hist
+                        fillWithValueHist2D( _Nevents_twoWinsAcceptance_ ,   1      );
 
                         // NfNb:
 //                        fillHistWithValue( _Nf_    ,   nF             );

@@ -91,6 +91,7 @@ int read_output()
     //    TString fileName = "toy_output_fraction_K_fraction_fixed_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
 //    TString fileName = "toy_output_gaus_500_10.root";
     TString fileName = "output_toy.root";
+//    TString fileName = "output_toy_e8_p8_25kEvents.root";
 //    TString fileName = "before_phi_output_toy.root";
     //    TString fileName = "toy_output_gaus_500_10_BEFORE_CHANGES.root";
     //    TString fileName = "toy_output_FIST.root";
@@ -145,7 +146,6 @@ int read_output()
     double ptmax[nPtBins] = { 100.0 };
 
 
-    int whichInputHist = 1;
 
     //
     const int nPartTypes = 1;//5;//10;//6;//3;//4;
@@ -187,9 +187,15 @@ int read_output()
     const double pSize = TMath::TwoPi()/8;
 
 
-//    TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
-    TString strAnLevels[] = { "REC" };
+    TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
+//    TString strAnLevels[] = { "REC" };
     const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
+
+
+    int whichInputHist = 1;
+
+
+
 
     TStopwatch timer;
     timer.Start();
@@ -440,33 +446,34 @@ int read_output()
 
 
     // ###### Draw dEta-dPhi 2D
+    for ( int iAnLevel = 0; iAnLevel < N_AN_LEVELS; ++iAnLevel )
     for ( int iType = 0; iType < 1/*nPartTypes*/; iType++)
     {
         TString strPID = Form( "pid_%d_%d_%d_%d_charge_%d_%d_%d_%d",
                                arrPartTypes[iType][0], arrPartTypes[iType][1], arrPartTypes[iType][2], arrPartTypes[iType][3],
                 arrCharges[iType][0], arrCharges[iType][1], arrCharges[iType][2], arrCharges[iType][3] );
 
-        TString strCanvName = Form( "canv_Graph2D_type_%s", strPID.Data() );
+        TString strCanvName = Form( "canv_Graph2D_type_%s_%s", strPID.Data(), strAnLevels[iAnLevel].Data() );
         TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas( strCanvName, strCanvName, 10+30*iType,10 +30*iType,800,800);
         canv_ratio_ratio_VS_ETA_Graph2D->Divide(2,2);
 
         canv_ratio_ratio_VS_ETA_Graph2D->cd(1);
-//        TGraph2D *gr2D_0_rr_GEN = observables[0][iType][0][0][0].getGraph2D( "corr_rr_formula" );
-        TH2D *gr2D_0_sigmaXY_GEN = observables[0][iType][0][0][0].getHist2D( "sigma_XY" );
-        gr2D_0_sigmaXY_GEN->Draw("surf1");
+//        TGraph2D *gr2D_0_rr = observables[0][iType][0][0][0].getGraph2D( "corr_rr_formula" );
+        TH2D *gr2D_0_sigmaXY = observables[iAnLevel][iType][0][0][0].getHist2D( "sigma_XY" );
+        gr2D_0_sigmaXY->Draw("surf1");
 
 
         canv_ratio_ratio_VS_ETA_Graph2D->cd(2);
-        TH2D *gr2D_0_rr_GEN = observables[0][iType][0][0][0].getHist2D( "corr_rr_formula" );
-        gr2D_0_rr_GEN->Draw("surf1");
+        TH2D *gr2D_0_rr = observables[iAnLevel][iType][0][0][0].getHist2D( "corr_rr_formula" );
+        gr2D_0_rr->Draw("surf1");
 
         canv_ratio_ratio_VS_ETA_Graph2D->cd(3);
-        TH2D *gr2D_0_rPt_GEN = observables[0][iType][0][0][0].getHist2D( "corr_rPt_formula" );
-        gr2D_0_rPt_GEN->Draw("surf1");
+        TH2D *gr2D_0_rPt = observables[iAnLevel][iType][0][0][0].getHist2D( "corr_rPt_formula" );
+        gr2D_0_rPt->Draw("surf1");
 
         canv_ratio_ratio_VS_ETA_Graph2D->cd(4);
-        TH2D *gr2D_0_PtPt_GEN = observables[0][iType][0][0][0].getHist2D( "avPtF_avPtB_formula" );
-        gr2D_0_PtPt_GEN->Draw("surf1");
+        TH2D *gr2D_0_PtPt = observables[iAnLevel][iType][0][0][0].getHist2D( "avPtF_avPtB_formula" );
+        gr2D_0_PtPt->Draw("surf1");
 
     }
 
