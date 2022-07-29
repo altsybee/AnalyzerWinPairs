@@ -149,11 +149,11 @@ double table5_par_n[] = {
 };
 
 
-const int nSubsamples = 3;//15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//20;//5;//3;//15;//8;//30;
+const int nSubsamples = 3;//10;//3;//15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//20;//5;//3;//15;//8;//30;
 
 
 const int nEtaBins = 8;
-const int nPhiBins = 1;//8;//8;
+const int nPhiBins = 8;//8;//8;
 
 double eRange[] = { -0.8, 0.8 };
 
@@ -171,7 +171,7 @@ double ptRange[] = { 0., 100 };
 
 
 //
-const int nPartTypes = 5;//3;//4;
+const int nPartTypes = 1;//5;//3;//4;
 int arrPartTypes[nPartTypes][4] =
 { // F,B, X,Y
   //  { /*421*/0, 0, 0, 0 },         // 0
@@ -180,10 +180,10 @@ int arrPartTypes[nPartTypes][4] =
   //  { 321, 321, 211, 211 }, // 6
 
   { 321, 321, 211, 211 }, // 7
-  { 321, 321, 211, 211 }, // 8
-  { 321, 321, 211, 211 }, // 9
-  { 321, 321, 211, 211 }, // 8
-  { 321, 321, 211, 211 }, // 9
+//  { 321, 321, 211, 211 }, // 8
+//  { 321, 321, 211, 211 }, // 9
+//  { 321, 321, 211, 211 }, // 8
+//  { 321, 321, 211, 211 }, // 9
 
   //  { 0, 321, 0, 211 }, // 7
   //  { 0, 321, 0, 211 }, // 8
@@ -192,11 +192,11 @@ int arrPartTypes[nPartTypes][4] =
 
 int arrCharges[nPartTypes][4] =
 { // F,B, X,Y
-  {  0,  0,  0,  0 },
-  { +1, +1, +1, +1 },
-  { -1, -1, -1, -1 },
+//  {  0,  0,  0,  0 },
+//  { +1, +1, +1, +1 },
+//  { -1, -1, -1, -1 },
   { +1, -1, +1, -1 },
-  { -1, +1, -1, +1 },
+//  { -1, +1, -1, +1 },
 };
 
 
@@ -207,11 +207,12 @@ const double cBinWidths[] = { 100 }; // in %
 
 
 
-TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
+//TString strAnLevels[] = { "GEN", "REC" };//, "CORRECTED" };
+TString strAnLevels[] = { "REC" };
 const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
 
-bool whichHistos[] = { false, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
+bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
 
 
 
@@ -222,7 +223,7 @@ WinPairWrapper winPairWrapper_FULL_ETA_NUM_AND_DENOM[N_AN_LEVELS][nPartTypes][nC
 
 
 // ########################
-void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
+void toy_model( int _nEv = 5e3 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
         )
 {
 
@@ -256,6 +257,11 @@ void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
     //    return;
 
 
+    TF1 *fSlopeEta = new TF1( "slopeEta", "[0]+x*[1]", -1.5, 1.5 );
+    fSlopeEta->SetParameters( 3, -1 );
+
+//    fSlopeEta->Draw();
+//    return;
 
 
     TList* fOutputWinPairsLists[nPartTypes];       //! output list
@@ -274,7 +280,7 @@ void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
 
 
 
-//    cout << "### nVars = " << nVars << endl;
+    //    cout << "### nVars = " << nVars << endl;
 
 
 
@@ -282,39 +288,39 @@ void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
 
 
     TH2I *histAccMap = new TH2I( "histAccMap", "histAccMap;#eta;#varphi", nEtaBins, eRange[0], eRange[1], nPhiBins, 0, TMath::TwoPi() );
-    for( int e1 = 0; e1 < nEtaBins; e1++ )
+    for( int e1 = 0; e1 < /*nEtaBins*/6; e1++ )
         for( int p1 = 0; p1 < nPhiBins; p1++ )
-           histAccMap->SetBinContent( e1+1, p1+1, 1 );
+            histAccMap->SetBinContent( e1+1, p1+1, 1 );
 
-    histAccMap->Fill( -0.6, 4.8, -1 );
-    histAccMap->Fill( 0.2, 2.5, -1 );
+//    histAccMap->Fill( -0.6, 4.8, -1 );
+//    histAccMap->Fill( 0.2, 2.5, -1 );
 
 
     // ### FB:
     for ( int iAnLevel = 0; iAnLevel < N_AN_LEVELS; ++iAnLevel )
-    for ( int iType = 0; iType < nPartTypes; iType++)
-        for ( int iCW = 0; iCW < nCW; iCW++)
-            for ( int cBin = 0; cBin < /*nCentrBins[iCW]*/nCentrBins; ++cBin )
-                for ( int iPt = 0; iPt < nPtBins; ++iPt )
-                {
-                    winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel], cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType] );
-                    if ( iAnLevel == 1 ) // TEST ACC MAP FOR RECO!!
+        for ( int iType = 0; iType < nPartTypes; iType++)
+            for ( int iCW = 0; iCW < nCW; iCW++)
+                for ( int cBin = 0; cBin < /*nCentrBins[iCW]*/nCentrBins; ++cBin )
+                    for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
-                        winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].hAccMap = histAccMap;
-                        fOutputWinPairsLists[iType]->Add( winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].hAccMap );
-                        fOutputWinPairsLists[iType]->Add( winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].QA_hist_n[0] );
-                        fOutputWinPairsLists[iType]->Add( winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].QA_hist_pt[0] );
+                        winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel], cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType] );
+                        if ( strAnLevels[iAnLevel].Contains( "REC" ) )//iAnLevel == 1 ) // TEST ACC MAP FOR RECO!!
+                        {
+                            winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].hAccMap = histAccMap;
+                            fOutputWinPairsLists[iType]->Add( winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].hAccMap );
+                            fOutputWinPairsLists[iType]->Add( winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].QA_hist_n[0] );
+                            fOutputWinPairsLists[iType]->Add( winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].QA_hist_pt[0] );
 
-                    }
+                        }
 
-                    // ##### FULL ETA FOR DENOM:
-                    winPairWrapper_FULL_ETA_DENOM[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel]+"_FULL_ETA_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType], true );
+                        // ##### FULL ETA FOR DENOM:
+                        winPairWrapper_FULL_ETA_DENOM[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel]+"_FULL_ETA_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType], true );
 
-                    // ##### FULL ETA FOR both Num and Denom: to calc nu_dyn!
-                    bool whichHistosFullAcceptance[] = { true, false, false };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
-                    winPairWrapper_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel]+"_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], 1, 1, eRange, ptRange, whichHistosFullAcceptance, fOutputWinPairsLists[iType], true );
+                        // ##### FULL ETA FOR both Num and Denom: to calc nu_dyn!
+                        bool whichHistosFullAcceptance[] = { true, false, false };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
+                        winPairWrapper_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel]+"_FULL_ETA_NUM_AND_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], 1, 1, eRange, ptRange, whichHistosFullAcceptance, fOutputWinPairsLists[iType], true );
 
-                } // end of pT loop
+                    } // end of pT loop
 
 
     //    double multRanges[] = { 3199.5, 283.382, 195.397, 133.02, 88.058, 55.5156, 32.8752, 18.0094, 8.92059, 3.94449,  };
@@ -323,7 +329,7 @@ void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
     //    int nCbins = sizeof(multRanges)/sizeof(*multRanges);
     int nCbins = nCentrBins; // for pp!
 
-//        return;
+    //        return;
 
     //
     TDatabasePDG *db_PDG = new TDatabasePDG;
@@ -673,7 +679,9 @@ void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
                 //            double pt = my_func_BW->GetRandom();
                 //            double eta = gRandom->Uniform(-2, 2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
                 //            double eta = gRandom->Uniform(-1.2, 1.2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-                double eta = gRandom->Uniform( -0.8, 0.8 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+//                double eta = gRandom->Uniform( -0.8, 0.8 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                double eta = gRandom->Uniform( -1.5, 1.5 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+//                double eta = fSlopeEta->GetRandom();
                 double phi = gRandom->Uniform( 0, TMath::TwoPi() );
 
                 // !!!
@@ -705,11 +713,15 @@ void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
                     //                }
                     else
                     {
-//                        double randWhat = gRandom->Uniform();
-//                        if ( randWhat < 0.25 ) // opposite-sign correlation (25% prob.)
+                        //                        double randWhat = gRandom->Uniform();
+                        //                        if ( randWhat < 0.25 ) // opposite-sign correlation (25% prob.)
                         {
-                            eta = gRandom->Gaus(prevEta,0.35);
-                            phi = gRandom->Gaus(prevPhi,0.35);
+                            eta = gRandom->Gaus(prevEta,0.32);
+                            phi = gRandom->Gaus(prevPhi,0.32);
+                            if( phi < 0 )
+                                phi += TMath::TwoPi();
+                            else if( phi > TMath::TwoPi() )
+                                phi -= TMath::TwoPi();
                             pt = gRandom->Gaus(prevPt, 0.02);
                             pdg = -prevPdg;
                             //charge = -prevCharge;
@@ -1058,14 +1070,14 @@ void toy_model( int _nEv =  1e3 //800 //50000 //25000 //25000 //3e2 //250000
 
         // finish event for winPairs:
         for ( int iAnLevel = 0; iAnLevel < N_AN_LEVELS; ++iAnLevel )
-        for ( int iType = 0; iType < nPartTypes; iType++)
-            for ( int iCW = 0; iCW < nCW; iCW++)
-                for ( int iPt = 0; iPt < nPtBins; ++iPt )
-                {
-                    winPairWrapper[iAnLevel][iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId);
-                    winPairWrapper_FULL_ETA_DENOM[iAnLevel][iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId);
-                    winPairWrapper_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId);
-                }
+            for ( int iType = 0; iType < nPartTypes; iType++)
+                for ( int iCW = 0; iCW < nCW; iCW++)
+                    for ( int iPt = 0; iPt < nPtBins; ++iPt )
+                    {
+                        winPairWrapper[iAnLevel][iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId);
+                        winPairWrapper_FULL_ETA_DENOM[iAnLevel][iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId);
+                        winPairWrapper_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][cBinId[iCW]][iPt].finishEvent(subsampleId);
+                    }
 
 
     } // end of event loop

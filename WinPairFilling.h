@@ -21,25 +21,14 @@
 
 using namespace std;
 
-
-
 // #########################
-// ##### available vars:
-enum vars
+// ##### available 1D vars:
+enum vars_1D
 {
     _Nevents_    ,   // 1D var
-    _f_Nevents_,
-    _x_Nevents_  ,
-    _fb_Nevents_ ,
-    _xy_Nevents_ ,
-//    _fy_Nevents_ ,
+//    _f_Nevents_,
 
     // ##### ratio-ratio correlations by approx. formula:
-    _Nf_Nb_ ,       // "pure" 2D var
-    _Nx_Ny_ ,       // "pure" 2D var
-    _Nf_Ny_ ,       // "pure" 2D var
-    _Nb_Nx_ ,       // "pure" 2D var
-
     _Nf_    ,   // 1D var
     _Nb_    ,   // 1D var
     _Nx_    ,   // 1D var
@@ -49,6 +38,47 @@ enum vars
     _Nb2_   ,   // 1D var
     _Nx2_   ,   // 1D var
     _Ny2_   ,   // 1D var
+
+
+    // ##### for pt-pt FB
+    _PF_ ,   // 1D var
+    _PB_ ,   // 1D var
+
+    _nF_PF_, // for same-window case    // 1D var
+
+    // ##### for pt-pt XY
+    _PX_ ,   // 1D var
+    _PY_ ,   // 1D var
+    //    nY_PX ,  // added above!
+
+    _nX_PX_, // for same-window case   // 1D var
+
+    _PF2_ ,   // 1D var
+    _PX2_ ,   // 1D var
+
+    // for corrections:
+    _piF2_ ,   // 1D var
+    _piX2_ ,   // 1D var
+
+    // total number of vars:
+    _nVars_1D_
+
+};
+
+// #########################
+// ##### available vars:
+enum vars_2D
+{
+//    _x_Nevents_  ,
+    _fb_Nevents_ ,
+    _xy_Nevents_ ,
+//    _fy_Nevents_ ,
+
+    // ##### ratio-ratio correlations by approx. formula:
+    _Nf_Nb_ ,       // "pure" 2D var
+    _Nx_Ny_ ,       // "pure" 2D var
+    _Nf_Ny_ ,       // "pure" 2D var
+    _Nb_Nx_ ,       // "pure" 2D var
 
     // ratio-ratio correlations by direct formula:
     _Nf_OVER_Nx_vs_Nb_OVER_Ny_  ,
@@ -67,56 +97,109 @@ enum vars
     _PfPb_avPf_avPb_,
     _PfPb_avPf_,
     _PfPb_avPb_,
-    _PF_ ,   // 1D var
-    _PB_ ,   // 1D var
     _PF_PB_ ,       // "pure" 2D var
     _nF_PB_ ,       // "pure" 2D var
     _nB_PF_ ,       // "pure" 2D var
 
-    _nF_PF_, // for same-window case    // 1D var
 
     // ##### for pt-pt XY
     _PxPy_avPx_avPy_ ,
     _PxPy_avPx_ ,
     _PxPy_avPy_ ,
-    _PX_ ,   // 1D var
-    _PY_ ,   // 1D var
     _PX_PY_ ,       // "pure" 2D var
     _nX_PY_ ,       // "pure" 2D var
     //    nY_PX ,  // added above!
 
-    _nX_PX_, // for same-window case   // 1D var
-
-    _PF2_ ,   // 1D var
-    _PX2_ ,   // 1D var
-
-    // for corrections:
-    _piF2_ ,   // 1D var
-    _piX2_ ,   // 1D var
-
     // total number of vars:
-    _nVars_
+    _nVars_2D_
 
 };
 
 
 
+//// #########################
+//// ##### available vars:
+//enum vars
+//{
+//    _Nevents_    ,   // 1D var
+//    _f_Nevents_,
+//    _x_Nevents_  ,
+//    _fb_Nevents_ ,
+//    _xy_Nevents_ ,
+////    _fy_Nevents_ ,
 
-//constexpr
-const char* enumToStr(int e) //throw()
+//    // ##### ratio-ratio correlations by approx. formula:
+//    _Nf_Nb_ ,       // "pure" 2D var
+//    _Nx_Ny_ ,       // "pure" 2D var
+//    _Nf_Ny_ ,       // "pure" 2D var
+//    _Nb_Nx_ ,       // "pure" 2D var
+
+//    _Nf_    ,   // 1D var
+//    _Nb_    ,   // 1D var
+//    _Nx_    ,   // 1D var
+//    _Ny_    ,   // 1D var
+
+//    _Nf2_   ,   // 1D var
+//    _Nb2_   ,   // 1D var
+//    _Nx2_   ,   // 1D var
+//    _Ny2_   ,   // 1D var
+
+//    // ratio-ratio correlations by direct formula:
+//    _Nf_OVER_Nx_vs_Nb_OVER_Ny_  ,
+//    _Nf_OVER_Nx_                ,   // 1D var
+//    _Nb_OVER_Ny_                ,   // 1D var
+
+
+//    // ##### for r-Pt
+//    _Nb_OVER_Ny_vs_avPx_,
+////    _PfNb_Pf_           ,
+//    //    sumPtAllEvX      , // replaced by PX
+//    _nY_PX_            ,       // "pure" 2D var
+//    _nB_PX_            ,       // "pure" 2D var
+
+//    // ##### for pt-pt FB
+//    _PfPb_avPf_avPb_,
+//    _PfPb_avPf_,
+//    _PfPb_avPb_,
+//    _PF_ ,   // 1D var
+//    _PB_ ,   // 1D var
+//    _PF_PB_ ,       // "pure" 2D var
+//    _nF_PB_ ,       // "pure" 2D var
+//    _nB_PF_ ,       // "pure" 2D var
+
+//    _nF_PF_, // for same-window case    // 1D var
+
+//    // ##### for pt-pt XY
+//    _PxPy_avPx_avPy_ ,
+//    _PxPy_avPx_ ,
+//    _PxPy_avPy_ ,
+//    _PX_ ,   // 1D var
+//    _PY_ ,   // 1D var
+//    _PX_PY_ ,       // "pure" 2D var
+//    _nX_PY_ ,       // "pure" 2D var
+//    //    nY_PX ,  // added above!
+
+//    _nX_PX_, // for same-window case   // 1D var
+
+//    _PF2_ ,   // 1D var
+//    _PX2_ ,   // 1D var
+
+//    // for corrections:
+//    _piF2_ ,   // 1D var
+//    _piX2_ ,   // 1D var
+
+//    // total number of vars:
+//    _nVars_
+
+//};
+
+
+
+const char* enum1D_toStr(int e) //throw()
 {
     switch (e)
     {
     case _Nevents_      :              return "Nevents"    ;
-    case _f_Nevents_    :              return "f_Nevents";
-    case _x_Nevents_    :              return "x_Nevents"  ;
-    case _fb_Nevents_   :              return "fb_Nevents" ;
-    case _xy_Nevents_   :              return "xy_Nevents" ;
-//    case _fy_Nevents_   :              return "fy_Nevents" ;
-    case _Nf_Nb_  :                    return "Nf*Nb" ;
-    case _Nx_Ny_  :                    return "Nx*Ny" ;
-    case _Nf_Ny_  :                    return "Nf*Ny" ;
-    case _Nb_Nx_  :                    return "Nb*Nx" ;
     case _Nf_     :                    return "Nf"    ;
     case _Nb_     :                    return "Nb"    ;
     case _Nx_     :                    return "Nx"    ;
@@ -125,29 +208,11 @@ const char* enumToStr(int e) //throw()
     case _Nb2_    :                    return "Nb2";
     case _Nx2_    :                    return "Nx2";
     case _Ny2_    :                    return "Ny2";
-    case _Nf_OVER_Nx_vs_Nb_OVER_Ny_ :  return "Nf_OVER_Nx_vs_Nb_OVER_Ny"  ;
-    case _Nf_OVER_Nx_               :  return "Nf_OVER_Nx"                ;
-    case _Nb_OVER_Ny_               :  return "Nb_OVER_Ny"                ;
-    case _Nb_OVER_Ny_vs_avPx_ :        return "Nb_OVER_Ny_vs_avPx";
-//    case _PfNb_Pf_            :        return "PfNb_Pf"           ;
-    case _nY_PX_             :         return "nY*PX"            ;
-    case _nB_PX_             :         return "nB*PX"            ;
-    case _PfPb_avPf_avPb_ :            return "PfPb_avPf_avPb";
-    case _PfPb_avPf_ :                 return "PfPb_avPf";
-    case _PfPb_avPb_ :                 return "PfPb_avPb";
     case _PF_  :                       return "PF" ;
     case _PB_  :                       return "PB" ;
-    case _PF_PB_  :                    return "PF*PB" ;
-    case _nF_PB_  :                    return "nF*PB" ;
-    case _nB_PF_  :                    return "nB*PF" ;
     case _nF_PF_ :                     return "nF*PF";
-    case _PxPy_avPx_avPy_  :           return "PxPy_avPx_avPy" ;
-    case _PxPy_avPx_  :                return "PxPy_avPx" ;
-    case _PxPy_avPy_  :                return "PxPy_avPy" ;
     case _PX_  :                       return "PX" ;
     case _PY_  :                       return "PY" ;
-    case _PX_PY_  :                    return "PX*PY" ;
-    case _nX_PY_  :                    return "nX*PY" ;
     case _nX_PX_ :                     return "nX*PX";
     case _PF2_  :                      return "PF2" ;
     case _PX2_  :                      return "PX2" ;
@@ -155,7 +220,7 @@ const char* enumToStr(int e) //throw()
     case _piX2_  :                     return "piX2" ;
     default: //throw std::invalid_argument("Unimplemented item");
     {
-        cout << "AHTUNG! Unimplemented var name!" << endl;
+        cout << "AHTUNG! Unimplemented var name in enum1D_toStr!" << endl;
         int aa;
         cin >> aa;
     }
@@ -164,6 +229,116 @@ const char* enumToStr(int e) //throw()
 
     return "";
 }
+
+
+
+//constexpr
+const char* enum2D_toStr(int e) //throw()
+{
+    switch (e)
+    {
+//    case _f_Nevents_    :              return "f_Nevents";
+//    case _x_Nevents_    :              return "x_Nevents"  ;
+    case _fb_Nevents_   :              return "fb_Nevents" ;
+    case _xy_Nevents_   :              return "xy_Nevents" ;
+//    case _fy_Nevents_   :              return "fy_Nevents" ;
+    case _Nf_Nb_  :                    return "Nf*Nb" ;
+    case _Nx_Ny_  :                    return "Nx*Ny" ;
+    case _Nf_Ny_  :                    return "Nf*Ny" ;
+    case _Nb_Nx_  :                    return "Nb*Nx" ;
+    case _Nf_OVER_Nx_vs_Nb_OVER_Ny_ :  return "Nf_OVER_Nx_vs_Nb_OVER_Ny"  ;
+    case _Nb_OVER_Ny_vs_avPx_ :        return "Nb_OVER_Ny_vs_avPx";
+    case _Nf_OVER_Nx_               :  return "Nf_OVER_Nx"                ;
+    case _Nb_OVER_Ny_               :  return "Nb_OVER_Ny"                ;
+//    case _PfNb_Pf_            :        return "PfNb_Pf"           ;
+    case _nY_PX_             :         return "nY*PX"            ;
+    case _nB_PX_             :         return "nB*PX"            ;
+    case _PfPb_avPf_avPb_ :            return "PfPb_avPf_avPb";
+    case _PfPb_avPf_ :                 return "PfPb_avPf";
+    case _PfPb_avPb_ :                 return "PfPb_avPb";
+    case _PF_PB_  :                    return "PF*PB" ;
+    case _nF_PB_  :                    return "nF*PB" ;
+    case _nB_PF_  :                    return "nB*PF" ;
+    case _PxPy_avPx_avPy_  :           return "PxPy_avPx_avPy" ;
+    case _PxPy_avPx_  :                return "PxPy_avPx" ;
+    case _PxPy_avPy_  :                return "PxPy_avPy" ;
+    case _PX_PY_  :                    return "PX*PY" ;
+    case _nX_PY_  :                    return "nX*PY" ;
+    default: //throw std::invalid_argument("Unimplemented item");
+    {
+        cout << "AHTUNG! Unimplemented var name in enum2D_toStr!" << endl;
+        int aa;
+        cin >> aa;
+    }
+
+    }
+
+    return "";
+}
+
+
+////constexpr
+//const char* enumToStr(int e) //throw()
+//{
+//    switch (e)
+//    {
+//    case _Nevents_      :              return "Nevents"    ;
+//    case _f_Nevents_    :              return "f_Nevents";
+//    case _x_Nevents_    :              return "x_Nevents"  ;
+//    case _fb_Nevents_   :              return "fb_Nevents" ;
+//    case _xy_Nevents_   :              return "xy_Nevents" ;
+////    case _fy_Nevents_   :              return "fy_Nevents" ;
+//    case _Nf_Nb_  :                    return "Nf*Nb" ;
+//    case _Nx_Ny_  :                    return "Nx*Ny" ;
+//    case _Nf_Ny_  :                    return "Nf*Ny" ;
+//    case _Nb_Nx_  :                    return "Nb*Nx" ;
+//    case _Nf_     :                    return "Nf"    ;
+//    case _Nb_     :                    return "Nb"    ;
+//    case _Nx_     :                    return "Nx"    ;
+//    case _Ny_     :                    return "Ny"    ;
+//    case _Nf2_    :                    return "Nf2";
+//    case _Nb2_    :                    return "Nb2";
+//    case _Nx2_    :                    return "Nx2";
+//    case _Ny2_    :                    return "Ny2";
+//    case _Nf_OVER_Nx_vs_Nb_OVER_Ny_ :  return "Nf_OVER_Nx_vs_Nb_OVER_Ny"  ;
+//    case _Nf_OVER_Nx_               :  return "Nf_OVER_Nx"                ;
+//    case _Nb_OVER_Ny_               :  return "Nb_OVER_Ny"                ;
+//    case _Nb_OVER_Ny_vs_avPx_ :        return "Nb_OVER_Ny_vs_avPx";
+////    case _PfNb_Pf_            :        return "PfNb_Pf"           ;
+//    case _nY_PX_             :         return "nY*PX"            ;
+//    case _nB_PX_             :         return "nB*PX"            ;
+//    case _PfPb_avPf_avPb_ :            return "PfPb_avPf_avPb";
+//    case _PfPb_avPf_ :                 return "PfPb_avPf";
+//    case _PfPb_avPb_ :                 return "PfPb_avPb";
+//    case _PF_  :                       return "PF" ;
+//    case _PB_  :                       return "PB" ;
+//    case _PF_PB_  :                    return "PF*PB" ;
+//    case _nF_PB_  :                    return "nF*PB" ;
+//    case _nB_PF_  :                    return "nB*PF" ;
+//    case _nF_PF_ :                     return "nF*PF";
+//    case _PxPy_avPx_avPy_  :           return "PxPy_avPx_avPy" ;
+//    case _PxPy_avPx_  :                return "PxPy_avPx" ;
+//    case _PxPy_avPy_  :                return "PxPy_avPy" ;
+//    case _PX_  :                       return "PX" ;
+//    case _PY_  :                       return "PY" ;
+//    case _PX_PY_  :                    return "PX*PY" ;
+//    case _nX_PY_  :                    return "nX*PY" ;
+//    case _nX_PX_ :                     return "nX*PX";
+//    case _PF2_  :                      return "PF2" ;
+//    case _PX2_  :                      return "PX2" ;
+//    case _piF2_  :                     return "piF2" ;
+//    case _piX2_  :                     return "piX2" ;
+//    default: //throw std::invalid_argument("Unimplemented item");
+//    {
+//        cout << "AHTUNG! Unimplemented var name!" << endl;
+//        int aa;
+//        cin >> aa;
+//    }
+
+//    }
+
+//    return "";
+//}
 
 
 
@@ -202,10 +377,16 @@ public:
     TH2D *QA_hist_pt[4];  //!
 
 
-    //    int nWPs;
+    TH1D *hMetaInfo; //!
+
+    // histos with SINGLE win info:
+    TH3D *hSingleWin; //!
+
+    // histos with win PAIR info:
     TH3D *hAllWins; //!
     TH3D *hDetaDphi; //!
     TH3D *hAllEtaDphi; //!
+
 
     bool flagHistAllWins;
     bool flagHistDetaDphi;
@@ -219,7 +400,8 @@ public:
 
     // some vars to make flexible hist filling (i.e. don't fill if bin name is not in varNames array):
     int currentSubsampleId;
-    int currentWinId;
+    int currentSingleWinId;
+    int currentWinPairId;
     int currentDetaDphiPairId;
     int currentEtaWinsDphiPairId;
 
@@ -229,6 +411,9 @@ public:
     // ############
     WinPairWrapper()
     {
+        hMetaInfo = 0x0;
+        hSingleWin = 0x0;
+
         hAllWins = 0x0;
         hDetaDphi = 0x0;
         hAllEtaDphi = 0x0;
@@ -296,19 +481,12 @@ public:
         //        phiSep[iWin] = round( (phiFpos - phiBpos)*100 ) / 100;
         //        phiFsize[iWin] = round( (_phiWins[3] - _phiWins[2])*100 ) / 100;
         //        phiBsize[iWin] = round( (_phiWins[3] - _phiWins[2])*100 ) / 100;
-//    }
 
-    // ############
-//    void setHistAllWins( const char* strPrefix, int cBin, int nSub ) //, const char* _varNames[] )//, int _nVars )
-//    {
-        int _nVars = _nVars_;
-        cout << "_nVars = " << _nVars << endl;
-        //        if ( nWPs == 0 )
-        //        {
-        //            cout << "AHTUNG!!! No win pairs!" << endl;
-        //            int tmpA;
-        //            cin >> tmpA;
-        //        }
+
+        // ############
+//        int _nVars2D = _nVars_2D_;
+        cout << "_nVars_1D_ = " << _nVars_1D_ << ", _nVars_2D_ = " << _nVars_2D_ << endl;
+
 
         TString strAnLevel = Form("%s", strPrefix);
 
@@ -356,16 +534,60 @@ public:
             }
 
 
-        double etaStep  = ( etaMax - etaMin ) / nEtaWins;
-        double min_dEta = -( etaMax - etaMin ) + etaStep;
-        double max_dEta = ( etaMax - etaMin ) - etaStep;
+        double etaSize  = ( etaMax - etaMin ) / nEtaWins;
+        double min_dEta = -( etaMax - etaMin ) + etaSize;
+        double max_dEta = ( etaMax - etaMin ) - etaSize;
 
         // find max dPhi:
-        double phiStep  = TMath::TwoPi() / nPhiWins;
-        double min_dPhi = -TMath::TwoPi() + phiStep;
-        double max_dPhi = TMath::TwoPi() - phiStep;
+        double phiSize  = TMath::TwoPi() / nPhiWins;
+        double min_dPhi = -TMath::TwoPi() + phiSize;
+        double max_dPhi = TMath::TwoPi() - phiSize;
 
 
+        // hist with meta info:
+        TString strHistMetaInfo = Form("hMetaInfo_%s_cBin%d", strAnLevel.Data(), cBin);
+        hMetaInfo = new TH1D( strHistMetaInfo, strHistMetaInfo
+                              , 10, -0.5, 10-0.5 );
+        int metaBinId = 1;
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "nEtaWins" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "nPhiWins" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "etaRangeMin" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "etaRangeMax" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "etaSize" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "phiSize" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "ptMin" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "ptMax" );
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "fullAcceptanceForDenom" );
+        hMetaInfo->Fill( "nEtaWins", nEtaWins );
+        hMetaInfo->Fill( "nPhiWins", nPhiWins );
+        hMetaInfo->Fill( "etaRangeMin",  _etaRange[0] );
+        hMetaInfo->Fill( "etaRangeMax",  _etaRange[1] );
+        hMetaInfo->Fill( "etaSize",   etaSize );
+        hMetaInfo->Fill( "phiSize", phiSize );
+        hMetaInfo->Fill( "ptMin", _ptRange[0] );
+        hMetaInfo->Fill( "ptMax", _ptRange[1] );
+        hMetaInfo->Fill( "fullAcceptanceForDenom", _fullAcceptanceForDenom );
+
+
+//        void setup( const char* strPrefix, int cBin, int nSub,
+//                    int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *_outputList
+//                    , bool _fullAcceptanceForDenom = false //, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8
+//                )
+
+
+
+
+
+        // single win histos:
+        TString strHist1DName = Form("hSingleWin_%s_cBin%d", strAnLevel.Data(), cBin);
+        hSingleWin = new TH3D( strHist1DName, strHist1DName
+                              , _nVars_1D_, -0.5, _nVars_1D_-0.5
+                              , nEtaWins*nPhiWins, -0.5, nEtaWins*nPhiWins-0.5
+                              , nSub, -0.5, nSub-0.5
+                              );
+
+
+        // win pair info histos:
         TString strHistName = Form("hAllWins_%s_cBin%d", strAnLevel.Data(), cBin);
 
         int nAllEtaWPs = nEtaWins*nEtaWins;
@@ -375,7 +597,7 @@ public:
         // all window pairs separately:
         if( flagHistAllWins )
             hAllWins = new TH3D( strHistName, strHistName
-                                  , _nVars, -0.5, _nVars-0.5
+                                  , _nVars_2D_, -0.5, _nVars_2D_-0.5
                                   , nAllWPs, -0.5, nAllWPs-0.5
                                   , nSub, -0.5, nSub-0.5
                                   );
@@ -386,7 +608,7 @@ public:
         TString str_dEta_dPhi_HistName = Form("hDetaDphi_%s_cBin%d", strAnLevel.Data(), cBin);
         if( flagHistDetaDphi )
             hDetaDphi = new TH3D( str_dEta_dPhi_HistName, str_dEta_dPhi_HistName
-                              , _nVars, -0.5, _nVars-0.5
+                              , _nVars_2D_, -0.5, _nVars_2D_-0.5
                               , nDetaWP*nDphiWP, -0.5, nDetaWP*nDphiWP-0.5
                               , nSub, -0.5, nSub-0.5
                               );
@@ -398,7 +620,7 @@ public:
         TString str_AllEta_dPhi_HistName = Form("hAllEtaDphi_%s_cBin%d", strAnLevel.Data(), cBin);
         if( flagHistAllEtaDphi )
             hAllEtaDphi = new TH3D( str_AllEta_dPhi_HistName, str_AllEta_dPhi_HistName
-                                          , _nVars, -0.5, _nVars-0.5
+                                          , _nVars_2D_, -0.5, _nVars_2D_-0.5
                                           , nAllEtaDphiWP, -0.5, nAllEtaDphiWP-0.5
                                           , nSub, -0.5, nSub-0.5
                                           );
@@ -407,10 +629,19 @@ public:
 
 
         // set labels x and prepare a map with vars
-        cout << "_nVars = " << _nVars << endl;
-        for( int i = 0; i < _nVars; i++ )
+//        cout << "_nVars = " << _nVars << endl;
+        for( int i = 0; i < _nVars_1D_; i++ )
         {
-            const char* _varName = enumToStr(i);
+            const char* _varName = enum1D_toStr(i);
+            if(0)cout << "i = " << i << ", _varName = " << _varName << endl;
+
+            if( hSingleWin )
+                hSingleWin->GetXaxis()->SetBinLabel( i+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+        }
+
+        for( int i = 0; i < _nVars_2D_; i++ )
+        {
+            const char* _varName = enum2D_toStr(i);
             if(0)cout << "i = " << i << ", _varName = " << _varName << endl;
 
             if( flagHistAllWins )
@@ -421,6 +652,24 @@ public:
                 hAllEtaDphi->GetXaxis()->SetBinLabel( i+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
         }
 
+
+
+        // set labels y for hSingleWin
+        if( 1 )
+        {
+            int wpId = 0;
+            for( int e1 = 0; e1 < nEtaWins; e1++ )
+                for( int p1 = 0; p1 < nPhiWins; p1++ )
+                {
+                    double eMin = hist_n[0]->GetXaxis()->GetBinLowEdge(e1+1);
+                    double pMin = hist_n[0]->GetYaxis()->GetBinLowEdge(p1+1);
+                    double eMax = hist_n[0]->GetXaxis()->GetBinUpEdge(e1+1);
+                    double pMax = hist_n[0]->GetYaxis()->GetBinUpEdge(p1+1);
+
+                    hSingleWin->GetYaxis()->SetBinLabel( wpId+1, Form("eta_%.2f_%.2f_phi_%.2f_%.2f", eMin, eMax, pMin, pMax ) );
+                    wpId++;
+                }
+        }
 
         // set labels y for hAllWins
         if( flagHistAllWins )
@@ -450,26 +699,52 @@ public:
                                                                             , eBmin, eBmax,    pBmin, pBmax
                                                                             , eFmin, eFmax,    pFmin, pFmax
                                                                             ) );
+
+                            // for QA (alternative binLabelling for hDetaDphi):
+                            if(0)
+                            {
+                                int id_dEta = nEtaWins-1 + e1-e2;
+                                int id_dPhi = nPhiWins-1 + p1-p2;
+                                int sepId = nDphiWP*id_dEta + id_dPhi;
+    //                            cout << "sepId = " << sepId << endl;
+                                hDetaDphi->GetYaxis()->SetBinLabel( sepId+1, Form("dEta_%.2f_dPhi_%.2f", round( (e1-e2)*etaSize *100 )/100, round( (p1-p2)*phiSize *100 ) / 100 ) );
+                            }
+
                             wpId++;
                         }
                 }
         }
 
 
+        // QA:
+        if(0)
+        {
+            cout << "hDetaDphi->GetYaxis()->GetBinLabel( j+1 ):" << endl;
+            for( int j = 0; j < hDetaDphi->GetNbinsY(); j++ )
+                cout << hDetaDphi->GetYaxis()->GetBinLabel( j+1 ) << " ";
+            cout << endl;
+        }
+
+
         // set labels y for hDetaDphi
+//        cout << "was like this:" << endl;
         if( flagHistDetaDphi )
         {
             for( int i = 0; i < nDetaWP; i++ )
                 for( int j = 0; j < nDphiWP; j++ )
                 {
                     int sepId = nDphiWP*i + j;
-                    hDetaDphi->GetYaxis()->SetBinLabel( sepId+1, Form("dEta_%.2f_dPhi_%.2f", min_dEta + etaStep*i, min_dPhi + phiStep*j ) );
+                    hDetaDphi->GetYaxis()->SetBinLabel( sepId+1, Form("dEta_%.2f_dPhi_%.2f", min_dEta + etaSize*i, min_dPhi + phiSize*j ) );
+//                    cout << Form("dEta_%.2f_dPhi_%.2f", min_dEta + etaSize*i, min_dPhi + phiSize*j ) << " ";
 
                     if(0) cout << "i = " << i << ", j = " << j << ", sepId = " << sepId
-                         << ", min_dEta + etaStep*i = " << min_dEta + etaStep*i
-                         << ", min_dPhi + phiStep*j = " << min_dPhi + phiStep*j  << endl;
+                         << ", min_dEta + etaStep*i = " << min_dEta + etaSize*i
+                         << ", min_dPhi + phiSize*j = " << min_dPhi + phiSize*j  << endl;
                 }
         }
+//        cout << endl;
+//        int aa;
+//        cin >> aa;
 
 
         // set labels y for hAllEtaDphi
@@ -490,14 +765,15 @@ public:
                         int sepId = nDphiWP*(nEtaWins*e1+e2) + j;
                         hAllEtaDphi->GetYaxis()->SetBinLabel( sepId+1, Form("etaB_%.2f_%.2f_etaF_%.2f_%.2f_dPhi_%.2f"
                                                                         , eBmin, eBmax
-                                                                        , eFmin, eFmax,    min_dPhi + phiStep*j
+                                                                        , eFmin, eFmax,    min_dPhi + phiSize*j
                                                                         ) );
                     }
                 }
             }
         }
 
-
+        _outputList->Add( hMetaInfo );
+        _outputList->Add( hSingleWin );
         if ( flagHistAllWins    )  _outputList->Add( hAllWins );
         if ( flagHistDetaDphi   )  _outputList->Add( hDetaDphi );
         if ( flagHistAllEtaDphi )  _outputList->Add( hAllEtaDphi );
@@ -579,13 +855,17 @@ public:
 //        cin >> aa;
     }
 
+    void fillWithValueHist1D( /*const char *varName,*/ int varId, double value ) //, bool forceFilling = false )
+    {
+        if( hSingleWin )
+            hSingleWin->Fill(  varId, currentSingleWinId, currentSubsampleId, value  );
+    }
 
-
-    void fillHistWithValue( /*const char *varName,*/ int varId, double value ) //, bool forceFilling = false )
+    void fillWithValueHist2D( /*const char *varName,*/ int varId, double value ) //, bool forceFilling = false )
     {
         //                return;
         if( flagHistAllWins )
-            hAllWins->Fill(  varId, currentWinId, currentSubsampleId, value  );
+            hAllWins->Fill(  varId, currentWinPairId, currentSubsampleId, value  );
 
         if( flagHistDetaDphi )
             hDetaDphi->Fill(  varId, currentDetaDphiPairId, currentSubsampleId, value  );
@@ -595,45 +875,14 @@ public:
     }
 
 
+
+
     // ############
     void finishEvent( int subId )
     {
         currentSubsampleId = subId;
 
         int nDphiWP = 2*nPhiWins-1;
-
-//        int sizeOfMap = map_DetaDphi_bin.size();
-        //        cout << "in finishEvent: " << nEta << endl;
-
-
-
-        //        // fill TH3D with single eta-phi win info
-        //        for( int e1 = 0; e1 < nEtaWins; e1++ )
-        //        {
-        //            double center_e1 = hist_n[0]->GetXaxis()->GetBinCenter(e1+1);
-        //            for( int p1 = 0; p1 < nPhiWins; p1++ )
-        //            {
-        //                int e1Den = !fullAcceptanceForDenom ? e1 : 0;
-        //                int p1Den = !fullAcceptanceForDenom ? p1 : 0;
-
-
-        //                double nF = hist_n[0]->GetBinContent(e1+1, p1+1);
-        //                double nX = hist_n[2]->GetBinContent(e1Den+1, p1Den+1);
-
-        //                double ptF = hist_pt[0]->GetBinContent(e1+1, p1+1);
-        //                double ptX = hist_pt[2]->GetBinContent(e1Den+1, p1Den+1);
-
-
-        //                double w_wMinus1_F = hist_w_wMinus1[0]->GetBinContent(e1+1, p1+1);
-        //                double w_wMinus1_X = hist_w_wMinus1[2]->GetBinContent(e1Den+1, p1Den+1);
-
-        //                double w_wMinus1_PF = hist_w_wMinus1_pt[0]->GetBinContent(e1+1, p1+1);
-        //                double w_wMinus1_PX = hist_w_wMinus1_pt[2]->GetBinContent(e1Den+1, p1Den+1);
-
-        //                double ptF2 = hist_pt2[0]->GetBinContent(e1+1, p1+1);
-        //                double ptX2 = hist_pt2[2]->GetBinContent(e1Den+1, p1Den+1);
-        //            }
-        //        }
 
 //         cout << "in finishEvent(): nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
         // cout << "TList name: " << strListName << endl;
@@ -645,6 +894,122 @@ public:
 
 //        int aa;
 //        cin >> aa;
+
+        int singleWinId = 0;
+        for( int e1 = 0; e1 < nEtaWins; e1++ )
+        {
+            double center_e1 = hist_n[0]->GetXaxis()->GetBinCenter(e1+1);
+            int e1Den = !fullAcceptanceForDenom ? e1 : 0;
+
+            for( int p1 = 0; p1 < nPhiWins; p1++ )
+            {
+
+                if( hAccMap && ( !hAccMap->GetBinContent( e1+1, p1+1 )  ) )
+                {
+//                    cout << "hAccMap CHECK!!!" << endl;
+                    singleWinId++;   // IMPORTANT!!!
+                    continue;
+                }
+
+                double center_p1 = hist_n[0]->GetYaxis()->GetBinCenter(p1+1);
+                int p1Den = !fullAcceptanceForDenom ? p1 : 0;
+
+                currentSingleWinId = singleWinId;
+
+                // F, X:
+                double nF = hist_n[0]->GetBinContent(e1+1, p1+1);
+                double nX = hist_n[2]->GetBinContent(e1Den+1, p1Den+1);
+
+                double ptF = hist_pt[0]->GetBinContent(e1+1, p1+1);
+                double ptX = hist_pt[2]->GetBinContent(e1Den+1, p1Den+1);
+
+
+                double w_wMinus1_F = hist_w_wMinus1[0]->GetBinContent(e1+1, p1+1);
+                double w_wMinus1_X = hist_w_wMinus1[2]->GetBinContent(e1Den+1, p1Den+1);
+
+                double w_wMinus1_PF = hist_w_wMinus1_pt[0]->GetBinContent(e1+1, p1+1);
+                double w_wMinus1_PX = hist_w_wMinus1_pt[2]->GetBinContent(e1Den+1, p1Den+1);
+
+                double ptF2 = hist_pt2[0]->GetBinContent(e1+1, p1+1);
+                double ptX2 = hist_pt2[2]->GetBinContent(e1Den+1, p1Den+1);
+
+
+                // B, Y:
+                double nB = hist_n[1]->GetBinContent(e1+1, p1+1);
+                double nY = hist_n[3]->GetBinContent(e1Den+1, p1Den+1);
+
+                double ptB = hist_pt[1]->GetBinContent(e1+1, p1+1);
+                double ptY = hist_pt[3]->GetBinContent(e1Den+1, p1Den+1);
+
+                double w_wMinus1_B = hist_w_wMinus1[1]->GetBinContent(e1+1, p1+1);
+                double w_wMinus1_Y = hist_w_wMinus1[3]->GetBinContent(e1Den+1, p1Den+1);
+
+                double w_wMinus1_PB = hist_w_wMinus1_pt[1]->GetBinContent(e1+1, p1+1);
+                double w_wMinus1_PY = hist_w_wMinus1_pt[3]->GetBinContent(e1Den+1, p1Den+1);
+
+                double ptB2 = hist_pt2[1]->GetBinContent(e1+1, p1+1);
+                double ptY2 = hist_pt2[3]->GetBinContent(e1Den+1, p1Den+1);
+
+//                double meanPtF = -1;
+//                double meanPtB = -1;
+//                double meanPtX = -1;
+//                double meanPtY = -1;
+
+//                if ( nF > 0 ) { meanPtF = ptF / nF; }
+//                if ( nB > 0 ) { meanPtB = ptB / nB; }
+//                if ( nX > 0 ) { meanPtX = ptX / nX; }
+//                if ( nY > 0 ) { meanPtY = ptY / nY; }
+
+
+
+                // QA check
+                if( hAccMap && hAccMap->GetBinContent( e1+1, p1+1 ) )
+                {
+                    QA_hist_n[0]->Fill( center_e1, center_p1, nF );
+                    QA_hist_pt[0]->Fill( center_e1, center_p1, ptF );
+                }
+
+
+                fillWithValueHist1D( _Nevents_, 1 );//, true ); // last argument - forcing filling the 0th bin of the hist
+
+                // NfNb:
+                fillWithValueHist1D( _Nf_    ,   nF             );
+                fillWithValueHist1D( _Nb_    ,   nB             );
+                fillWithValueHist1D( _Nf2_  ,   nF * nF - w_wMinus1_F     );
+                fillWithValueHist1D( _Nb2_  ,   nB * nB - w_wMinus1_B     );
+//                fillHistWithValue( _Nf_Nb_ ,   nF * nB      );
+
+                // NxNy:
+                fillWithValueHist1D( _Nx_      ,   nX             );
+                fillWithValueHist1D( _Ny_      ,   nY             );
+                fillWithValueHist1D( _Nx2_     ,   nX * nX - w_wMinus1_X   ); // !fullEtaForDenom ? _nX*_nX  : _nX*_nX - _w_wMinus1_X   );
+                fillWithValueHist1D( _Ny2_     ,   nY * nY - w_wMinus1_Y   ); // !fullEtaForDenom ? _nY*_nY  : _nY*_nY - _w_wMinus1_Y   );
+//                fillHistWithValue( _Nx_Ny_   ,   nX * nY      );
+
+//                fillHistWithValue( _PF_PB_ ,      ptF*ptB );
+                fillWithValueHist1D( _PF_ ,              ptF );
+                fillWithValueHist1D( _PB_ ,              ptB );
+
+//                fillHistWithValue( _PX_PY_ ,      ptX*ptY );
+                fillWithValueHist1D( _PX_ ,              ptX );
+                fillWithValueHist1D( _PY_ ,              ptY );
+
+
+                // for new ratio-pt
+                fillWithValueHist1D( _nF_PF_ , nF*ptF - w_wMinus1_PF );
+                fillWithValueHist1D( _nX_PX_ , nX*ptX - w_wMinus1_PX );
+
+                fillWithValueHist1D( _PF2_ , ptF*ptF ); //- w_wMinus1_PF );
+                fillWithValueHist1D( _PX2_ , ptX*ptX ); //- w_wMinus1_PX );
+
+                fillWithValueHist1D( _piF2_ , ptF2 );
+                fillWithValueHist1D( _piX2_ , ptX2 );
+
+
+                singleWinId++;
+            }
+        }
+
 
 
         if(0)for( int e1 = 0; e1 < nEtaWins; e1++ )
@@ -674,7 +1039,7 @@ public:
 
         // fill TH3D with win pairs info
         int wpId = 0;
-        for( int e1 = 0; e1 < nEtaWins; e1++ )
+        for( int e1 = 0; e1 < nEtaWins; e1++ )  // 1==Forward
         {
             double center_e1 = hist_n[0]->GetXaxis()->GetBinCenter(e1+1);
 
@@ -705,39 +1070,39 @@ public:
 
 
                 // QA check
-                if( hAccMap && hAccMap->GetBinContent( e1+1, p1+1 ) )
-                {
-                    QA_hist_n[0]->Fill( center_e1, center_p1, nF );
-                    QA_hist_pt[0]->Fill( center_e1, center_p1, ptF );
-                }
+//                if( hAccMap && hAccMap->GetBinContent( e1+1, p1+1 ) )
+//                {
+//                    QA_hist_n[0]->Fill( center_e1, center_p1, nF );
+//                    QA_hist_pt[0]->Fill( center_e1, center_p1, ptF );
+//                }
 
 
                 // loop over pairing windows:
-                for( int e2 = 0; e2 < nEtaWins; e2++ )
+                for( int e2 = 0; e2 < nEtaWins; e2++ )  // 2==Backward
                 {
-                    double center_e2 = hist_n[0]->GetXaxis()->GetBinCenter(e2+1);
-                    double etaSep = center_e2 - center_e1;
+//                    double center_e2 = hist_n[0]->GetXaxis()->GetBinCenter(e2+1);
+//                    double etaSep = center_e2 - center_e1;
 
                     for( int p2 = 0; p2 < nPhiWins; p2++ )
                     {
                         // check if we take this bin or not!
                         if( hAccMap && ( !hAccMap->GetBinContent( e1+1, p1+1 ) || !hAccMap->GetBinContent( e2+1, p2+1 ) ) )
                         {
-                            cout << "hAccMap CHECK!!!" << endl;
+//                            cout << "hAccMap CHECK!!!" << endl;
                             wpId++;   // IMPORTANT!!!
                             continue;
                         }
 
-                        double center_p2 = hist_n[0]->GetYaxis()->GetBinCenter(p2+1);
-                        double phiSep = center_p2 - center_p1;
+//                        double center_p2 = hist_n[0]->GetYaxis()->GetBinCenter(p2+1);
+//                        double phiSep = center_p2 - center_p1;
                         //                        continue;
 
                         //                        cout << "e1, p1, e2, p2 = " << e1 << ", " << p1 << ", " << e2 << ", " << p2 << endl;
-                        currentWinId = wpId;
+                        currentWinPairId = wpId;
 
                         // winId for dEta-dPhi:
-                        int id_dEta = nEtaWins-1 + e2-e1;
-                        int id_dPhi = nPhiWins-1 + p2-p1;
+                        int id_dEta = nEtaWins-1 + e1-e2;
+                        int id_dPhi = nPhiWins-1 + p1-p2;
                         currentDetaDphiPairId = nDphiWP*id_dEta + id_dPhi;
 
 //                        int sepId = nDphiWP*(nEtaWins*e1+e2) + j;
@@ -799,27 +1164,27 @@ public:
 
 //                        cout << " >>> nF = " << nF << ", nB = " << nB << ", ptF = " << ptF << ", ptB = " << ptB << endl;
 
-                        fillHistWithValue( _Nevents_, 1 );//, true ); // last argument - forcing filling the 0th bin of the hist
+//                        fillHistWithValue( _Nevents_, 1 );//, true ); // last argument - forcing filling the 0th bin of the hist
 
                         // NfNb:
-                        fillHistWithValue( _Nf_    ,   nF             );
-                        fillHistWithValue( _Nb_    ,   nB             );
-                        fillHistWithValue( _Nf2_  ,   nF * nF - w_wMinus1_F     );
-                        fillHistWithValue( _Nb2_  ,   nB * nB - w_wMinus1_B     );
-                        fillHistWithValue( _Nf_Nb_ ,   nF * nB      );
+//                        fillHistWithValue( _Nf_    ,   nF             );
+//                        fillHistWithValue( _Nb_    ,   nB             );
+//                        fillHistWithValue( _Nf2_  ,   nF * nF - w_wMinus1_F     );
+//                        fillHistWithValue( _Nb2_  ,   nB * nB - w_wMinus1_B     );
+                        fillWithValueHist2D( _Nf_Nb_ ,   nF * nB      );
 
                         // NxNy:
-                        fillHistWithValue( _Nx_      ,   nX             );
-                        fillHistWithValue( _Ny_      ,   nY             );
-                        fillHistWithValue( _Nx2_     ,   nX * nX - w_wMinus1_X   ); // !fullEtaForDenom ? _nX*_nX  : _nX*_nX - _w_wMinus1_X   );
-                        fillHistWithValue( _Ny2_     ,   nY * nY - w_wMinus1_Y   ); // !fullEtaForDenom ? _nY*_nY  : _nY*_nY - _w_wMinus1_Y   );
-                        fillHistWithValue( _Nx_Ny_   ,   nX * nY      );
+//                        fillHistWithValue( _Nx_      ,   nX             );
+//                        fillHistWithValue( _Ny_      ,   nY             );
+//                        fillHistWithValue( _Nx2_     ,   nX * nX - w_wMinus1_X   ); // !fullEtaForDenom ? _nX*_nX  : _nX*_nX - _w_wMinus1_X   );
+//                        fillHistWithValue( _Ny2_     ,   nY * nY - w_wMinus1_Y   ); // !fullEtaForDenom ? _nY*_nY  : _nY*_nY - _w_wMinus1_Y   );
+                        fillWithValueHist2D( _Nx_Ny_   ,   nX * nY      );
 
 
                         // Nf_Nx Nf_Ny Nb_Nx Nb_Ny:
                         //                        if(0) fillHistWithValue( _Nf_Nx_  ,   nF * nX       );
-                        fillHistWithValue( _Nf_Ny_  ,   nF * nY       );
-                        fillHistWithValue( _Nb_Nx_  ,   nB * nX       );
+                        fillWithValueHist2D( _Nf_Ny_  ,   nF * nY       );
+                        fillWithValueHist2D( _Nb_Nx_  ,   nB * nX       );
                         //                        if(0) fillHistWithValue( _Nb_Ny_  ,   nB * nY       );
 
 
@@ -831,8 +1196,8 @@ public:
 
                         // for dptdpt:
                         //                if(0) fillHistWithValue( _piFpjB_ , w->piFpjB );
-                        fillHistWithValue( _nF_PB_ ,  nF * ptB );
-                        fillHistWithValue( _nB_PF_ ,  nB * ptF );
+                        fillWithValueHist2D( _nF_PB_ ,  nF * ptB );
+                        fillWithValueHist2D( _nB_PF_ ,  nB * ptF );
 
                         // for C when av over pairs is OUTSIDE sum:
                         //                if(0) fillHistWithValue( _pipjF_ ,          w->pipjF );
@@ -846,32 +1211,32 @@ public:
 
 
                         // to check VV comparison ptpt vs dptdpt: special terms:
-                        fillHistWithValue( _PF_PB_ ,      ptF*ptB );
-                        fillHistWithValue( _PF_ ,              ptF );
-                        fillHistWithValue( _PB_ ,              ptB );
+                        fillWithValueHist2D( _PF_PB_ ,      ptF*ptB );
+//                        fillHistWithValue( _PF_ ,              ptF );
+//                        fillHistWithValue( _PB_ ,              ptB );
 
-                        fillHistWithValue( _PX_PY_ ,      ptX*ptY );
-                        fillHistWithValue( _PX_ ,              ptX );
-                        fillHistWithValue( _PY_ ,              ptY );
+                        fillWithValueHist2D( _PX_PY_ ,      ptX*ptY );
+//                        fillHistWithValue( _PX_ ,              ptX );
+//                        fillHistWithValue( _PY_ ,              ptY );
 
 
                         // for new ratio-pt (April 2021)
                         //                        fillHistWithValue( _nY_PF_ , nY*ptF );
-                        fillHistWithValue( _nB_PX_ , nB*ptX );
-                        fillHistWithValue( _nY_PX_ , nY*ptX );
+                        fillWithValueHist2D( _nB_PX_ , nB*ptX );
+                        fillWithValueHist2D( _nY_PX_ , nY*ptX );
 
                         //                        fillHistWithValue( _nX_PB_ , nX*ptB );
                         //                        fillHistWithValue( _nF_PY_ , nF*ptY );
-                        fillHistWithValue( _nX_PY_ , nX*ptY );
+                        fillWithValueHist2D( _nX_PY_ , nX*ptY );
 
-                        fillHistWithValue( _nF_PF_ , nF*ptF - w_wMinus1_PF );
-                        fillHistWithValue( _nX_PX_ , nX*ptX - w_wMinus1_PX );
+//                        fillHistWithValue( _nF_PF_ , nF*ptF - w_wMinus1_PF );
+//                        fillHistWithValue( _nX_PX_ , nX*ptX - w_wMinus1_PX );
 
-                        fillHistWithValue( _PF2_ , ptF*ptF ); //- w_wMinus1_PF );
-                        fillHistWithValue( _PX2_ , ptX*ptX ); //- w_wMinus1_PX );
+//                        fillHistWithValue( _PF2_ , ptF*ptF ); //- w_wMinus1_PF );
+//                        fillHistWithValue( _PX2_ , ptX*ptX ); //- w_wMinus1_PX );
 
-                        fillHistWithValue( _piF2_ , ptF2 );
-                        fillHistWithValue( _piX2_ , ptX2 );
+//                        fillHistWithValue( _piF2_ , ptF2 );
+//                        fillHistWithValue( _piX2_ , ptX2 );
 
                         if ( nY > 0 )
                         {
@@ -923,7 +1288,7 @@ public:
                         // PfNb:
                         if ( nF > 0 )
                         {
-                            fillHistWithValue( _f_Nevents_ ,    1                  );
+//                            fillWithValueHist2D( _f_Nevents_ ,    1                  );
 
                             //                            fillHistWithValue( _PfNb_avPf_ ,         meanPtF           );
                             //                            if(0) fillHistWithValue( _PfNb_Nb_ ,        nB            );
@@ -956,13 +1321,13 @@ public:
                         // fb:
                         if ( nF > 0 && nB > 0 )
                         {
-                            if(1) fillHistWithValue( _fb_Nevents_ ,   1                  );
+                            if(1) fillWithValueHist2D( _fb_Nevents_ ,   1                  );
 
-                            if(1) fillHistWithValue( _PfPb_avPf_ ,       meanPtF             );
-                            if(1) fillHistWithValue( _PfPb_avPb_ ,       meanPtB             );
+                            if(1) fillWithValueHist2D( _PfPb_avPf_ ,       meanPtF             );
+                            if(1) fillWithValueHist2D( _PfPb_avPb_ ,       meanPtB             );
                             //                            if(0) fillHistWithValue( _PfPb_avPf2_ ,     meanPtF*meanPtF      );
                             //                            if(0) fillHistWithValue( _PfPb_avPb2_ ,     meanPtB*meanPtB      );
-                            if(1) fillHistWithValue( _PfPb_avPf_avPb_ ,   meanPtF*meanPtB      );
+                            if(1) fillWithValueHist2D( _PfPb_avPf_avPb_ ,   meanPtF*meanPtB      );
 
                             //                            if(0) fillHistWithValue( _Nx_OVER_Nf_vs_avPb_ ,   nX/(double)nF *meanPtB      );
                             //                            if(0) fillHistWithValue( _Ny_OVER_Nb_vs_avPf_ ,   nY/(double)nB *meanPtF      );
@@ -990,7 +1355,6 @@ public:
 
 
                             //                            if(0) fillHistWithValue( _Nf_OVER_Ny_ ,    nF/(double)nY      );
-                            fillHistWithValue( _Nb_OVER_Ny_ ,    nB/(double)nY      );
                             //                            if(0) fillHistWithValue( _Nx_OVER_Ny_ ,    nX/(double)nY      );
 
                             //                            if(0) fillHistWithValue( _Nf_avPy_ ,   nF*meanPtY       );
@@ -1000,7 +1364,7 @@ public:
                         // x:
                         if ( nX > 0 )
                         {
-                            fillHistWithValue( _x_Nevents_ ,    1                  );
+//                            fillWithValueHist2D( _x_Nevents_ ,    1                  );
 
                             //                            if(0) fillHistWithValue( _PxNy_avPx_ ,         meanPtX           );
                             //                            if(0) fillHistWithValue( _PxNy_Ny_ ,        nY            );
@@ -1008,7 +1372,6 @@ public:
                             //                            if(0) fillHistWithValue( _PxNy_Ny2_ ,      nY*nY      );
                             //                            if(0) fillHistWithValue( _PxNy_avPx_Ny_ ,    meanPtX*nY      );
 
-                            fillHistWithValue( _Nf_OVER_Nx_ ,    nF/(double)nX      );
                             //                            if(0) fillHistWithValue( _Nb_OVER_Nx_ ,    nB/(double)nX      );
                             //                            if(0) fillHistWithValue( _Ny_OVER_Nx_ ,    nY/(double)nX      );
 
@@ -1020,17 +1383,21 @@ public:
                         // xy:
                         if ( nX > 0 && nY > 0 )
                         {
-                            fillHistWithValue( _xy_Nevents_ ,   1                  );
-                            if(1) fillHistWithValue( _PxPy_avPx_ ,       meanPtX             );
-                            if(1) fillHistWithValue( _PxPy_avPy_ ,       meanPtY             );
+                            fillWithValueHist2D( _xy_Nevents_ ,   1                  );
+
+                            fillWithValueHist2D( _Nb_OVER_Ny_ ,    nB/(double)nY      );
+                            fillWithValueHist2D( _Nf_OVER_Nx_ ,    nF/(double)nX      );
+
+                            if(1) fillWithValueHist2D( _PxPy_avPx_ ,       meanPtX             );
+                            if(1) fillWithValueHist2D( _PxPy_avPy_ ,       meanPtY             );
                             //                            if(0) fillHistWithValue( _PxPy_avPx2_ ,     meanPtX*meanPtX      );
                             //                            if(0) fillHistWithValue( _PxPy_avPy2_ ,     meanPtY*meanPtY      );
-                            if(1) fillHistWithValue( _PxPy_avPx_avPy_ ,   meanPtX*meanPtY      );
+                            if(1) fillWithValueHist2D( _PxPy_avPx_avPy_ ,   meanPtX*meanPtY      );
 
                             //                            if(0) fillHistWithValue( _Nf_OVER_Nx_vs_avPy_ ,   nF/(double)nX*meanPtY      );
-                            if(1) fillHistWithValue( _Nb_OVER_Ny_vs_avPx_ ,   nB/(double)nY*meanPtX      );
+                            if(1) fillWithValueHist2D( _Nb_OVER_Ny_vs_avPx_ ,   nB/(double)nY*meanPtX      );
 
-                            fillHistWithValue( _Nf_OVER_Nx_vs_Nb_OVER_Ny_ ,   nF/(double)nX * nB/(double)nY      );
+                            fillWithValueHist2D( _Nf_OVER_Nx_vs_Nb_OVER_Ny_ ,   nF/(double)nX * nB/(double)nY      );
                         }
 
                         // fx:
@@ -1045,7 +1412,7 @@ public:
                         // fy:
                         if ( nF > 0 && nY > 0 )
                         {
-                            fillHistWithValue( _fy_Nevents_ ,   1                  );
+//                            fillHistWithValue( _fy_Nevents_ ,   1                  );
 
                             //                            if(0) fillHistWithValue( _avPf_avPy_ ,   meanPtF*meanPtY      );
                             //                            if(0) fillHistWithValue( _Nx_OVER_Nf_vs_avPy_ ,   nX/(double)nF *meanPtY      );

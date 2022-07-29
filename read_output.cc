@@ -15,7 +15,7 @@
 
 #include "TPad.h"
 
-#include "WinPairFilling.h"
+//#include "WinPairFilling.h"
 #include "CalcRoutineFB.h"
 
 //#include "/opt/mygit/alice_NN_PtPt_2016/utils.C"
@@ -145,8 +145,10 @@ int read_output()
     double ptmax[nPtBins] = { 100.0 };
 
 
+    int whichInputHist = 1;
+
     //
-    const int nPartTypes = 5;//5;//10;//6;//3;//4;
+    const int nPartTypes = 1;//5;//10;//6;//3;//4;
     int arrPartTypes[nPartTypes][4] =
     { // F,B, X,Y
       //  { /*421*/0, 0, 0, 0 },         // 0
@@ -162,10 +164,10 @@ int read_output()
 
 
       { 321, 321, 211, 211 }, // 7
-      { 321, 321, 211, 211 }, // 8
-      { 321, 321, 211, 211 }, // 9
-      { 321, 321, 211, 211 }, // 8
-      { 321, 321, 211, 211 }, // 9
+//      { 321, 321, 211, 211 }, // 8
+//      { 321, 321, 211, 211 }, // 9
+//      { 321, 321, 211, 211 }, // 8
+//      { 321, 321, 211, 211 }, // 9
 
 
       //  { 0, 321, 0, 211 }, // 7
@@ -175,16 +177,18 @@ int read_output()
 
     int arrCharges[/*nPartTypes*/][4] =
     { // F,B, X,Y
-      {  0,  0,  0,  0 },
-      { +1, +1, +1, +1 },
-      { -1, -1, -1, -1 },
+//      {  0,  0,  0,  0 },
+//      { +1, +1, +1, +1 },
+//      { -1, -1, -1, -1 },
       { +1, -1, +1, -1 },
-      { -1, +1, -1, +1 },
+//      { -1, +1, -1, +1 },
     };
 
+    const double pSize = TMath::TwoPi()/8;
 
 
-    TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
+//    TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
+    TString strAnLevels[] = { "REC" };
     const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
     TStopwatch timer;
@@ -193,7 +197,7 @@ int read_output()
 
 
     // NEW WRAPPER:
-    TList* fOutputWinPairsLists[nPartTypes];
+//    TList* fOutputWinPairsLists[nPartTypes];
 
     CalcWithSubsamples observables[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins];
     CalcWithSubsamples observables_FULL_ETA_DENOM[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins];
@@ -212,9 +216,10 @@ int read_output()
                                        arrPartTypes[iType][0], arrPartTypes[iType][1], arrPartTypes[iType][2], arrPartTypes[iType][3],
                         arrCharges[iType][0], arrCharges[iType][1], arrCharges[iType][2], arrCharges[iType][3] );
 
-                fOutputWinPairsLists[iType] = new TList();
-                fOutputWinPairsLists[iType] = (TList*)gDirectory->Get("list_PIDcorr_"+strPID );
-                cout << "taking list " << strPID << ": " << fOutputWinPairsLists[iType] << endl;
+//                fOutputWinPairsLists[iType] = new TList();
+//                fOutputWinPairsLists[iType] = (TList*)gDirectory->Get("list_PIDcorr_"+strPID );
+                TList *inList = (TList*)gDirectory->Get("list_PIDcorr_"+strPID );
+                cout << "taking list " << strPID << ": " << inList << endl;
 //                fOutputWinPairsLists[iType]->ls();
 
                 bool ifIdent = ifIdenticalParticlesFB( arrPartTypes[iType], arrCharges[iType] );
@@ -224,22 +229,19 @@ int read_output()
                     for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
                         CalcWithSubsamples *calcObj = &observables[iAnLevel][iType][iCW][ cBin ][iPt];
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->calc( eSize, eSize, ifIdent );
+                        TString strPostfix = Form("%s_cBin%d", strAnLevels[iAnLevel].Data(), cBin);
+                        calcObj->calc( inList, strPostfix, ifIdent, whichInputHist ); // eSize, eSize, ifIdent, pSize );
 
                         // FULL ETA DENOM:
                         calcObj = &observables_FULL_ETA_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
-//                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hDetaDphi_%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        calcObj->calc( eSize, eRange*2, ifIdent );
+                        strPostfix = Form("%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin);
+                        calcObj->calc( inList, strPostfix, ifIdent, whichInputHist );
 
 
                         // FULL ETA FOR both Num and Denom: to calc nu_dyn!
                         calcObj = &observables_FULL_ETA_NUM_AND_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
-                        calcObj->h3D = (TH3D*)fOutputWinPairsLists[iType]->FindObject( Form("hAllWins_%s_FULL_ETA_NUM_AND_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin) );
-                        if(calcObj->h3D)
-                            calcObj->calc( eRange*2, eRange*2, ifIdent );
+                        strPostfix = Form("%s_FULL_ETA_NUM_AND_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin);
+                        calcObj->calc( inList, strPostfix, ifIdent, 0 );
                     }
             }
     }
@@ -273,6 +275,217 @@ int read_output()
     TCanvas *canv_nF = new TCanvas("canv_nF","canv_nF",0,0,800,600);
     tuneCanvas( canv_nF );
 //    drawGraph( gr_nF[ 0 ][0][0][0], 20, kRed, "APz" );
+
+
+
+
+
+
+
+
+
+
+    // #################################
+    // #### Several basic observables
+    TCanvas *canv_basic_1D_obs_VS_ETA = new TCanvas("canv_basic_1D_obs_VS_ETA","canv_basic_obs_VS_ETA",220,55,800,600);
+    tuneCanvas( canv_basic_1D_obs_VS_ETA );
+    gPad->SetGridy();
+
+
+    //    TGraphErrors *gr3;
+    //    gr0 = gr_SIGMA_VS_ETA[ 0 ][0][0];
+    //    gr1 = gr_SIGMA_VS_ETA[ 1 ][0][0];
+    //    gr2 = gr_SIGMA_VS_ETA[ 2 ][0][0];
+    //    gr0 = gr_SIGMA_VS_ETA   [ 0 ][0][0];
+    //    gr1 = gr_SIGMA_XY_VS_ETA[ 0 ][0][0];
+    //    gr2 = gr_SIGMA_FY_VS_ETA[ 0 ][0][0];
+    //    gr3 = gr_SIGMA_XB_VS_ETA[ 0 ][0][0];
+
+    TGraphErrors *gr_F = observables[0][0][0][0][0].getGraphVsWinIdQA( "avF" );
+    TGraphErrors *gr_B = observables[0][0][0][0][0].getGraphVsWinIdQA( "avB" );
+    TGraphErrors *gr_X = observables[0][0][0][0][0].getGraphVsWinIdQA( "avX" );
+    TGraphErrors *gr_Y = observables[0][0][0][0][0].getGraphVsWinIdQA( "avY" );
+
+
+    gr_F->GetYaxis()->SetRangeUser(-1, 2);
+
+    drawGraph( gr_F, 20, kRed, "APz" );
+    drawGraph( gr_B, 24, kBlue, "Pz" );
+    drawGraph( gr_X, 25, kMagenta, "Pz" );
+    drawGraph( gr_Y, 5, kGray+2, "Pz" );
+
+
+
+    TLegend *leg_1D_obs_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_1D_obs_vs_eta );
+    leg_1D_obs_vs_eta->AddEntry( gr_F, "F", "p");
+    leg_1D_obs_vs_eta->AddEntry( gr_B, "B", "p");
+    leg_1D_obs_vs_eta->AddEntry( gr_X, "X", "p");
+    leg_1D_obs_vs_eta->AddEntry( gr_Y, "Y", "p");
+    leg_1D_obs_vs_eta->Draw();
+
+
+    // ###
+    TCanvas *canv_basic_2D_obs_VS_ETA = new TCanvas("canv_basic_2D_obs_VS_ETA","canv_basic_2D_obs_VS_ETA",220,55,800,600);
+    tuneCanvas( canv_basic_2D_obs_VS_ETA );
+    gPad->SetGridy();
+
+    TGraphErrors *gr_FB = observables[0][0][0][0][0].getGraphVsWinIdQA( "FB" );
+    TGraphErrors *gr_XY = observables[0][0][0][0][0].getGraphVsWinIdQA( "XY" );
+    TGraphErrors *gr_FY = observables[0][0][0][0][0].getGraphVsWinIdQA( "FY" );
+    TGraphErrors *gr_XB = observables[0][0][0][0][0].getGraphVsWinIdQA( "XB" );
+
+
+    drawGraph( gr_FB, 20, kRed, "APz" );
+    drawGraph( gr_XY, 24, kBlue, "Pz" );
+    drawGraph( gr_FY, 25, kMagenta, "Pz" );
+    drawGraph( gr_XB, 5, kGray+2, "Pz" );
+
+
+
+
+
+
+
+
+
+    // #######################################
+    // ### Sigma correlations VS winId
+    TCanvas *canv_sigma_VS_winId = new TCanvas("canv_sigma_VS_winId","canv_sigma_VS_winId",220,55,800,600);
+    tuneCanvas( canv_sigma_VS_winId );
+
+    TGraphErrors *gr_sigma_FB_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_FB" );
+    TGraphErrors *gr_sigma_XY_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_XY" );
+    TGraphErrors *gr_sigma_FY_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_FY" );
+    TGraphErrors *gr_sigma_XB_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_XB" );
+
+
+
+
+    tuneGraphAxisLabels( gr_sigma_FB_vs_winId );
+    gr_sigma_FB_vs_winId->GetYaxis()->SetRangeUser(0.88, 1.2);
+    gr_sigma_FB_vs_winId->SetTitle( ";winId;#Sigma_{FB}" );
+
+    drawGraph( gr_sigma_FB_vs_winId, 20, kRed, "APz" );
+    drawGraph( gr_sigma_XY_vs_winId, 24, kBlue, "Pz" );
+    drawGraph( gr_sigma_FY_vs_winId, 25, kMagenta, "Pz" );
+    drawGraph( gr_sigma_XB_vs_winId, 5, kGray+2, "Pz" );
+
+
+    TLegend *leg_SIGMAFB_vs_winId = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_SIGMAFB_vs_winId );
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, formula", "p");
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, formula", "p");
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr2, "K+/#pi+, K#minus/#pi#minus, formula", "p");
+    leg_SIGMAFB_vs_winId->AddEntry( gr_sigma_FB_vs_winId, "FB", "p");
+    leg_SIGMAFB_vs_winId->AddEntry( gr_sigma_XY_vs_winId, "XY", "p");
+    leg_SIGMAFB_vs_winId->AddEntry( gr_sigma_FY_vs_winId, "FY", "p");
+    leg_SIGMAFB_vs_winId->AddEntry( gr_sigma_XB_vs_winId, "XB", "p");
+    leg_SIGMAFB_vs_winId->Draw();
+
+
+    gPad->SetGrid();
+
+
+    // #######################################
+    // ### Sigma correlations VS dEta:
+    TCanvas *canv_sigma_VS_ETA = new TCanvas("canv_sigma_VS_ETA","canv_sigma_vs_eta",220,55,800,600);
+    tuneCanvas( canv_sigma_VS_ETA );
+
+
+    //    TGraphErrors *gr3;
+    //    gr0 = gr_SIGMA_VS_ETA[ 0 ][0][0];
+    //    gr1 = gr_SIGMA_VS_ETA[ 1 ][0][0];
+    //    gr2 = gr_SIGMA_VS_ETA[ 2 ][0][0];
+    //    gr0 = gr_SIGMA_VS_ETA   [ 0 ][0][0];
+    //    gr1 = gr_SIGMA_XY_VS_ETA[ 0 ][0][0];
+    //    gr2 = gr_SIGMA_FY_VS_ETA[ 0 ][0][0];
+    //    gr3 = gr_SIGMA_XB_VS_ETA[ 0 ][0][0];
+
+    TGraphErrors *gr_sigma_FB = observables[0][0][0][0][0].getGraph( "sigma_FB" );
+    TGraphErrors *gr_sigma_XY = observables[0][0][0][0][0].getGraph( "sigma_XY" );
+    TGraphErrors *gr_sigma_FY = observables[0][0][0][0][0].getGraph( "sigma_FY" );
+    TGraphErrors *gr_sigma_XB = observables[0][0][0][0][0].getGraph( "sigma_XB" );
+
+
+
+
+    tuneGraphAxisLabels( gr_sigma_FB );
+    gr_sigma_FB->GetYaxis()->SetRangeUser(0.88, 1.2);
+    gr_sigma_FB->SetTitle( ";#Delta#eta;#Sigma_{FB}" );
+
+    drawGraph( gr_sigma_FB, 20, kRed, "APz" );
+    drawGraph( gr_sigma_XY, 24, kBlue, "Pz" );
+    drawGraph( gr_sigma_FY, 25, kMagenta, "Pz" );
+    drawGraph( gr_sigma_XB, 5, kGray+2, "Pz" );
+
+
+    TLegend *leg_SIGMAFB_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_SIGMAFB_vs_eta );
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, formula", "p");
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, formula", "p");
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr2, "K+/#pi+, K#minus/#pi#minus, formula", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_FB, "FB", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_XY, "XY", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_FY, "FY", "p");
+    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_XB, "XB", "p");
+    leg_SIGMAFB_vs_eta->Draw();
+
+
+    gPad->SetGrid();
+
+
+
+
+
+
+    // ###### Draw dEta-dPhi 2D
+    for ( int iType = 0; iType < 1/*nPartTypes*/; iType++)
+    {
+        TString strPID = Form( "pid_%d_%d_%d_%d_charge_%d_%d_%d_%d",
+                               arrPartTypes[iType][0], arrPartTypes[iType][1], arrPartTypes[iType][2], arrPartTypes[iType][3],
+                arrCharges[iType][0], arrCharges[iType][1], arrCharges[iType][2], arrCharges[iType][3] );
+
+        TString strCanvName = Form( "canv_Graph2D_type_%s", strPID.Data() );
+        TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas( strCanvName, strCanvName, 10+30*iType,10 +30*iType,800,800);
+        canv_ratio_ratio_VS_ETA_Graph2D->Divide(2,2);
+
+        canv_ratio_ratio_VS_ETA_Graph2D->cd(1);
+//        TGraph2D *gr2D_0_rr_GEN = observables[0][iType][0][0][0].getGraph2D( "corr_rr_formula" );
+        TH2D *gr2D_0_sigmaXY_GEN = observables[0][iType][0][0][0].getHist2D( "sigma_XY" );
+        gr2D_0_sigmaXY_GEN->Draw("surf1");
+
+
+        canv_ratio_ratio_VS_ETA_Graph2D->cd(2);
+        TH2D *gr2D_0_rr_GEN = observables[0][iType][0][0][0].getHist2D( "corr_rr_formula" );
+        gr2D_0_rr_GEN->Draw("surf1");
+
+        canv_ratio_ratio_VS_ETA_Graph2D->cd(3);
+        TH2D *gr2D_0_rPt_GEN = observables[0][iType][0][0][0].getHist2D( "corr_rPt_formula" );
+        gr2D_0_rPt_GEN->Draw("surf1");
+
+        canv_ratio_ratio_VS_ETA_Graph2D->cd(4);
+        TH2D *gr2D_0_PtPt_GEN = observables[0][iType][0][0][0].getHist2D( "avPtF_avPtB_formula" );
+        gr2D_0_PtPt_GEN->Draw("surf1");
+
+    }
+
+
+
+
+
+
+return 0;
+
+
+
+
+
+
+
+
+
+
 
 
     // #####################################################
@@ -676,6 +889,8 @@ int read_output()
 
 
 
+
+
     // ############## ratio_ratio BIS
     TCanvas *canv_ratio_ratio_VS_ETA_bis = new TCanvas("canv_ratio_ratio_VS_ETA_bis","canv_ratio_ratio_VS_ETA_bis",170,95,800,600);
     tuneCanvas( canv_ratio_ratio_VS_ETA );
@@ -714,53 +929,7 @@ int read_output()
 //    drawGraph( gr4_rr_formula_fullDenom, 30, kBlue+2, "Pz", 1.5 );
 
 
-    // #######################################
-    // ### Sigma correlations:
-    // VS ETA:
-    TCanvas *canv_sigma_VS_ETA = new TCanvas("canv_sigma_VS_ETA","canv_sigma_vs_eta",220,55,800,600);
-    tuneCanvas( canv_sigma_VS_ETA );
 
-
-    //    TGraphErrors *gr3;
-    //    gr0 = gr_SIGMA_VS_ETA[ 0 ][0][0];
-    //    gr1 = gr_SIGMA_VS_ETA[ 1 ][0][0];
-    //    gr2 = gr_SIGMA_VS_ETA[ 2 ][0][0];
-    //    gr0 = gr_SIGMA_VS_ETA   [ 0 ][0][0];
-    //    gr1 = gr_SIGMA_XY_VS_ETA[ 0 ][0][0];
-    //    gr2 = gr_SIGMA_FY_VS_ETA[ 0 ][0][0];
-    //    gr3 = gr_SIGMA_XB_VS_ETA[ 0 ][0][0];
-
-    TGraphErrors *gr_sigma_FB = observables[0][1][0][0][0].getGraph( "sigma_FB" );  //  gr_SIGMA_VS_ETA   [0][ 3 ][0][0];
-    TGraphErrors *gr_sigma_XY = observables[0][1][0][0][0].getGraph( "sigma_XY" );  //  gr_SIGMA_XY_VS_ETA[0][ 3 ][0][0];
-    TGraphErrors *gr_sigma_FY = observables[0][1][0][0][0].getGraph( "sigma_FY" );  //  gr_SIGMA_FY_VS_ETA[0][ 3 ][0][0];
-    TGraphErrors *gr_sigma_XB = observables[0][1][0][0][0].getGraph( "sigma_XB" );  //  gr_SIGMA_XB_VS_ETA[0][ 3 ][0][0];
-
-
-
-
-    tuneGraphAxisLabels( gr_sigma_FB );
-    gr_sigma_FB->GetYaxis()->SetRangeUser(0.88, 1.2);
-    gr_sigma_FB->SetTitle( ";#Delta#eta;#Sigma_{FB}" );
-
-    drawGraph( gr_sigma_FB, 20, kRed, "APz" );
-    drawGraph( gr_sigma_XY, 24, kBlue, "Pz" );
-    drawGraph( gr_sigma_FY, 25, kMagenta, "Pz" );
-    drawGraph( gr_sigma_XB, 5, kGray+2, "Pz" );
-
-
-    TLegend *leg_SIGMAFB_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
-    tuneLegend( leg_SIGMAFB_vs_eta );
-    //    leg_SIGMAFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, formula", "p");
-    //    leg_SIGMAFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, formula", "p");
-    //    leg_SIGMAFB_vs_eta->AddEntry( gr2, "K+/#pi+, K#minus/#pi#minus, formula", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_FB, "FB", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_XY, "XY", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_FY, "FY", "p");
-    leg_SIGMAFB_vs_eta->AddEntry( gr_sigma_XB, "XB", "p");
-    leg_SIGMAFB_vs_eta->Draw();
-
-
-    gPad->SetGrid();
 
 
     //    return 0;
@@ -1038,6 +1207,7 @@ int read_output()
 
 
 
+    return 0;
 
 
 
@@ -1053,13 +1223,17 @@ int read_output()
 
 
 
-    // ###### Draw Graph 2D
-    TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas("canv_ratio_ratio_VS_ETA_Graph2D","canv_ratio_ratio_VS_ETA_Graph2D",140,75,800,600);
-    TGraph2D *gr2D_0_rr_GEN = observables[0][0][0][0][0].getGraph2D( "corr_rr_formula" );
-    gr2D_0_rr_GEN->Draw("surf1");
-    gr2D_0_rr_GEN->SetMarkerStyle(24);
-    gr2D_0_rr_GEN->SetMarkerColor( kRed );
-    gr2D_0_rr_GEN->Draw("same P");
+//    // ###### Draw Graph 2D
+//    TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas("canv_ratio_ratio_VS_ETA_Graph2D","canv_ratio_ratio_VS_ETA_Graph2D",140,75,800,600);
+//    TGraph2D *gr2D_0_rr_GEN = observables[0][0][0][0][0].getGraph2D( "corr_rr_formula" );
+//    gr2D_0_rr_GEN->Draw("surf1");
+//    gr2D_0_rr_GEN->SetMarkerStyle(24);
+//    gr2D_0_rr_GEN->SetMarkerColor( kRed );
+//    gr2D_0_rr_GEN->Draw("same P");
+
+
+
+
 
 
     return 0;
