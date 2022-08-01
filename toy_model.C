@@ -149,11 +149,11 @@ double table5_par_n[] = {
 };
 
 
-const int nSubsamples = 3;//10;//3;//15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//20;//5;//3;//15;//8;//30;
+const int nSubsamples = 3;//5;//3;//10;//3;//15;//3;//10;//8;//20;//4;//20;//15;//20;//15;//3;//20;//5;//3;//15;//8;//30;
 
 
-const int nEtaBins = 6;//8;
-const int nPhiBins = 6;//8;//8;//8;
+const int nEtaBins = 8;//8;
+const int nPhiBins = 2;//8;//8;//8;
 
 double eRange[] = { -0.8, 0.8 };
 
@@ -161,7 +161,8 @@ double eRange[] = { -0.8, 0.8 };
 //const double eRange = 0.8; //1.0;//1.4;//1.6;//0.8;
 
 const int nPtBins = 1;
-double ptRange[] = { 0., 100 };
+//double ptRange[] = { 0., 100 };
+double ptRange[] = { 0.2, 2.0 };
 
 
 
@@ -171,7 +172,7 @@ double ptRange[] = { 0., 100 };
 
 
 //
-const int nPartTypes = 1;//5;//3;//4;
+const int nPartTypes = 5;//3;//4;
 int arrPartTypes[nPartTypes][4] =
 { // F,B, X,Y
   //  { /*421*/0, 0, 0, 0 },         // 0
@@ -180,10 +181,10 @@ int arrPartTypes[nPartTypes][4] =
   //  { 321, 321, 211, 211 }, // 6
 
   { 321, 321, 211, 211 }, // 7
-//  { 321, 321, 211, 211 }, // 8
-//  { 321, 321, 211, 211 }, // 9
-//  { 321, 321, 211, 211 }, // 8
-//  { 321, 321, 211, 211 }, // 9
+  { 321, 321, 211, 211 }, // 8
+  { 321, 321, 211, 211 }, // 9
+  { 321, 321, 211, 211 }, // 8
+  { 321, 321, 211, 211 }, // 9
 
   //  { 0, 321, 0, 211 }, // 7
   //  { 0, 321, 0, 211 }, // 8
@@ -192,11 +193,11 @@ int arrPartTypes[nPartTypes][4] =
 
 int arrCharges[nPartTypes][4] =
 { // F,B, X,Y
-//  {  0,  0,  0,  0 },
-//  { +1, +1, +1, +1 },
-//  { -1, -1, -1, -1 },
+  {  0,  0,  0,  0 },
+  { +1, +1, +1, +1 },
+  { -1, -1, -1, -1 },
   { +1, -1, +1, -1 },
-//  { -1, +1, -1, +1 },
+  { -1, +1, -1, +1 },
 };
 
 
@@ -213,7 +214,7 @@ const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
 
 //bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
-bool whichHistos[] = { false, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
+bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
 
 
 
@@ -224,7 +225,7 @@ WinPairWrapper winPairWrapper_FULL_ETA_NUM_AND_DENOM[N_AN_LEVELS][nPartTypes][nC
 
 
 // ########################
-void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
+void toy_model( int _nEv = 20e3 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
         )
 {
 
@@ -292,12 +293,36 @@ void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
     for( int e1 = 0; e1 < nEtaBins; e1++ )
         for( int p1 = 0; p1 < nPhiBins; p1++ )
 //            histAccMap->SetBinContent( e1+1, p1+1, 1 );
-            histAccMap->SetBinContent( e1+1, p1+1, gRandom->Uniform() > 0.4 ? 1 : 0 );
+            histAccMap->SetBinContent( e1+1, p1+1, gRandom->Uniform() > 0.2 ? 1 : 0 );
+
+    // ##### prepare efficiency map:
+//    TCanvas *canv_eff_map = new TCanvas( "canv_eff_map", "canv_eff_map", 20,30,800,600 );
+    const int nPtEffBins = 4;
+    TH3D *histEffMap[4]; // eff per each particle specie
+    for( int i = 0; i < 4; i++ )
+    {
+        TString strName = Form( "histEffMap_specie_%d", i );
+        histEffMap[i] = new TH3D( strName, strName+";p_{T};#eta;#varphi", nPtEffBins, 0.2, 2.0, nEtaBins, eRange[0], eRange[1], nPhiBins, 0, TMath::TwoPi() );
+    }
+
+    for( int ptBin = 0; ptBin < nPtEffBins; ptBin++ )
+    {
+        for( int e1 = 0; e1 < nEtaBins; e1++ )
+            for( int p1 = 0; p1 < nPhiBins; p1++ )
+            {
+//                double eff = gRandom->Uniform(0.2, 0.8);
+                histEffMap[0]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.3, 0.8) );
+                histEffMap[1]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.25, 0.73) );
+                histEffMap[2]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.18, 0.68) );
+                histEffMap[3]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.22, 0.56) );
+//                cout << eff << endl;
+            }
+    }
 
 //    histAccMap->Fill( -0.6, 4.8, -1 );
 //    histAccMap->Fill( 0.2, 2.5, -1 );
 
-
+//return;
 
     // ### FB:
     for ( int iAnLevel = 0; iAnLevel < N_AN_LEVELS; ++iAnLevel )
@@ -436,7 +461,7 @@ void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
     int nEvents = _nEv;//4e3;//30000;//3e4;//1e6; //chain->GetEntries();
     for (int iEv = 0; iEv < nEvents; iEv++)
     {
-        if( iEv%10 == 0 )
+        if( iEv%50 == 0 )
             cout << "generating " << (int)iEv << "/" << nEvents << " event... \r"; cout.flush();
 
         //        cout << "event " << iEv << ": npart = " << npart << ", impact_b = " << impact_b << ", isEmpty = " << emptyEv << endl;
@@ -945,7 +970,10 @@ void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
             //                 || ( (pt > 0.3 && pt < 0.5) && randForEff > 0.68 )
             //                 || ( pt > 0.5 && randForEff > 0.85 )
             //                 )
-            if(1) // "toy" efficiency
+            int whichEffHist = -1;
+            int effHistBinId = 0;
+
+            if(0) // "toy" efficiency simple (pt-only)
             {
                 if( fabs(pdg) == 211 ) // pi
                 {
@@ -966,6 +994,23 @@ void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
                             )
                         continue;
                 }
+            }
+            else // "toy" efficiency 3D pt-eta-phi map
+            {
+                if( pdg == 211 ) whichEffHist = 0;
+                else if( pdg == -211 ) whichEffHist = 1;
+                else if( pdg == 321 ) whichEffHist = 2;
+                else if( pdg == -321 ) whichEffHist = 3;
+//                cout << "whichEffHist = " << whichEffHist << endl;
+
+                if ( whichEffHist >= 0 )
+                {
+                    effHistBinId = histEffMap[whichEffHist]->FindBin(pt, eta, phi);
+                    double effForThisBin = histEffMap[whichEffHist]->GetBinContent( effHistBinId );
+                    if ( randForEff > effForThisBin )
+                        continue;
+                }
+
             }
 
             // realistic efficiency
@@ -1007,14 +1052,14 @@ void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
 
 
 
-            double weight = 1.;
+            double weight = -1;
             //            if ( pt < 0.3 )
             //                weight = 1./0.5;
             //            else if ( pt > 0.3 && pt < 0.5 )
             //                weight = 1./0.68;
             //            else if ( pt > 0.5 )
             //                weight = 1./0.85;
-            if(1) // "toy" efficiency correction
+            if(0) // "toy" efficiency correction
             {
                 if( fabs(pdg) == 211 ) // pi
                 {
@@ -1040,8 +1085,24 @@ void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
                 }
                 //                weight = 1./0.65;
             }
+            else // "toy" efficiency correction with 3D pt-eta-phi map
+            {
+                if ( whichEffHist >= 0 )
+                {
+                    effHistBinId = histEffMap[whichEffHist]->FindBin(pt, eta, phi);
+                    double effForThisBin = histEffMap[whichEffHist]->GetBinContent( effHistBinId );
+                    weight = 1./effForThisBin;
+                }
+            }
             // realistic weight
             //            weight = 1./eff;
+
+            if ( weight < 0 )
+            {
+                cout << "AHTUNG! weight < 0!.. " << endl;
+                int aa;
+                cin >> aa;
+            }
 
 
             h_weights->Fill(weight);
@@ -1147,6 +1208,10 @@ void toy_model( int _nEv = 2e3 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
     TFile *fileOutput = new TFile( fullOutputName, "recreate");
 
     h_QA_event->Write();
+
+    histAccMap->Write();
+    for( int i = 0; i < 4; i++ )
+        histEffMap[i]->Write();
 
     h_Pt_in_eta16->Write();
     h_Eta_in_pt01_10->Write();

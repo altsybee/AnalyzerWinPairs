@@ -90,7 +90,8 @@ int read_output()
     //    TString fileName = "toy_output_fraction_K_fraction_binomial_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
     //    TString fileName = "toy_output_fraction_K_fraction_fixed_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
 //    TString fileName = "toy_output_gaus_500_10.root";
-    TString fileName = "output_toy.root";
+//    TString fileName = "output_toy.root";
+    TString fileName = "output_toy_e8_p1_250k.root";
 //    TString fileName = "output_toy_e8_p8_25kEvents.root";
 //    TString fileName = "before_phi_output_toy.root";
     //    TString fileName = "toy_output_gaus_500_10_BEFORE_CHANGES.root";
@@ -142,13 +143,13 @@ int read_output()
     const int nPtBins = 1;
     //    double ptmin[nPtBins] = { 0 }; //0.2 };//0.1,  };//0.2 }; //0.3, };//0.2 };
     //    double ptmax[nPtBins] = { 100 }; //2.0,};// 2.0 }; //1.5,};// 5.0 };
-    double ptmin[nPtBins] = { 0. };
-    double ptmax[nPtBins] = { 100.0 };
+//    double ptmin[nPtBins] = { 0. };
+//    double ptmax[nPtBins] = { 100.0 };
 
 
 
     //
-    const int nPartTypes = 1;//5;//10;//6;//3;//4;
+    const int nPartTypes = 5;//10;//6;//3;//4;
     int arrPartTypes[nPartTypes][4] =
     { // F,B, X,Y
       //  { /*421*/0, 0, 0, 0 },         // 0
@@ -164,10 +165,10 @@ int read_output()
 
 
       { 321, 321, 211, 211 }, // 7
-//      { 321, 321, 211, 211 }, // 8
-//      { 321, 321, 211, 211 }, // 9
-//      { 321, 321, 211, 211 }, // 8
-//      { 321, 321, 211, 211 }, // 9
+      { 321, 321, 211, 211 }, // 8
+      { 321, 321, 211, 211 }, // 9
+      { 321, 321, 211, 211 }, // 8
+      { 321, 321, 211, 211 }, // 9
 
 
       //  { 0, 321, 0, 211 }, // 7
@@ -177,11 +178,11 @@ int read_output()
 
     int arrCharges[/*nPartTypes*/][4] =
     { // F,B, X,Y
-//      {  0,  0,  0,  0 },
-//      { +1, +1, +1, +1 },
-//      { -1, -1, -1, -1 },
+      {  0,  0,  0,  0 },
+      { +1, +1, +1, +1 },
+      { -1, -1, -1, -1 },
       { +1, -1, +1, -1 },
-//      { -1, +1, -1, +1 },
+      { -1, +1, -1, +1 },
     };
 
     const double pSize = TMath::TwoPi()/8;
@@ -192,7 +193,7 @@ int read_output()
     const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
 
-    int whichInputHist = 1;
+    int whichInputHist = 0;
 
 
 
@@ -262,7 +263,6 @@ int read_output()
     timer.Stop();
     Double_t rtime = timer.RealTime();
     Double_t ctime = timer.CpuTime();
-
     printf("End of calc: RealTime=%f seconds, CpuTime=%f seconds\n",rtime,ctime);
 
     //    return 0;
@@ -273,23 +273,15 @@ int read_output()
     TStopwatch timer2;
     timer2.Start();
 
-    //    int pTypeForAn = 1;
-//    int ptBinForAn = 0;//1;//0;//1;
-
 
     // QA: nF vs centrality:
-    TCanvas *canv_nF = new TCanvas("canv_nF","canv_nF",0,0,800,600);
-    tuneCanvas( canv_nF );
+//    TCanvas *canv_nF = new TCanvas("canv_nF","canv_nF",0,0,800,600);
+//    tuneCanvas( canv_nF );
 //    drawGraph( gr_nF[ 0 ][0][0][0], 20, kRed, "APz" );
 
 
 
-
-
-
-
-
-
+    int whichBasicToDraw = 3;
 
     // #################################
     // #### Several basic observables
@@ -297,28 +289,54 @@ int read_output()
     tuneCanvas( canv_basic_1D_obs_VS_ETA );
     gPad->SetGridy();
 
+    TGraphErrors *gr_F = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avF" );
+    TGraphErrors *gr_B = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avB" );
+    TGraphErrors *gr_X = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avX" );
+    TGraphErrors *gr_Y = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avY" );
 
-    //    TGraphErrors *gr3;
-    //    gr0 = gr_SIGMA_VS_ETA[ 0 ][0][0];
-    //    gr1 = gr_SIGMA_VS_ETA[ 1 ][0][0];
-    //    gr2 = gr_SIGMA_VS_ETA[ 2 ][0][0];
-    //    gr0 = gr_SIGMA_VS_ETA   [ 0 ][0][0];
-    //    gr1 = gr_SIGMA_XY_VS_ETA[ 0 ][0][0];
-    //    gr2 = gr_SIGMA_FY_VS_ETA[ 0 ][0][0];
-    //    gr3 = gr_SIGMA_XB_VS_ETA[ 0 ][0][0];
-
-    TGraphErrors *gr_F = observables[0][0][0][0][0].getGraphVsWinIdQA( "avF" );
-    TGraphErrors *gr_B = observables[0][0][0][0][0].getGraphVsWinIdQA( "avB" );
-    TGraphErrors *gr_X = observables[0][0][0][0][0].getGraphVsWinIdQA( "avX" );
-    TGraphErrors *gr_Y = observables[0][0][0][0][0].getGraphVsWinIdQA( "avY" );
-
-
-    gr_F->GetYaxis()->SetRangeUser(-1, 2);
+    gr_F->GetYaxis()->SetRangeUser(-1, 10);
+    gr_F->SetTitle( ";winId;#LTN#GT" );
 
     drawGraph( gr_F, 20, kRed, "APz" );
     drawGraph( gr_B, 24, kBlue, "Pz" );
-    drawGraph( gr_X, 25, kMagenta, "Pz" );
-    drawGraph( gr_Y, 5, kGray+2, "Pz" );
+    drawGraph( gr_X, 21, kMagenta, "Pz" );
+    drawGraph( gr_Y, 25, kGray+2, "Pz" );
+
+    // RECONSTRUCTED
+    if ( N_AN_LEVELS > 1 )
+    {
+        TGraphErrors *gr_F = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avF" );
+        TGraphErrors *gr_B = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avB" );
+        TGraphErrors *gr_X = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avX" );
+        TGraphErrors *gr_Y = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avY" );
+
+        shiftPointX( gr_F, 0.1 );
+        shiftPointX( gr_B, 0.1 );
+        shiftPointX( gr_X, 0.1 );
+        shiftPointX( gr_Y, 0.1 );
+        drawGraph( gr_F, 5, kRed, "Pz" );
+        drawGraph( gr_B, 5, kBlue, "Pz" );
+        drawGraph( gr_X, 5, kMagenta, "Pz" );
+        drawGraph( gr_Y, 5, kGray+2, "Pz" );
+    }
+
+    // CORRECTED
+    if ( N_AN_LEVELS > 2 )
+    {
+        TGraphErrors *gr_F = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avF" );
+        TGraphErrors *gr_B = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avB" );
+        TGraphErrors *gr_X = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avX" );
+        TGraphErrors *gr_Y = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avY" );
+
+        shiftPointX( gr_F, 0.2 );
+        shiftPointX( gr_B, 0.2 );
+        shiftPointX( gr_X, 0.2 );
+        shiftPointX( gr_Y, 0.2 );
+        drawGraph( gr_F, 27, kRed, "Pz" );
+        drawGraph( gr_B, 27, kBlue, "Pz" );
+        drawGraph( gr_X, 27, kMagenta, "Pz" );
+        drawGraph( gr_Y, 27, kGray+2, "Pz" );
+    }
 
 
 
@@ -331,21 +349,382 @@ int read_output()
     leg_1D_obs_vs_eta->Draw();
 
 
-    // ###
-    TCanvas *canv_basic_2D_obs_VS_ETA = new TCanvas("canv_basic_2D_obs_VS_ETA","canv_basic_2D_obs_VS_ETA",220,55,800,600);
-    tuneCanvas( canv_basic_2D_obs_VS_ETA );
+
+
+
+    // #################################
+    // #### sumPt
+    TCanvas *canv_basic_sumPt_VS_ETA = new TCanvas("canv_basic_sumPt_VS_ETA","canv_basic_sumPt_VS_ETA",220,55,800,600);
+    tuneCanvas( canv_basic_sumPt_VS_ETA );
     gPad->SetGridy();
 
-    TGraphErrors *gr_FB = observables[0][0][0][0][0].getGraphVsWinIdQA( "FB" );
-    TGraphErrors *gr_XY = observables[0][0][0][0][0].getGraphVsWinIdQA( "XY" );
-    TGraphErrors *gr_FY = observables[0][0][0][0][0].getGraphVsWinIdQA( "FY" );
-    TGraphErrors *gr_XB = observables[0][0][0][0][0].getGraphVsWinIdQA( "XB" );
+    TGraphErrors *gr_ptF = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtF" );
+    TGraphErrors *gr_ptB = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtB" );
+    TGraphErrors *gr_ptX = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtX" );
+    TGraphErrors *gr_ptY = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtY" );
+
+    gr_ptF->GetYaxis()->SetRangeUser(-1, 10);
+    gr_ptF->SetTitle( ";winId;#LT#Sigmap_{T}#GT" );
+
+    drawGraph( gr_ptF, 20, kRed, "APz" );
+    drawGraph( gr_ptB, 24, kBlue, "Pz" );
+    drawGraph( gr_ptX, 21, kMagenta, "Pz" );
+    drawGraph( gr_ptY, 25, kGray+2, "Pz" );
+
+    // RECONSTRUCTED
+    if ( N_AN_LEVELS > 1 )
+    {
+        TGraphErrors *gr_ptF = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtF" );
+        TGraphErrors *gr_ptB = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtB" );
+        TGraphErrors *gr_ptX = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtX" );
+        TGraphErrors *gr_ptY = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtY" );
+
+        shiftPointX( gr_ptF, 0.1 );
+        shiftPointX( gr_ptB, 0.1 );
+        shiftPointX( gr_ptX, 0.1 );
+        shiftPointX( gr_ptY, 0.1 );
+        drawGraph( gr_ptF, 5, kRed, "Pz" );
+        drawGraph( gr_ptB, 5, kBlue, "Pz" );
+        drawGraph( gr_ptX, 5, kMagenta, "Pz" );
+        drawGraph( gr_ptY, 5, kGray+2, "Pz" );
+    }
+
+    // CORRECTED
+    if ( N_AN_LEVELS > 2 )
+    {
+        TGraphErrors *gr_ptF = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtF" );
+        TGraphErrors *gr_ptB = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtB" );
+        TGraphErrors *gr_ptX = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtX" );
+        TGraphErrors *gr_ptY = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "avPtY" );
+
+        shiftPointX( gr_ptF, 0.2 );
+        shiftPointX( gr_ptB, 0.2 );
+        shiftPointX( gr_ptX, 0.2 );
+        shiftPointX( gr_ptY, 0.2 );
+        drawGraph( gr_ptF, 27, kRed, "Pz" );
+        drawGraph( gr_ptB, 27, kBlue, "Pz" );
+        drawGraph( gr_ptX, 27, kMagenta, "Pz" );
+        drawGraph( gr_ptY, 27, kGray+2, "Pz" );
+    }
 
 
-    drawGraph( gr_FB, 20, kRed, "APz" );
-    drawGraph( gr_XY, 24, kBlue, "Pz" );
-    drawGraph( gr_FY, 25, kMagenta, "Pz" );
-    drawGraph( gr_XB, 5, kGray+2, "Pz" );
+
+    TLegend *leg_sumPt_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_sumPt_vs_eta );
+    leg_sumPt_vs_eta->AddEntry( gr_ptF, "F", "p");
+    leg_sumPt_vs_eta->AddEntry( gr_ptB, "B", "p");
+    leg_sumPt_vs_eta->AddEntry( gr_ptX, "X", "p");
+    leg_sumPt_vs_eta->AddEntry( gr_ptY, "Y", "p");
+    leg_sumPt_vs_eta->Draw();
+
+
+
+
+
+
+
+
+    // #######################################
+    // ### <nF*nB> corrrelators VS winId
+    TCanvas *canv_correlators_VS_winId = new TCanvas("canv_correlators_VS_winId","canv_correlators_VS_winId",220,55,800,600);
+    tuneCanvas( canv_correlators_VS_winId );
+
+    TGraphErrors *gr_FB_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "FB" );
+    TGraphErrors *gr_XY_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "XY" );
+    TGraphErrors *gr_FY_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "FY" );
+    TGraphErrors *gr_XB_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "XB" );
+
+    tuneGraphAxisLabels( gr_FB_vs_winId );
+    gr_FB_vs_winId->GetYaxis()->SetRangeUser(-2, 90);
+    gr_FB_vs_winId->SetTitle( ";winId;#LTN_{F}N_{B}#GT" );
+
+    drawGraph( gr_FB_vs_winId, 20, kRed, "APz" );
+    drawGraph( gr_XY_vs_winId, 24, kBlue, "Pz" );
+    drawGraph( gr_FY_vs_winId, 21, kMagenta, "Pz" );
+    drawGraph( gr_XB_vs_winId, 25, kGray+2, "Pz" );
+
+
+    TLegend *leg_FB_vs_winId = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_FB_vs_winId );
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, formula", "p");
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, formula", "p");
+    //    leg_SIGMAFB_vs_eta->AddEntry( gr2, "K+/#pi+, K#minus/#pi#minus, formula", "p");
+    leg_FB_vs_winId->AddEntry( gr_FB_vs_winId, "FB", "p");
+    leg_FB_vs_winId->AddEntry( gr_XY_vs_winId, "XY", "p");
+    leg_FB_vs_winId->AddEntry( gr_FY_vs_winId, "FY", "p");
+    leg_FB_vs_winId->AddEntry( gr_XB_vs_winId, "XB", "p");
+    leg_FB_vs_winId->Draw();
+
+
+    gPad->SetGrid();
+
+
+
+    // RECONSTRUCTED
+    if ( N_AN_LEVELS > 1 )
+    {
+        TGraphErrors *gr_FB_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "FB" );
+        TGraphErrors *gr_XY_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "XY" );
+        TGraphErrors *gr_FY_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "FY" );
+        TGraphErrors *gr_XB_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "XB" );
+
+        shiftPointX( gr_FB_vs_winId, 0.1 );
+        shiftPointX( gr_XY_vs_winId, 0.1 );
+        shiftPointX( gr_FY_vs_winId, 0.1 );
+        shiftPointX( gr_XB_vs_winId, 0.1 );
+        drawGraph( gr_FB_vs_winId, 5, kRed, "Pz" );
+        drawGraph( gr_XY_vs_winId, 5, kBlue, "Pz" );
+        drawGraph( gr_FY_vs_winId, 5, kMagenta, "Pz" );
+        drawGraph( gr_XB_vs_winId, 5, kGray+2, "Pz" );
+    }
+
+    // CORRECTED
+    if ( N_AN_LEVELS > 2 )
+    {
+        TGraphErrors *gr_FB_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "FB" );
+        TGraphErrors *gr_XY_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "XY" );
+        TGraphErrors *gr_FY_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "FY" );
+        TGraphErrors *gr_XB_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "XB" );
+
+        shiftPointX( gr_FB_vs_winId, 0.2 );
+        shiftPointX( gr_XY_vs_winId, 0.2 );
+        shiftPointX( gr_FY_vs_winId, 0.2 );
+        shiftPointX( gr_XB_vs_winId, 0.2 );
+        drawGraph( gr_FB_vs_winId, 27, kRed, "Pz" );
+        drawGraph( gr_XY_vs_winId, 27, kBlue, "Pz" );
+        drawGraph( gr_FY_vs_winId, 27, kMagenta, "Pz" );
+        drawGraph( gr_XB_vs_winId, 27, kGray+2, "Pz" );
+    }
+
+
+
+
+    // #######################################
+    // ### OTHER correlators with Pt VS winId
+    TCanvas *canv_more_correlators_VS_winId = new TCanvas("canv_more_correlators_VS_winId","canv_more_correlators_VS_winId",220,55,800,600);
+    tuneCanvas( canv_more_correlators_VS_winId );
+
+    TGraphErrors *gr_nB_PX_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nB*PX" );
+    TGraphErrors *gr_nY_PX_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nY*PX" );
+    TGraphErrors *gr_PF_PB_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "PF*PB" );
+    TGraphErrors *gr_nF_PB_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nF*PB" );
+    TGraphErrors *gr_nB_PF_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nB*PF" );
+
+    tuneGraphAxisLabels( gr_nB_PX_vs_winId );
+    gr_nB_PX_vs_winId->GetYaxis()->SetRangeUser(-2, 90);
+    gr_nB_PX_vs_winId->SetTitle( ";winId;#LTK_{F}L_{B}#GT" );
+
+    drawGraph( gr_nB_PX_vs_winId, 20, kRed, "APz" );
+    drawGraph( gr_nY_PX_vs_winId, 20, kBlue, "Pz" );
+    drawGraph( gr_PF_PB_vs_winId, 24, kMagenta, "Pz" );
+    drawGraph( gr_nF_PB_vs_winId, 25, kRed+2, "Pz" );
+    drawGraph( gr_nB_PF_vs_winId, 25, kBlue+2, "Pz" );
+
+
+    TLegend *leg_Other2D_vs_winId = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_Other2D_vs_winId );
+    leg_Other2D_vs_winId->AddEntry( gr_nB_PX_vs_winId, "nB_PX", "p");
+    leg_Other2D_vs_winId->AddEntry( gr_nY_PX_vs_winId, "nY_PX", "p");
+    leg_Other2D_vs_winId->AddEntry( gr_PF_PB_vs_winId, "PF_PB", "p");
+    leg_Other2D_vs_winId->AddEntry( gr_nF_PB_vs_winId, "nF_PB", "p");
+    leg_Other2D_vs_winId->AddEntry( gr_nB_PF_vs_winId, "nB_PF", "p");
+    leg_Other2D_vs_winId->Draw();
+
+
+    gPad->SetGrid();
+
+
+
+    // RECONSTRUCTED
+    if ( N_AN_LEVELS > 1 )
+    {
+        TGraphErrors *gr_nB_PX_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nB*PX" );
+        TGraphErrors *gr_nY_PX_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nY*PX" );
+        TGraphErrors *gr_PF_PB_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "PF*PB" );
+        TGraphErrors *gr_nF_PB_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nF*PB" );
+        TGraphErrors *gr_nB_PF_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nB*PF" );
+
+        shiftPointX( gr_nB_PX_vs_winId, 0.1 );
+        shiftPointX( gr_nY_PX_vs_winId, 0.1 );
+        shiftPointX( gr_PF_PB_vs_winId, 0.1 );
+        shiftPointX( gr_nF_PB_vs_winId, 0.1 );
+        shiftPointX( gr_nB_PF_vs_winId, 0.1 );
+        drawGraph( gr_nB_PX_vs_winId, 5, kRed, "Pz" );
+        drawGraph( gr_nY_PX_vs_winId, 5, kBlue, "Pz" );
+        drawGraph( gr_PF_PB_vs_winId, 5, kMagenta, "Pz" );
+        drawGraph( gr_nF_PB_vs_winId, 5, kGray+2, "Pz" );
+        drawGraph( gr_nB_PF_vs_winId, 5, kGray+2, "Pz" );
+    }
+
+    // CORRECTED
+    if ( N_AN_LEVELS > 2 )
+    {
+        TGraphErrors *gr_nB_PX_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nB*PX" );
+        TGraphErrors *gr_nY_PX_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nY*PX" );
+        TGraphErrors *gr_PF_PB_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "PF*PB" );
+        TGraphErrors *gr_nF_PB_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nF*PB" );
+        TGraphErrors *gr_nB_PF_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "nB*PF" );
+
+        shiftPointX( gr_nB_PX_vs_winId, 0.2 );
+        shiftPointX( gr_nY_PX_vs_winId, 0.2 );
+        shiftPointX( gr_PF_PB_vs_winId, 0.2 );
+        shiftPointX( gr_nF_PB_vs_winId, 0.2 );
+        shiftPointX( gr_nB_PF_vs_winId, 0.2 );
+        drawGraph( gr_nB_PX_vs_winId, 27, kRed, "Pz" );
+        drawGraph( gr_nY_PX_vs_winId, 27, kBlue, "Pz" );
+        drawGraph( gr_PF_PB_vs_winId, 27, kMagenta, "Pz" );
+        drawGraph( gr_nF_PB_vs_winId, 27, kGray+2, "Pz" );
+        drawGraph( gr_nB_PF_vs_winId, 27, kGray+2, "Pz" );
+    }
+
+
+
+
+
+
+    // ### R2 vs win Id:
+    TCanvas *canv_R2_VS_winId = new TCanvas("canv_R2_VS_winId","canv_R2_VS_winId",220,55,800,600);
+    tuneCanvas( canv_R2_VS_winId );
+
+    TGraphErrors *grRaa_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_aa" );  //  gr_corr_R2_aa_VS_ETA   [0][ 1 ][0][0];
+    TGraphErrors *grRbb_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_bb" );  //  gr_corr_R2_bb_VS_ETA   [0][ 1 ][0][0];
+    TGraphErrors *grRab_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ab" );  //  gr_corr_R2_ab_VS_ETA   [0][ 1 ][0][0];
+    TGraphErrors *grRba_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ba" );  //  gr_corr_R2_ba_VS_ETA   [0][ 1 ][0][0];
+
+    tuneGraphAxisLabels( grRaa_vs_winId );
+    grRaa_vs_winId->GetYaxis()->SetRangeUser( -0.2, 0.2 );
+    grRaa_vs_winId->SetTitle( ";#Delta#eta;R_{2}" );
+
+    drawGraph( grRaa_vs_winId, 20, kRed,     "APz" );
+    drawGraph( grRbb_vs_winId, 24, kBlue,    "Pz" );
+    drawGraph( grRab_vs_winId, 21, kMagenta, "Pz" );
+    drawGraph( grRba_vs_winId, 25, kGray+2,  "Pz" );
+
+
+    TLegend *leg_R2_vs_winId = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_R2_vs_winId );
+    leg_R2_vs_winId->AddEntry( grRaa_vs_winId, "Raa", "p");
+    leg_R2_vs_winId->AddEntry( grRbb_vs_winId, "Rbb", "p");
+    leg_R2_vs_winId->AddEntry( grRab_vs_winId, "Rab", "p");
+    leg_R2_vs_winId->AddEntry( grRba_vs_winId, "Rba", "p");
+    leg_R2_vs_winId->Draw();
+
+    gPad->SetGrid();
+
+
+
+
+
+    // RECONSTRUCTED R2:
+    TGraphErrors *gr0_R2_aa_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 1 ][1][0][0];
+    TGraphErrors *gr1_R2_bb_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 1 ][1][0][0];
+    TGraphErrors *gr2_R2_ab_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 1 ][1][0][0];
+    TGraphErrors *gr3_R2_ba_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 1 ][1][0][0];
+
+    gr0_R2_aa_vs_winId_REC->GetYaxis()->SetRangeUser(-2, 2);
+
+    shiftPointX( gr0_R2_aa_vs_winId_REC, 0.04 );
+    shiftPointX( gr1_R2_bb_vs_winId_REC, 0.04 );
+    shiftPointX( gr2_R2_ab_vs_winId_REC, 0.04 );
+    shiftPointX( gr3_R2_ba_vs_winId_REC, 0.04 );
+
+    drawGraph( gr0_R2_aa_vs_winId_REC, 5, kRed,       "Pz", 1.5 );
+    drawGraph( gr1_R2_bb_vs_winId_REC, 5, kBlue,      "Pz", 1.5 );
+    drawGraph( gr2_R2_ab_vs_winId_REC, 5, kMagenta,   "Pz", 1.5 );
+    drawGraph( gr3_R2_ba_vs_winId_REC, 5, kGray+2,    "Pz", 1.5 );
+
+
+    // CORRECTED:
+    TGraphErrors *gr0_R2_aa_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 2 ][1][0][0];
+    TGraphErrors *gr1_R2_bb_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 2 ][1][0][0];
+    TGraphErrors *gr2_R2_ab_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 2 ][1][0][0];
+    TGraphErrors *gr3_R2_ba_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 2 ][1][0][0];
+
+    shiftPointX( gr0_R2_aa_vs_winId_CORR, 0.04 );
+    shiftPointX( gr1_R2_bb_vs_winId_CORR, 0.04 );
+    shiftPointX( gr2_R2_ab_vs_winId_CORR, 0.04 );
+    shiftPointX( gr3_R2_ba_vs_winId_CORR, 0.04 );
+
+    drawGraph( gr0_R2_aa_vs_winId_CORR, 27, kRed,       "Pz", 1.5 );
+    drawGraph( gr1_R2_bb_vs_winId_CORR, 27, kBlue,      "Pz", 1.5 );
+    drawGraph( gr2_R2_ab_vs_winId_CORR, 27, kMagenta,   "Pz", 1.5 );
+    drawGraph( gr3_R2_ba_vs_winId_CORR, 27, kGray+2,    "Pz", 1.5 );
+
+
+
+
+
+
+
+
+    // ### R2 VS ETA:
+    TCanvas *canv_R2_VS_ETA = new TCanvas("canv_R2_VS_ETA","canv_R2_VS_ETA",220,55,800,600);
+    tuneCanvas( canv_R2_VS_ETA );
+
+    TGraphErrors *grRaa = observables[0][whichBasicToDraw][0][0][0].getGraph( "corr_R2_aa" );  //  gr_corr_R2_aa_VS_ETA   [0][ 1 ][0][0];
+    TGraphErrors *grRbb = observables[0][whichBasicToDraw][0][0][0].getGraph( "corr_R2_bb" );  //  gr_corr_R2_bb_VS_ETA   [0][ 1 ][0][0];
+    TGraphErrors *grRab = observables[0][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ab" );  //  gr_corr_R2_ab_VS_ETA   [0][ 1 ][0][0];
+    TGraphErrors *grRba = observables[0][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ba" );  //  gr_corr_R2_ba_VS_ETA   [0][ 1 ][0][0];
+
+    tuneGraphAxisLabels( grRaa );
+    grRaa->GetYaxis()->SetRangeUser( -0.2, 0.2 );
+    grRaa->SetTitle( ";#Delta#eta;R_{2}" );
+
+    drawGraph( grRaa, 20, kRed,     "APz" );
+    drawGraph( grRbb, 24, kBlue,    "Pz" );
+    drawGraph( grRab, 21, kMagenta, "Pz" );
+    drawGraph( grRba, 25, kGray+2,  "Pz" );
+
+
+    TLegend *leg_R2_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
+    tuneLegend( leg_R2_vs_eta );
+    leg_R2_vs_eta->AddEntry( grRaa, "Raa", "p");
+    leg_R2_vs_eta->AddEntry( grRbb, "Rbb", "p");
+    leg_R2_vs_eta->AddEntry( grRab, "Rab", "p");
+    leg_R2_vs_eta->AddEntry( grRba, "Rba", "p");
+    leg_R2_vs_eta->Draw();
+
+    gPad->SetGrid();
+
+
+
+
+
+    // RECONSTRUCTED R2:
+    TGraphErrors *gr0_R2_aa_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 1 ][1][0][0];
+    TGraphErrors *gr1_R2_bb_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 1 ][1][0][0];
+    TGraphErrors *gr2_R2_ab_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 1 ][1][0][0];
+    TGraphErrors *gr3_R2_ba_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 1 ][1][0][0];
+
+    gr0_R2_aa_REC->GetYaxis()->SetRangeUser(-2, 2);
+
+    shiftPointX( gr0_R2_aa_REC, 0.04 );
+    shiftPointX( gr1_R2_bb_REC, 0.04 );
+    shiftPointX( gr2_R2_ab_REC, 0.04 );
+    shiftPointX( gr3_R2_ba_REC, 0.04 );
+
+    drawGraph( gr0_R2_aa_REC, 5, kRed,       "Pz", 1.5 );
+    drawGraph( gr1_R2_bb_REC, 5, kBlue,      "Pz", 1.5 );
+    drawGraph( gr2_R2_ab_REC, 5, kMagenta,   "Pz", 1.5 );
+    drawGraph( gr3_R2_ba_REC, 5, kGray+2,    "Pz", 1.5 );
+
+
+    // CORRECTED:
+    TGraphErrors *gr0_R2_aa_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 2 ][1][0][0];
+    TGraphErrors *gr1_R2_bb_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 2 ][1][0][0];
+    TGraphErrors *gr2_R2_ab_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 2 ][1][0][0];
+    TGraphErrors *gr3_R2_ba_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 2 ][1][0][0];
+
+    shiftPointX( gr0_R2_aa_CORR, 0.04 );
+    shiftPointX( gr1_R2_bb_CORR, 0.04 );
+    shiftPointX( gr2_R2_ab_CORR, 0.04 );
+    shiftPointX( gr3_R2_ba_CORR, 0.04 );
+
+    drawGraph( gr0_R2_aa_CORR, 27, kRed,       "Pz", 1.5 );
+    drawGraph( gr1_R2_bb_CORR, 27, kBlue,      "Pz", 1.5 );
+    drawGraph( gr2_R2_ab_CORR, 27, kMagenta,   "Pz", 1.5 );
+    drawGraph( gr3_R2_ba_CORR, 27, kGray+2,    "Pz", 1.5 );
+
 
 
 
@@ -356,26 +735,26 @@ int read_output()
 
 
     // #######################################
-    // ### Sigma correlations VS winId
+    // ### Sigma VS winId
     TCanvas *canv_sigma_VS_winId = new TCanvas("canv_sigma_VS_winId","canv_sigma_VS_winId",220,55,800,600);
     tuneCanvas( canv_sigma_VS_winId );
 
-    TGraphErrors *gr_sigma_FB_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_FB" );
-    TGraphErrors *gr_sigma_XY_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_XY" );
-    TGraphErrors *gr_sigma_FY_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_FY" );
-    TGraphErrors *gr_sigma_XB_vs_winId = observables[0][0][0][0][0].getGraphVsWinIdQA( "sigma_XB" );
+    TGraphErrors *gr_sigma_FB_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_FB" );
+    TGraphErrors *gr_sigma_XY_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_XY" );
+    TGraphErrors *gr_sigma_FY_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_FY" );
+    TGraphErrors *gr_sigma_XB_vs_winId = observables[0][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_XB" );
 
 
 
 
     tuneGraphAxisLabels( gr_sigma_FB_vs_winId );
     gr_sigma_FB_vs_winId->GetYaxis()->SetRangeUser(0.88, 1.2);
-    gr_sigma_FB_vs_winId->SetTitle( ";winId;#Sigma_{FB}" );
+    gr_sigma_FB_vs_winId->SetTitle( ";winId;#Sigma" );
 
-    drawGraph( gr_sigma_FB_vs_winId, 20, kRed, "APz" );
-    drawGraph( gr_sigma_XY_vs_winId, 24, kBlue, "Pz" );
-    drawGraph( gr_sigma_FY_vs_winId, 25, kMagenta, "Pz" );
-    drawGraph( gr_sigma_XB_vs_winId, 5, kGray+2, "Pz" );
+    drawGraph( gr_sigma_FB_vs_winId, 20, kRed,      "APz" );
+    drawGraph( gr_sigma_XY_vs_winId, 24, kBlue,     "Pz" );
+    drawGraph( gr_sigma_FY_vs_winId, 21, kMagenta,  "Pz" );
+    drawGraph( gr_sigma_XB_vs_winId, 25, kGray+2,   "Pz" );
 
 
     TLegend *leg_SIGMAFB_vs_winId = new TLegend(0.64,0.55,0.94,0.82);
@@ -393,8 +772,57 @@ int read_output()
     gPad->SetGrid();
 
 
+
+    // RECONSTRUCTED
+    if ( N_AN_LEVELS > 1 )
+    {
+        TGraphErrors *gr_sigma_FB_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_FB" );
+        TGraphErrors *gr_sigma_XY_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_XY" );
+        TGraphErrors *gr_sigma_FY_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_FY" );
+        TGraphErrors *gr_sigma_XB_vs_winId = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_XB" );
+
+        gr_F->GetYaxis()->SetRangeUser(-1, 10);
+
+        shiftPointX( gr_sigma_FB_vs_winId, 0.1 );
+        shiftPointX( gr_sigma_XY_vs_winId, 0.1 );
+        shiftPointX( gr_sigma_FY_vs_winId, 0.1 );
+        shiftPointX( gr_sigma_XB_vs_winId, 0.1 );
+        drawGraph( gr_sigma_FB_vs_winId, 5, kRed, "Pz" );
+        drawGraph( gr_sigma_XY_vs_winId, 5, kBlue, "Pz" );
+        drawGraph( gr_sigma_FY_vs_winId, 5, kMagenta, "Pz" );
+        drawGraph( gr_sigma_XB_vs_winId, 5, kGray+2, "Pz" );
+    }
+
+    // CORRECTED
+    if ( N_AN_LEVELS > 2 )
+    {
+        TGraphErrors *gr_sigma_FB_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_FB" );
+        TGraphErrors *gr_sigma_XY_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_XY" );
+        TGraphErrors *gr_sigma_FY_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_FY" );
+        TGraphErrors *gr_sigma_XB_vs_winId = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "sigma_XB" );
+
+        gr_F->GetYaxis()->SetRangeUser(-1, 10);
+
+        shiftPointX( gr_sigma_FB_vs_winId, 0.2 );
+        shiftPointX( gr_sigma_XY_vs_winId, 0.2 );
+        shiftPointX( gr_sigma_FY_vs_winId, 0.2 );
+        shiftPointX( gr_sigma_XB_vs_winId, 0.2 );
+        drawGraph( gr_sigma_FB_vs_winId, 27, kRed, "Pz" );
+        drawGraph( gr_sigma_XY_vs_winId, 27, kBlue, "Pz" );
+        drawGraph( gr_sigma_FY_vs_winId, 27, kMagenta, "Pz" );
+        drawGraph( gr_sigma_XB_vs_winId, 27, kGray+2, "Pz" );
+    }
+
+
+
+
+
+
+
+
+
     // #######################################
-    // ### Sigma correlations VS dEta:
+    // ### Sigma VS dEta:
     TCanvas *canv_sigma_VS_ETA = new TCanvas("canv_sigma_VS_ETA","canv_sigma_vs_eta",220,55,800,600);
     tuneCanvas( canv_sigma_VS_ETA );
 
@@ -408,10 +836,10 @@ int read_output()
     //    gr2 = gr_SIGMA_FY_VS_ETA[ 0 ][0][0];
     //    gr3 = gr_SIGMA_XB_VS_ETA[ 0 ][0][0];
 
-    TGraphErrors *gr_sigma_FB = observables[0][0][0][0][0].getGraph( "sigma_FB" );
-    TGraphErrors *gr_sigma_XY = observables[0][0][0][0][0].getGraph( "sigma_XY" );
-    TGraphErrors *gr_sigma_FY = observables[0][0][0][0][0].getGraph( "sigma_FY" );
-    TGraphErrors *gr_sigma_XB = observables[0][0][0][0][0].getGraph( "sigma_XB" );
+    TGraphErrors *gr_sigma_FB = observables[0][whichBasicToDraw][0][0][0].getGraph( "sigma_FB" );
+    TGraphErrors *gr_sigma_XY = observables[0][whichBasicToDraw][0][0][0].getGraph( "sigma_XY" );
+    TGraphErrors *gr_sigma_FY = observables[0][whichBasicToDraw][0][0][0].getGraph( "sigma_FY" );
+    TGraphErrors *gr_sigma_XB = observables[0][whichBasicToDraw][0][0][0].getGraph( "sigma_XB" );
 
 
 
@@ -480,9 +908,6 @@ int read_output()
 
 
 
-
-
-return 0;
 
 
 
@@ -706,8 +1131,8 @@ return 0;
 
 
 
-    gr0_corr_rr_formula->Fit("pol0");
-    gr0_corr_rr_formula->GetFunction("pol0")->Draw("same");
+//    gr0_corr_rr_formula->Fit("pol0");
+//    gr0_corr_rr_formula->GetFunction("pol0")->Draw("same");
 
 
     // direct:
@@ -939,85 +1364,12 @@ return 0;
 
 
 
-    //    return 0;
+        return 0;
 
 
 
 
 
-
-
-    // ### R2:
-    // VS ETA:
-    TCanvas *canv_R2_VS_ETA = new TCanvas("canv_R2_VS_ETA","canv_R2_VS_ETA",220,55,800,600);
-    tuneCanvas( canv_sigma_VS_ETA );
-
-    TGraphErrors *grRaa = observables[0][1][0][0][0].getGraph( "corr_R2_aa" );  //  gr_corr_R2_aa_VS_ETA   [0][ 1 ][0][0];
-    TGraphErrors *grRbb = observables[0][1][0][0][0].getGraph( "corr_R2_bb" );  //  gr_corr_R2_bb_VS_ETA   [0][ 1 ][0][0];
-    TGraphErrors *grRab = observables[0][1][0][0][0].getGraph( "corr_R2_ab" );  //  gr_corr_R2_ab_VS_ETA   [0][ 1 ][0][0];
-    TGraphErrors *grRba = observables[0][1][0][0][0].getGraph( "corr_R2_ba" );  //  gr_corr_R2_ba_VS_ETA   [0][ 1 ][0][0];
-
-    tuneGraphAxisLabels( grRaa );
-    grRaa->GetYaxis()->SetRangeUser(0, 2);
-    grRaa->SetTitle( ";#Delta#eta;#R_{2}" );
-
-    drawGraph( grRaa, 20, kRed, "APz" );
-    drawGraph( grRbb, 24, kBlue, "Pz" );
-    drawGraph( grRab, 25, kMagenta, "Pz" );
-    drawGraph( grRba, 5, kGray+2, "Pz" );
-
-
-    TLegend *leg_R2_vs_eta = new TLegend(0.64,0.55,0.94,0.82);
-    tuneLegend( leg_R2_vs_eta );
-    //    leg_SIGMAFB_vs_eta->AddEntry( gr0, "K/#pi, K/#pi, formula", "p");
-    //    leg_SIGMAFB_vs_eta->AddEntry( gr1, "K+/#pi+, K+/#pi+, formula", "p");
-    //    leg_SIGMAFB_vs_eta->AddEntry( gr2, "K+/#pi+, K#minus/#pi#minus, formula", "p");
-    leg_R2_vs_eta->AddEntry( grRaa, "Raa", "p");
-    leg_R2_vs_eta->AddEntry( grRbb, "Rbb", "p");
-    leg_R2_vs_eta->AddEntry( grRab, "Rab", "p");
-    leg_R2_vs_eta->AddEntry( grRba, "Rba", "p");
-    leg_R2_vs_eta->Draw();
-
-    gPad->SetGrid();
-
-
-
-
-
-    // RECONSTRUCTED R2:
-    TGraphErrors *gr0_R2_aa_REC = observables[1][1][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr1_R2_bb_REC = observables[1][1][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr2_R2_ab_REC = observables[1][1][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr3_R2_ba_REC = observables[1][1][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 1 ][1][0][0];
-
-    gr0_R2_aa_REC->GetYaxis()->SetRangeUser(-2, 2);
-
-    shiftPointX( gr0_R2_aa_REC, 0.04 );
-    shiftPointX( gr1_R2_bb_REC, 0.04 );
-    shiftPointX( gr2_R2_ab_REC, 0.04 );
-    shiftPointX( gr3_R2_ba_REC, 0.04 );
-
-    drawGraph( gr0_R2_aa_REC, 24, kGreen+1,   "Pz", 1.5 );
-    drawGraph( gr1_R2_bb_REC, 24, kRed,       "Pz", 1.5 );
-    drawGraph( gr2_R2_ab_REC, 24, kRed+1,     "Pz", 1.5 );
-    drawGraph( gr3_R2_ba_REC, 24, kBlue,      "Pz", 1.5 );
-
-
-    // CORRECTED:
-    TGraphErrors *gr0_R2_aa_CORR = observables[2][1][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr1_R2_bb_CORR = observables[2][1][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr2_R2_ab_CORR = observables[2][1][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr3_R2_ba_CORR = observables[2][1][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 2 ][1][0][0];
-
-    shiftPointX( gr0_R2_aa_CORR, 0.04 );
-    shiftPointX( gr1_R2_bb_CORR, 0.04 );
-    shiftPointX( gr2_R2_ab_CORR, 0.04 );
-    shiftPointX( gr3_R2_ba_CORR, 0.04 );
-
-    drawGraph( gr0_R2_aa_CORR, 25, kGreen+1,   "Pz", 1.5 );
-    drawGraph( gr1_R2_bb_CORR, 25, kRed,       "Pz", 1.5 );
-    drawGraph( gr2_R2_ab_CORR, 25, kRed+1,     "Pz", 1.5 );
-    drawGraph( gr3_R2_ba_CORR, 25, kBlue,      "Pz", 1.5 );
 
 
 

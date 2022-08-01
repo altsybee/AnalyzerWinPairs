@@ -21,7 +21,7 @@ using namespace std;
 //int nEtaWins = 8;
 //int nPhiWins = 1;
 
-bool DO_GLOBAL_QA = false;
+bool DO_GLOBAL_QA = false;//true;
 
 
 // names of final quantities
@@ -39,13 +39,6 @@ const char *obsNames[] =
     //    "sigma_PtN",
     //    "sigma_PtPt",
 
-    "avNF",
-    "avNB",
-
-    "avPtF",
-    "avPtB",
-
-    // Dec2019: bonus:
 
     "bcorr_XY",
     "nu_dyn_XY",
@@ -67,6 +60,19 @@ const char *obsNames[] =
     "XY",
     "FY",
     "XB",
+
+    "avPtF",
+    "avPtB",
+    "avPtX",
+    "avPtY",
+
+    "nB*PX",
+    "nY*PX",
+
+    "PF*PB",
+    "nF*PB",
+    "nB*PF",
+
 
 
     "corr_rr_formula",
@@ -419,7 +425,7 @@ struct CalcWithSubsamples
                 cout << "##### WIN PAIR " << h3D_winPairInfo->GetYaxis()->GetBinLabel( currentWinPairId+1 ) << endl;
 //            if ( valueByNameWP( "Nf*Nb" ) < 0.00001 )
 //                continue;
-            bool isGoodCalc = finalCalc(); // in case of holes in the acceptance - win pair will be skipped
+            bool isGoodCalc = finalCalcPerWP(); // in case of holes in the acceptance - win pair will be skipped
             if ( !isGoodCalc )
                 continue;
 
@@ -428,7 +434,7 @@ struct CalcWithSubsamples
             {
                 // cout << "iSub=" << iSub << ", iType=" << iType << ", iCW=" << iCW << ", iWinPair=" << iWinPair << endl;
                 currentSubId = iSub;
-                finalCalc();
+                finalCalcPerWP();
             }
 
             // calc mean and errors:
@@ -467,7 +473,7 @@ struct CalcWithSubsamples
                 //                cout << " gr2D_dEta_dPhi[iObs]->GetN() = " << gr2D_dEta_dPhi[iObs]->GetN() << endl;
                 //                cout << "iWinPair = " << iWinPair << ", obs = " << obsNames[iObs] << ", currenEtaSep = " << currenEtaSep << ", currenPhiSep = " << currenPhiSep << ", mean = " << mean << endl;
 
-                integrals[iObs] += mean; //*eSizeNum;
+                integrals[iObs] += mean;
             }
 
 //            int aa;
@@ -652,11 +658,15 @@ struct CalcWithSubsamples
                                     value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, currentSubId+1 );
                                 else // i.e. we calc now the full hist (=sum of all subsamples)
                                 {
+                                    double sumOverSub = 0;
                                     for( int subId = 0; subId < h3D_singleWinInfo->GetNbinsZ(); subId++ )
-                                        value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, subId+1 );
+                                        sumOverSub += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, subId+1 );
+                                    value += sumOverSub;
                                     if( QA_FLAG )
-                                        cout << "  >> B: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( thisWinIdB+1 )
-                                             << "  >> F: " << h3D_singleWinInfo->GetYaxis()->GetBinLabel( thisWinIdF+1 ) << endl;
+                                    {
+                                        cout << (whichWin==0 ? "  >> F: " : "  >> B: ") << h3D_singleWinInfo->GetYaxis()->GetBinLabel( winId+1 )
+                                             << ", sumOverSub = " << sumOverSub << endl;
+                                    }
                                 }
                             }
                         }
@@ -717,39 +727,37 @@ struct CalcWithSubsamples
     }
 
 
-    //    void setValueByName( const char* binName, double value )
-    //    {
-    //        int varId = varIdByName( binName );
-    //        if( varId >= 0 )
-    //            currentVarFullWinPairsHist->SetBinContent(  varIdByName( binName )+1, value );
-    //    }
-
-
-
     // ###########
-    bool finalCalc() // /*int iWin,*/ double eSep, double phiSep ) //, bool if_Identical_FB_XY, double eSizeNum, double eSizeDenom )
+    bool finalCalcPerWP()
     {
         double eSep = currenEtaSep;
         double phiSep = currenPhiSep;
 
         // we assume that eSep=0 means windows are completely overlapped!
         bool identical = ( eSep==0 && phiSep==0 && if_Identical_FB_XY );
-        //        cout << "finalCalc: " << eSep << endl;
+//        cout << "finalCalcPerWP: " << eSep << endl;
 
 
         // ##############################
         // get n Events for F-, B-only, and for both FB - to deal with Acceptance Gaps!
-        double _nEventsAccFB = valueByNameWP( "Nevents_twoWins_Acceptance" );
+        double _nEventsAccFB = valueByNameWP( "NeventsBothWin" );
         if ( _nEventsAccFB < 0.0001 ) // GAP IN ACCEPTANCE (one of the two wins is zero), skip the rest
             return false;
 
+//        cout << "_nEventsAccFB = " << _nEventsAccFB << endl;
+        if( DO_GLOBAL_QA )
+            QA_FLAG = true;
         double _nEventsF     = valueByNameSW(  0, "Nevents" ); // take e.g. from F win
+        double _nEventsB     = valueByNameSW(  1, "Nevents" );
+        QA_FLAG = false;
+//        int aaa;
+//        cin >> aaa;
+
         if ( _nEventsF < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
         {
-            cout << "check _nEventsF < 0.0001: never should appear!.." << endl;
+            cout << "check _nEventsF < 0.0001: should never appear!.." << endl;
             return false;
         }
-        double _nEventsB     = valueByNameSW(  1, "Nevents" );
         if ( _nEventsB < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
         {
             cout << "check _nEventsB < 0.0001: never should appear!.." << endl;
@@ -764,10 +772,7 @@ struct CalcWithSubsamples
         double FY = valueByNameWP( "Nf*Ny" ) / _nEventsAccFB;
         double XB = valueByNameWP( "Nb*Nx" ) / _nEventsAccFB;
 
-        if( DO_GLOBAL_QA )
-            QA_FLAG = true;
         double F = valueByNameSW(  0,   "Nf" )  / _nEventsF;
-        QA_FLAG = false;
         double B = valueByNameSW(  1,   "Nb" )  / _nEventsB;
         double X = valueByNameSW(  0,   "Nx" )  / _nEventsF;
         double Y = valueByNameSW(  1,   "Ny" )  / _nEventsB;
@@ -777,13 +782,30 @@ struct CalcWithSubsamples
         double X2 = valueByNameSW(  0,  "Nx2" ) / _nEventsF;
         double Y2 = valueByNameSW(  1,  "Ny2" ) / _nEventsB;
 
+
+        double PF      = valueByNameSW(  0,  "PF" )  / _nEventsF;
+        double PB      = valueByNameSW(  1,  "PB" )  / _nEventsB;
+        double PX      = valueByNameSW(  0,  "PX" )  / _nEventsF;
+        double PY      = valueByNameSW(  1,  "PY" )  / _nEventsB;
+
+
+        double nB_PX = valueByNameWP(  "nB*PX" ) / _nEventsAccFB;
+        double nY_PX = valueByNameWP(  "nY*PX" ) / _nEventsAccFB;
+
+        double PF_PB = valueByNameWP(  "PF*PB" ) / _nEventsAccFB;
+        double nF_PB = valueByNameWP(  "nF*PB" ) / _nEventsAccFB;
+        double nB_PF = valueByNameWP(  "nB*PF" ) / _nEventsAccFB;
+
 //        if( _nEventsAccFB != _nEventsF || _nEventsF != _nEventsB || _nEventsAccFB != _nEventsB )
-            if(0) cout << "currentWinPairId = " << currentWinPairId << ", F = " << F << ", B = " << B << ", X = " << X << ", Y = " << Y
+            if(0)
+            {
+                cout << "currentWinPairId = " << currentWinPairId << ", F = " << F << ", B = " << B << ", X = " << X << ", Y = " << Y
                   << ", F2 = " << F2 << ", B2 = " << B2 << ", X2 = " << X2 << ", Y2 = " << Y2 << ", FY = " << FY << ", XB = " << XB
                   << ", _nEventsF = " << _nEventsF << ", _nEventsB = " << _nEventsB << ", _nEventsAccFB = " << _nEventsAccFB
                   << endl;
                     int aa;
-        //            cin >> aa;
+                    cin >> aa;
+            }
 
         // ###########
         // ##### R2:
@@ -862,9 +884,6 @@ struct CalcWithSubsamples
             fillHistWithValue( "corr_rPt_direct", X/eSizeNum * ( Nb_OVER_Ny_vs_Px/PxPy_avPx/ratioB - 1 ) );
 
             // formula
-            double nB_PX = valueByNameWP(  "nB*PX" ) / _nEventsAccFB;
-            double nY_PX = valueByNameWP(  "nY*PX" ) / _nEventsAccFB;
-            double PX      = valueByNameSW(  0,  "PX" )  / _nEventsF;
 
             // new ratio-meanPt formula - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
             //            double _avSumPtInEvX      = getValueByName(  "sumPtAllEvX" )  / _nEvents;
@@ -879,23 +898,34 @@ struct CalcWithSubsamples
         }
 
 
+        fillHistWithValue( "avF", F );
+        fillHistWithValue( "avB", B );
+        fillHistWithValue( "avX", X );
+        fillHistWithValue( "avY", Y );
 
+        fillHistWithValue( "FB", FB );
+        fillHistWithValue( "XY", XY );
+        fillHistWithValue( "FY", FY );
+        fillHistWithValue( "XB", XB );
+
+        fillHistWithValue( "avPtF", PF );
+        fillHistWithValue( "avPtB", PB );
+        fillHistWithValue( "avPtX", PX );
+        fillHistWithValue( "avPtY", PY );
+
+
+        fillHistWithValue( "nB*PX", nB_PX );
+        fillHistWithValue( "nY*PX", nY_PX );
+
+        fillHistWithValue( "PF*PB", PF_PB );
+        fillHistWithValue( "nF*PB", nF_PB );
+        fillHistWithValue( "nB*PF", nB_PF );
 
         // ####### nu_dyn, sigma, avX, avY
         if(1)
         {
             //            double numerator = XY - X * Y;
             //            double denominator_bCorr = X2 - X*X;
-
-            fillHistWithValue( "avF", F );
-            fillHistWithValue( "avB", B );
-            fillHistWithValue( "avX", X );
-            fillHistWithValue( "avY", Y );
-
-            fillHistWithValue( "FB", FB );
-            fillHistWithValue( "XY", XY );
-            fillHistWithValue( "FY", FY );
-            fillHistWithValue( "XB", XB );
 
 
             if ( F != 0 && B != 0 && X != 0 && Y != 0 )
@@ -954,14 +984,6 @@ struct CalcWithSubsamples
 
         // ##### coeff avPt-avPt formula (new expansion, July 2022)
         {
-            double PF_PB = valueByNameWP(  "PF*PB" ) / _nEventsAccFB;
-            double nF_PB = valueByNameWP(  "nF*PB" ) / _nEventsAccFB;
-            double nB_PF = valueByNameWP(  "nB*PF" ) / _nEventsAccFB;
-
-            double PF = valueByNameSW(  0,  "PF" ) / _nEventsF;
-            double PB = valueByNameSW(  1,  "PB" ) / _nEventsB;
-
-
             double avPtF_avPtB_formula = F/eSizeNum * ( PF_PB/PF/PB + FB/F/B - nF_PB/F/PB  - nB_PF/B/PF );
 
             if (identical)
@@ -980,11 +1002,11 @@ struct CalcWithSubsamples
 
         // ##### coeff avPt-avPt direct
         {
-            double Pf = valueByNameWP(  "PfPb_avPf" ) / valueByNameWP(  "fb_Nevents" );
-            double Pb = valueByNameWP(  "PfPb_avPb" ) / valueByNameWP(  "fb_Nevents" );
-            double Pf_Pb = valueByNameWP(  "PfPb_avPf_avPb" ) / valueByNameWP(  "fb_Nevents" );
+            double _Pf = valueByNameWP(  "PfPb_avPf" ) / valueByNameWP(  "fb_Nevents" );
+            double _Pb = valueByNameWP(  "PfPb_avPb" ) / valueByNameWP(  "fb_Nevents" );
+            double _Pf_Pb = valueByNameWP(  "PfPb_avPf_avPb" ) / valueByNameWP(  "fb_Nevents" );
 
-            fillHistWithValue( "avPtF_avPtB_direct", F/eSizeNum * ( Pf_Pb/(Pf * Pb) - 1 ) );
+            fillHistWithValue( "avPtF_avPtB_direct", F/eSizeNum * ( _Pf_Pb/(_Pf * _Pb) - 1 ) );
             //            cout << " >> Pf_Pb = " << Pf_Pb << ", Pf = " << Pf << ", Pb = " << Pb << endl;
         }
 
