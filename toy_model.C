@@ -214,7 +214,7 @@ const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
 
 //bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
-bool whichHistos[] = { true, true, true };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
+bool whichHistos[] = { true, false, false };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
 
 
 
@@ -225,7 +225,7 @@ WinPairWrapper winPairWrapper_FULL_ETA_NUM_AND_DENOM[N_AN_LEVELS][nPartTypes][nC
 
 
 // ########################
-void toy_model( int _nEv = 20e3 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
+void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
         )
 {
 

@@ -10,7 +10,8 @@
 #include "TDirectory.h"
 #include "TString.h"
 #include "TGraphErrors.h"
-#include "TGraph2D.h"
+//#include "TGraph2D.h"
+#include "TGraph2DErrors.h"
 
 #include <iostream>
 #include <string>
@@ -22,6 +23,9 @@ using namespace std;
 //int nPhiWins = 1;
 
 bool DO_GLOBAL_QA = false;//true;
+bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_1D = true;
+bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_2D = true;
+bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_Obs = true;
 
 
 // names of final quantities
@@ -88,9 +92,13 @@ const char *obsNames[] =
     "avPtF_avPtB_direct",
     "avPtF_avPtB_formula",
 
+    "avPtX_avPtY_direct",
+    "avPtX_avPtY_formula",
+
 
     // new ratio-ratio - June 2021: when denominator is in full acceptance
     "corr_rr_FULL_ETA_DENOM_formula",
+//    "corr_rr_FULL_ETA_DENOM_formula_with_minusC2X",
     "corr_rr_FULL_ETA_DENOM_direct",
 
     "corr_rPt_formula",   // new ratio-meanPt - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
@@ -162,8 +170,9 @@ struct CalcWithSubsamples
 
     TGraphErrors *grVsWinId[nObs];
     TGraphErrors *grVsDeltaEta[nObs];
-    TGraph2D *gr2D_dEta_dPhi[nObs];
+    TGraph2DErrors *gr2D_dEta_dPhi[nObs];
     TH2D *h2D_dEta_dPhi[nObs];
+    TH2D *h2D_dEta_dPhi_binError2[nObs];
     TH2D *h2D_dEta_dPhi_binCounts[nObs];
     //    TH2D *hist2D_dEta_dPhi[nObs];
     double integrals[nObs];
@@ -182,6 +191,8 @@ struct CalcWithSubsamples
 
     bool QA_FLAG;
 
+    // possibility to set bins zero by hand (artificial acceptance map) - Sept 12, 2022
+    vector<int> arrZeroWinIdsByHand;
 
     CalcWithSubsamples()
     {
@@ -189,6 +200,7 @@ struct CalcWithSubsamples
         h3D_winPairInfo = 0x0;
 
         QA_FLAG = false;
+//        nArrSizeZeroWinsByHand = 0;
     }
 
     TGraphErrors *getGraph( const char *strName )
@@ -312,19 +324,29 @@ struct CalcWithSubsamples
     {
         // extract meta info:
         TH1D *hMetaInfo = (TH1D*)inputList->FindObject( Form("hMetaInfo_%s", strPostfix.Data() ) );
+//        cout << "hMetaInfo = " << hMetaInfo << endl;
 
-        eRangeMin = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "etaRangeMin" ) );
-        eRangeMax = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "etaRangeMax" ) );
-        eSizeNum = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "etaSize" ) );
+        int nInstances = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "nInstances" ) );
+        if ( nInstances == 0 ) // TMP!!! for compatibility with task_2022_08_01_Data_PbPb_LHC10h_FB768_NewWP_e8p1_all_histos
+            nInstances = 8837;
+        eRangeMin = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "etaRangeMin" ) ) / nInstances;
+        eRangeMax = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "etaRangeMax" ) ) / nInstances;
+        eSizeNum = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "etaSize" ) ) / nInstances;
         eSizeDenom = eSizeNum;
         if ( hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "fullAcceptanceForDenom" ) ) )
             eSizeDenom = eRangeMax - eRangeMin;
-        double _pSize = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "phiSize" ) );
+        double _pSize = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "phiSize" ) ) / nInstances;
 
 
-        nEtaWins = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "nEtaWins" ) );
-        nPhiWins = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "nPhiWins" ) );
+        nEtaWins = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "nEtaWins" ) ) / nInstances;
+        nPhiWins = hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "nPhiWins" ) ) / nInstances;
 
+//        cout << " eRangeMax = " << eRangeMax << endl;
+//        cout << " eSizeNum = " << eSizeNum << endl;
+//        cout << " nEntries = " << eSizeNum / 0.2 << endl;
+//        cout << " hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( fullAcceptanceForDenom ) ) = " << hMetaInfo->GetBinContent( hMetaInfo->GetXaxis()->FindBin( "fullAcceptanceForDenom" ) ) << endl;
+//        int aa;
+//        cin >> aa;
 
         // create graphs per each observable
         for( int iObs = 0; iObs < nObs; iObs++ )
@@ -333,7 +355,7 @@ struct CalcWithSubsamples
             grVsWinId[iObs] = new TGraphErrors;
             integrals[iObs] = 0;
 
-            gr2D_dEta_dPhi[iObs] = new TGraph2D;
+            gr2D_dEta_dPhi[iObs] = new TGraph2DErrors;
         }
 
 
@@ -341,6 +363,18 @@ struct CalcWithSubsamples
         h3D_singleWinInfo = (TH3D*) inputList->FindObject( Form("hSingleWin_%s", strPostfix.Data() ) );
         if( h3D_singleWinInfo )
             nVars1D = h3D_singleWinInfo->GetNbinsX();
+
+        // artificial making of zero bins (Sept 2022):
+        if( arrZeroWinIdsByHand.size() > 0 )
+        {
+            for( int i = 0; i < arrZeroWinIdsByHand.size(); i++ )
+            {
+                int winIdToMakeZero = arrZeroWinIdsByHand[i];
+                for( int j = 0; j < h3D_singleWinInfo->GetNbinsX(); j++ ) // nVar
+                    for( int k = 0; k < h3D_singleWinInfo->GetNbinsZ(); k++ ) // nSub
+                        h3D_singleWinInfo->SetBinContent( j+1, winIdToMakeZero+1, k+1, 0 );
+            }
+        }
 
         whichInputHist = _whichInputHist;
         if( whichInputHist == 0 )
@@ -351,6 +385,14 @@ struct CalcWithSubsamples
             h3D_winPairInfo = (TH3D*) inputList->FindObject( Form("hAllEtaDphi_%s", strPostfix.Data() ) );
 
 
+        // calc integral for F, B, X, Y
+//        {
+//            double value = 0;
+//            int varId = mapVarIdByNameSingleWin.at( "Nf" );
+//            for( int winId = 0; winId < h3D_singleWinInfo->GetNbinsY(); winId++ )
+//                for( int subId = 0; subId < h3D_singleWinInfo->GetNbinsZ(); subId++ )
+//                    value += h3D_singleWinInfo->GetBinContent( varId+1, winId+1, subId+1 );
+//        }
 
 
         if_Identical_FB_XY = _if_Identical_FB_XY;
@@ -401,7 +443,7 @@ struct CalcWithSubsamples
         // loop over win pairs:
         for ( int iWinPair = 0; iWinPair < nWinPairs; iWinPair++ )
         {
-            //            cout << "###### STARTING iWinPair = " << iWinPair << endl;
+//            cout << "###### STARTING iWinPair = " << iWinPair << endl;
 
             // find out eSep, phiSep:
             takeEtaSep( iWinPair );
@@ -470,6 +512,7 @@ struct CalcWithSubsamples
 
 
                 gr2D_dEta_dPhi[iObs]->SetPoint( nGrP, currenEtaSep, currenPhiSep, mean );
+                gr2D_dEta_dPhi[iObs]->SetPointError( nGrP, 0, 0, std_dev );//currenEtaSep, currenPhiSep, std_dev );
                 //                cout << " gr2D_dEta_dPhi[iObs]->GetN() = " << gr2D_dEta_dPhi[iObs]->GetN() << endl;
                 //                cout << "iWinPair = " << iWinPair << ", obs = " << obsNames[iObs] << ", currenEtaSep = " << currenEtaSep << ", currenPhiSep = " << currenPhiSep << ", mean = " << mean << endl;
 
@@ -482,6 +525,7 @@ struct CalcWithSubsamples
 
 
 
+//        cout << "BEFORE HIST2D" << endl;
 
         // fill 2D hist
         TH1::AddDirectory(kFALSE); // to suppress Warning in <TFile::Append>: Replacing existing TH1, suggested in https://root-forum.cern.ch/t/switching-off-warning-in-tfile-append-replacing-existing-th1/32041
@@ -494,9 +538,11 @@ struct CalcWithSubsamples
 
             TString strHist2D = Form("h2D_dEta_dPhi_%s", obsNames[iObs]);
             h2D_dEta_dPhi[iObs] = new TH2D( strHist2D, ";#Delta#eta;#Delta#varphi", 2*nEtaWins-1, minEdge, maxEdge, 2*nPhiWins-1, -TMath::TwoPi(), TMath::TwoPi() );
+            h2D_dEta_dPhi_binError2[iObs] = new TH2D( strHist2D+"_binError2", ";#Delta#eta;#Delta#varphi", 2*nEtaWins-1, minEdge, maxEdge, 2*nPhiWins-1, -TMath::TwoPi(), TMath::TwoPi() );
             h2D_dEta_dPhi_binCounts[iObs] = new TH2D( strHist2D+"_binCounts", ";#Delta#eta;#Delta#varphi", 2*nEtaWins-1, minEdge, maxEdge, 2*nPhiWins-1, -TMath::TwoPi(), TMath::TwoPi() );
 
             TH2D *hist = h2D_dEta_dPhi[iObs];
+            TH2D *histError2 = h2D_dEta_dPhi_binError2[iObs];
             TH2D *histCounts = h2D_dEta_dPhi_binCounts[iObs];
 
             double eSep, pSep, value;
@@ -505,11 +551,16 @@ struct CalcWithSubsamples
                 gr2D_dEta_dPhi[iObs]->GetPoint( iP, eSep, pSep, value );
                 hist->Fill( eSep, pSep, value );
                 histCounts->Fill( eSep, pSep, 1 );
+
+                double err = gr2D_dEta_dPhi[iObs]->GetErrorZ( iP );
+//                cout << " err = " << err << endl;
+                histError2->Fill( eSep, pSep, err*err );
             }
             for ( int i = 0; i < hist->GetNbinsX(); i++)
                 for ( int j = 0; j < hist->GetNbinsY(); j++)
                 {
                     double binContent = hist->GetBinContent( i+1, j+1 );
+                    double sumBinError2 = histError2->GetBinContent( i+1, j+1 );
                     double nCounts = histCounts->GetBinContent( i+1, j+1 );
                     if( nCounts == 0 )
                     {
@@ -518,8 +569,12 @@ struct CalcWithSubsamples
                         //                    cin >> aa;
                     }
                     else
+                    {
                         hist->SetBinContent( i+1, j+1, binContent / nCounts );
+                        hist->SetBinError( i+1, j+1, sqrt( sumBinError2 / nCounts / nCounts ) );
+                    }
                 }
+            hist->SetMarkerStyle(24);
 
         }
 
@@ -559,7 +614,7 @@ struct CalcWithSubsamples
             obsId = mapObsIdByName.at( obsName );
         }
         catch (const std::out_of_range& oor) {
-            std::cerr << " Obs " << obsName << ": out of range error: " << oor.what() << '\n';
+            if(FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_Obs) { std::cerr << " Obs " << obsName << ": out of range error: " << oor.what() << "this message is shown only once.\n"; FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_Obs = false; }
         }
         if( obsId >= 0 )
             histCalcObs->SetBinContent( obsId+1, currentWinPairId+1, currentSubId+1, value );
@@ -581,7 +636,7 @@ struct CalcWithSubsamples
             varId = mapVarIdByNameSingleWin.at( binName );
         }
         catch (const std::out_of_range& oor) {
-            std::cerr << " Var " << binName << ": out of range error: " << oor.what() << '\n';
+            if(FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_1D) { std::cerr << " Var " << binName << ": out of range error: " << oor.what() << "this message is shown only once.\n"; FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_1D = false; }
         }
 
 
@@ -705,7 +760,7 @@ struct CalcWithSubsamples
             varId = mapVarIdByNameWinPairs.at( binName );
         }
         catch (const std::out_of_range& oor) {
-            std::cerr << " Var " << binName << ": out of range error: " << oor.what() << '\n';
+            if(FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_2D) { std::cerr << " Var " << binName << ": out of range error: " << oor.what() << "this message is shown only once.\n"; FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_2D = false; }
         }
 
 
@@ -796,106 +851,24 @@ struct CalcWithSubsamples
         double nF_PB = valueByNameWP(  "nF*PB" ) / _nEventsAccFB;
         double nB_PF = valueByNameWP(  "nB*PF" ) / _nEventsAccFB;
 
-//        if( _nEventsAccFB != _nEventsF || _nEventsF != _nEventsB || _nEventsAccFB != _nEventsB )
-            if(0)
-            {
-                cout << "currentWinPairId = " << currentWinPairId << ", F = " << F << ", B = " << B << ", X = " << X << ", Y = " << Y
-                  << ", F2 = " << F2 << ", B2 = " << B2 << ", X2 = " << X2 << ", Y2 = " << Y2 << ", FY = " << FY << ", XB = " << XB
-                  << ", _nEventsF = " << _nEventsF << ", _nEventsB = " << _nEventsB << ", _nEventsAccFB = " << _nEventsAccFB
-                  << endl;
-                    int aa;
-                    cin >> aa;
-            }
+        double PX_PY = valueByNameWP(  "PX*PY" ) / _nEventsAccFB;
+        double nX_PY = valueByNameWP(  "nX*PY" ) / _nEventsAccFB;
+//        double nY_PX = valueByNameWP(  "nY*PX" ) / _nEventsAccFB; // already have
 
-        // ###########
-        // ##### R2:
-        // ###########
+        double nX_PX = valueByNameSW(  0,  "nX*PX" ) / _nEventsF;
+
+
+        // if( _nEventsAccFB != _nEventsF || _nEventsF != _nEventsB || _nEventsAccFB != _nEventsB )
+        if(0)
         {
-            double R2_aa = FB/F/B - 1;
-            double R2_bb = XY/X/Y - 1;
-            if ( identical )
-            {
-                R2_aa = F2/F/F -1/F - 1;
-                R2_bb = X2/X/X -1/X - 1;
-            }
-            fillHistWithValue( "corr_R2_ab", R2_aa );
-            fillHistWithValue( "corr_R2_ba", R2_bb );
+            cout << "currentWinPairId = " << currentWinPairId << ", F = " << F << ", B = " << B << ", X = " << X << ", Y = " << Y
+                 << ", F2 = " << F2 << ", B2 = " << B2 << ", X2 = " << X2 << ", Y2 = " << Y2 << ", FY = " << FY << ", XB = " << XB
+                 << ", _nEventsF = " << _nEventsF << ", _nEventsB = " << _nEventsB << ", _nEventsAccFB = " << _nEventsAccFB
+                 << endl;
+            int aa;
+            cin >> aa;
         }
 
-
-        // ##############################
-        // ##### coeff ratio-ratio
-        // ##############################
-        double rFB      = valueByNameWP(  "Nf_OVER_Nx_vs_Nb_OVER_Ny" ) / valueByNameWP(  "xy_Nevents" );
-        double ratioF   = valueByNameWP(  "Nf_OVER_Nx" ) / valueByNameWP(  "xy_Nevents" );
-        double ratioB   = valueByNameWP(  "Nb_OVER_Ny" ) / valueByNameWP(  "xy_Nevents" );
-        {
-            double corr_rr_direct = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * ( rFB/ratioF/ratioB    - 1 );
-            double corr_rr_formula = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * (FB/F/B + XY/X/Y - FY/F/Y - XB/X/B   );
-
-            if (identical)
-            {
-                corr_rr_direct = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * ( rFB/ratioF/ratioB - 1/F - 1/X   - 1 );
-                corr_rr_formula = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom) * (F2/F/F + X2/X/X - FY/F/Y - XB/X/B - 1/F - 1/X );
-            }
-            fillHistWithValue( "corr_rr_direct", corr_rr_direct );
-            fillHistWithValue( "corr_rr_formula", corr_rr_formula );
-            if(0)cout << "corr_rr_formula = " << corr_rr_formula
-                      << ", F = " << F << ", X = " << X << ", Y = " << Y
-                      << ", F2 = " << F2 << ", X2 = " << X2 << ", FY = " << FY << ", XB = " << XB
-                      << ", _nEventsAccFB = " << _nEventsAccFB
-                      << endl;
-            //            int aa;
-            //            cin >> aa;
-
-            // when denominator is in full acceptance:
-            {
-                double FX = FY;
-
-                double corr_rr_FULL_ETA_DENOM_formula = F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  ) ;
-                double corr_rr_FULL_ETA_DENOM_direct =  F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * ( rFB/ratioF/ratioB - 1   -1/X  ) ;
-
-                if (identical)
-                {
-                    corr_rr_FULL_ETA_DENOM_formula = F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  - 1/F ) ;
-                    corr_rr_FULL_ETA_DENOM_direct =  F/eSizeNum * X/eSizeDenom / ( F/eSizeNum + X/eSizeDenom ) * ( rFB/ratioF/ratioB - 1   -1/X   - 1/F ) ;
-                }
-
-                //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", (F+B)/2 * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
-                //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", F*B/(F+B) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
-                fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", corr_rr_FULL_ETA_DENOM_formula );
-                fillHistWithValue( "corr_rr_FULL_ETA_DENOM_direct", corr_rr_FULL_ETA_DENOM_direct );
-
-            }
-        }
-
-
-
-        // ##############################
-        // ##### coeff ratio-pT
-        // ##############################
-        {
-            // B/Y vs pT_X
-            // direct
-            //            double Nb_OVER_Ny_PX = getValueByName(  "Nb_OVER_Ny*PX" );
-            double PxPy_avPx      = valueByNameWP(  "PxPy_avPx" );
-            double Nb_OVER_Ny_vs_Px = valueByNameWP(  "Nb_OVER_Ny_vs_avPx" );
-
-            fillHistWithValue( "corr_rPt_direct", X/eSizeNum * ( Nb_OVER_Ny_vs_Px/PxPy_avPx/ratioB - 1 ) );
-
-            // formula
-
-            // new ratio-meanPt formula - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
-            //            double _avSumPtInEvX      = getValueByName(  "sumPtAllEvX" )  / _nEvents;
-            double rPt_full_formula = X/eSizeNum * (  nB_PX /B/PX  + XY/X/Y - XB/X/B - nY_PX /Y/PX  ); // here even if wins are identical, +1/X-1/X cancels!
-            if (identical)
-            {
-                //                double subtrX = identical ? 1/X : 0;
-                double nX_PX = valueByNameSW(  0,  "nX*PX" ) / _nEventsF;
-                rPt_full_formula = X/eSizeNum * (  nB_PX /B/PX  + X2/X/X - XB/X/B - nX_PX /X/PX );
-            }
-            fillHistWithValue( "corr_rPt_formula", rPt_full_formula );
-        }
 
 
         fillHistWithValue( "avF", F );
@@ -920,6 +893,113 @@ struct CalcWithSubsamples
         fillHistWithValue( "PF*PB", PF_PB );
         fillHistWithValue( "nF*PB", nF_PB );
         fillHistWithValue( "nB*PF", nB_PF );
+
+
+        // ###########
+        // ##### R2:
+        // ###########
+        {
+            double R2_aa = FB/F/B - 1;
+            double R2_bb = XY/X/Y - 1;
+            if ( identical )
+            {
+                R2_aa = F2/F/F -1/F - 1;
+                R2_bb = X2/X/X -1/X - 1;
+            }
+            double R2_ab = FY/F/Y - 1;
+            double R2_ba = XB/X/B - 1;
+
+            fillHistWithValue( "corr_R2_aa", R2_aa );
+            fillHistWithValue( "corr_R2_bb", R2_bb );
+            fillHistWithValue( "corr_R2_ab", R2_ab );
+            fillHistWithValue( "corr_R2_ba", R2_ba );
+        }
+
+
+        // ##############################
+        // ##### coeff ratio-ratio
+        // ##############################
+        double rFB      = valueByNameWP(  "Nf_OVER_Nx_vs_Nb_OVER_Ny" ) / valueByNameWP(  "xy_Nevents" );
+        double ratioF   = valueByNameWP(  "Nf_OVER_Nx" ) / valueByNameWP(  "xy_Nevents" );
+        double ratioB   = valueByNameWP(  "Nb_OVER_Ny" ) / valueByNameWP(  "xy_Nevents" );
+        {
+//            double Norm = F/eSizeNum * X/eSizeDenom / (F/eSizeNum + X/eSizeDenom);
+            double Norm = (X+Y)/2 /eSizeDenom;
+            double corr_rr_direct = Norm * ( rFB/ratioF/ratioB    - 1 );
+            double corr_rr_formula = Norm * (FB/F/B + XY/X/Y - FY/F/Y - XB/X/B   );
+
+            if (identical)
+            {
+                corr_rr_direct = Norm * ( rFB/ratioF/ratioB - 1/F - 1/X   - 1 );
+                corr_rr_formula = Norm * (F2/F/F + X2/X/X - FY/F/Y - XB/X/B - 1/F - 1/X );
+            }
+            fillHistWithValue( "corr_rr_direct", corr_rr_direct );
+            fillHistWithValue( "corr_rr_formula", corr_rr_formula );
+            if(0)cout << "corr_rr_formula = " << corr_rr_formula
+                      << ", F = " << F << ", X = " << X << ", Y = " << Y
+                      << ", F2 = " << F2 << ", X2 = " << X2 << ", FY = " << FY << ", XB = " << XB
+                      << ", _nEventsAccFB = " << _nEventsAccFB
+                      << endl;
+            //            int aa;
+            //            cin >> aa;
+
+            // when denominator is in full acceptance:
+            {
+                double FX = FY;
+
+                double corr_rr_FULL_ETA_DENOM_formula = Norm * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  ) ;
+                double corr_rr_FULL_ETA_DENOM_direct =  Norm * ( rFB/ratioF/ratioB - 1   -1/X  ) ;
+
+                // March 2023: what if instead of 1/<X> take (<X2>-<X>^2) / <X^2>
+                // poluchaetsya bredovo -> disable
+                double corr_rr_FULL_ETA_DENOM_formula_with_minusC2X = Norm * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -(X2-X*X)/X/X  ) ;
+
+                if (identical)
+                {
+                    corr_rr_FULL_ETA_DENOM_formula = Norm * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  - 1/F ) ;
+                    corr_rr_FULL_ETA_DENOM_direct =  Norm * ( rFB/ratioF/ratioB - 1   -1/X   - 1/F ) ;
+                }
+
+                //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", (F+B)/2 * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
+                //            fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", F*B/(F+B) * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X) );
+                fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula", corr_rr_FULL_ETA_DENOM_formula );
+//                fillHistWithValue( "corr_rr_FULL_ETA_DENOM_formula_with_minusC2X", corr_rr_FULL_ETA_DENOM_formula_with_minusC2X );
+                fillHistWithValue( "corr_rr_FULL_ETA_DENOM_direct", corr_rr_FULL_ETA_DENOM_direct );
+
+            }
+        }
+
+
+
+        // ##############################
+        // ##### coeff ratio-pT
+        // ##############################
+        {
+            // B/Y vs pT_X
+            // direct
+            //            double Nb_OVER_Ny_PX = getValueByName(  "Nb_OVER_Ny*PX" );
+            double PxPy_avPx      = valueByNameWP(  "PxPy_avPx" );
+            double Nb_OVER_Ny_vs_Px = valueByNameWP(  "Nb_OVER_Ny_vs_avPx" );
+
+//            double Norm = X/eSizeNum;
+            double Norm = (X+Y)/2 /eSizeDenom;
+
+            fillHistWithValue( "corr_rPt_direct", Norm * ( Nb_OVER_Ny_vs_Px/PxPy_avPx/ratioB - 1 ) );
+
+            // formula
+
+            // new ratio-meanPt formula - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
+            //            double _avSumPtInEvX      = getValueByName(  "sumPtAllEvX" )  / _nEvents;
+            double rPt_full_formula = Norm * (  nB_PX /B/PX  + XY/X/Y - XB/X/B - nY_PX /Y/PX  ); // here even if wins are identical, +1/X-1/X cancels!
+            if (identical)
+            {
+                //                double subtrX = identical ? 1/X : 0;
+                rPt_full_formula = Norm * (  nB_PX /B/PX  + X2/X/X - XB/X/B - nX_PX /X/PX );
+            }
+            fillHistWithValue( "corr_rPt_formula", rPt_full_formula );
+        }
+
+
 
         // ####### nu_dyn, sigma, avX, avY
         if(1)
@@ -982,9 +1062,12 @@ struct CalcWithSubsamples
         }
 
 
-        // ##### coeff avPt-avPt formula (new expansion, July 2022)
+        // ##### coeff avPt-avPt FB formula (new expansion, July 2022)
         {
-            double avPtF_avPtB_formula = F/eSizeNum * ( PF_PB/PF/PB + FB/F/B - nF_PB/F/PB  - nB_PF/B/PF );
+//            double Norm = F/eSizeNum;
+            double Norm = (F+B)/2 /eSizeNum;
+
+            double avPtF_avPtB_formula = Norm * ( PF_PB/PF/PB + FB/F/B - nF_PB/F/PB  - nB_PF/B/PF );
 
             if (identical)
             {
@@ -993,22 +1076,59 @@ struct CalcWithSubsamples
                 double piF2 =   valueByNameSW(  0,  "piF2" ) / _nEventsF;
 
                 //                double subtrX = identical ? 1/X : 0;
-                // DODELAT' PF_PB !!!!!
-                avPtF_avPtB_formula = F/eSizeNum * ( (PF2 - piF2)/PF/PF + F2/F/F  - nF_PF/F/PF  - nF_PF/F/PF     - 1/F + 1/F + 1/F );
+                avPtF_avPtB_formula = Norm * ( (PF2 - piF2)/PF/PF + F2/F/F  - nF_PF/F/PF  - nF_PF/F/PF     - 1/F + 1/F + 1/F );
             }
 
             fillHistWithValue( "avPtF_avPtB_formula", avPtF_avPtB_formula );
+
+            // ##### direct
+            {
+                double _Pf = valueByNameWP(  "PfPb_avPf" ) / valueByNameWP(  "fb_Nevents" );
+                double _Pb = valueByNameWP(  "PfPb_avPb" ) / valueByNameWP(  "fb_Nevents" );
+                double _Pf_Pb = valueByNameWP(  "PfPb_avPf_avPb" ) / valueByNameWP(  "fb_Nevents" );
+
+                fillHistWithValue( "avPtF_avPtB_direct", Norm * ( _Pf_Pb/(_Pf * _Pb) - 1 ) );
+                //            cout << " >> Pf_Pb = " << Pf_Pb << ", Pf = " << Pf << ", Pb = " << Pb << endl;
+            }
         }
 
-        // ##### coeff avPt-avPt direct
+
+
+
+        // ##### coeff avPt-avPt XY formula
         {
-            double _Pf = valueByNameWP(  "PfPb_avPf" ) / valueByNameWP(  "fb_Nevents" );
-            double _Pb = valueByNameWP(  "PfPb_avPb" ) / valueByNameWP(  "fb_Nevents" );
-            double _Pf_Pb = valueByNameWP(  "PfPb_avPf_avPb" ) / valueByNameWP(  "fb_Nevents" );
+//            double Norm = X/eSizeNum;
+            double Norm = (X+Y)/2 /eSizeDenom;
+            double avPtX_avPtY_formula = Norm * ( PX_PY/PX/PY + XY/X/Y - nX_PY/X/PY  - nY_PX/Y/PX );
 
-            fillHistWithValue( "avPtF_avPtB_direct", F/eSizeNum * ( _Pf_Pb/(_Pf * _Pb) - 1 ) );
-            //            cout << " >> Pf_Pb = " << Pf_Pb << ", Pf = " << Pf << ", Pb = " << Pb << endl;
+            if (identical)
+            {
+                double PX2 =    valueByNameSW(  0,  "PX2" ) / _nEventsF;
+                double piX2 =   valueByNameSW(  0,  "piX2" ) / _nEventsF;
+
+                //                double subtrX = identical ? 1/X : 0;
+                avPtX_avPtY_formula = Norm * ( (PX2 - piX2)/PX/PX + X2/X/X  - nX_PX/X/PX  - nX_PX/X/PX     - 1/X + 1/X + 1/X );
+            }
+
+            fillHistWithValue( "avPtX_avPtY_formula", avPtX_avPtY_formula );
+
+            // ##### direct
+            {
+                double _Px = valueByNameWP(  "PxPy_avPx" ) / valueByNameWP(  "xy_Nevents" );
+                double _Py = valueByNameWP(  "PxPy_avPy" ) / valueByNameWP(  "xy_Nevents" );
+                double _Px_Py = valueByNameWP(  "PxPy_avPx_avPy" ) / valueByNameWP(  "xy_Nevents" );
+
+                double avPtX_avPtY_direct = Norm * ( _Px_Py/(_Px * _Py) - 1 );
+                if (identical)
+                {
+//                    avPtX_avPtY_direct = Norm * ( _Px_Py/(_Px * _Py) - 1 - 1/X ); // this is most probably wrong, need <<pT>^2>!..
+                }
+
+                fillHistWithValue( "avPtX_avPtY_direct", avPtX_avPtY_direct );
+                //            cout << " >> Pf_Pb = " << Pf_Pb << ", Pf = " << Pf << ", Pb = " << Pb << endl;
+            }
         }
+
 
 
 

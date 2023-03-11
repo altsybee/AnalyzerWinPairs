@@ -196,87 +196,6 @@ enum vars_2D
 
 
 
-const char* enum1D_toStr(int e) //throw()
-{
-    switch (e)
-    {
-    case _Nevents_      :              return "Nevents"    ;
-    case _Nf_     :                    return "Nf"    ;
-    case _Nb_     :                    return "Nb"    ;
-    case _Nx_     :                    return "Nx"    ;
-    case _Ny_     :                    return "Ny"    ;
-    case _Nf2_    :                    return "Nf2";
-    case _Nb2_    :                    return "Nb2";
-    case _Nx2_    :                    return "Nx2";
-    case _Ny2_    :                    return "Ny2";
-    case _PF_  :                       return "PF" ;
-    case _PB_  :                       return "PB" ;
-    case _nF_PF_ :                     return "nF*PF";
-    case _PX_  :                       return "PX" ;
-    case _PY_  :                       return "PY" ;
-    case _nX_PX_ :                     return "nX*PX";
-    case _PF2_  :                      return "PF2" ;
-    case _PX2_  :                      return "PX2" ;
-    case _piF2_  :                     return "piF2" ;
-    case _piX2_  :                     return "piX2" ;
-    default: //throw std::invalid_argument("Unimplemented item");
-    {
-        cout << "AHTUNG! Unimplemented var name in enum1D_toStr!" << endl;
-        int aa;
-        cin >> aa;
-    }
-
-    }
-
-    return "";
-}
-
-
-
-//constexpr
-const char* enum2D_toStr(int e) //throw()
-{
-    switch (e)
-    {
-//    case _f_Nevents_    :              return "f_Nevents";
-//    case _x_Nevents_    :              return "x_Nevents"  ;
-    case _Nevents_bothWinAcceptance_:  return "NeventsBothWin" ;
-    case _fb_Nevents_   :              return "fb_Nevents" ;
-    case _xy_Nevents_   :              return "xy_Nevents" ;
-//    case _fy_Nevents_   :              return "fy_Nevents" ;
-    case _Nf_Nb_  :                    return "Nf*Nb" ;
-    case _Nx_Ny_  :                    return "Nx*Ny" ;
-    case _Nf_Ny_  :                    return "Nf*Ny" ;
-    case _Nb_Nx_  :                    return "Nb*Nx" ;
-    case _Nf_OVER_Nx_vs_Nb_OVER_Ny_ :  return "Nf_OVER_Nx_vs_Nb_OVER_Ny"  ;
-    case _Nb_OVER_Ny_vs_avPx_ :        return "Nb_OVER_Ny_vs_avPx";
-    case _Nf_OVER_Nx_               :  return "Nf_OVER_Nx"                ;
-    case _Nb_OVER_Ny_               :  return "Nb_OVER_Ny"                ;
-//    case _PfNb_Pf_            :        return "PfNb_Pf"           ;
-    case _nY_PX_             :         return "nY*PX"            ;
-    case _nB_PX_             :         return "nB*PX"            ;
-    case _PfPb_avPf_avPb_ :            return "PfPb_avPf_avPb";
-    case _PfPb_avPf_ :                 return "PfPb_avPf";
-    case _PfPb_avPb_ :                 return "PfPb_avPb";
-    case _PF_PB_  :                    return "PF*PB" ;
-    case _nF_PB_  :                    return "nF*PB" ;
-    case _nB_PF_  :                    return "nB*PF" ;
-    case _PxPy_avPx_avPy_  :           return "PxPy_avPx_avPy" ;
-    case _PxPy_avPx_  :                return "PxPy_avPx" ;
-    case _PxPy_avPy_  :                return "PxPy_avPy" ;
-    case _PX_PY_  :                    return "PX*PY" ;
-    case _nX_PY_  :                    return "nX*PY" ;
-    default: //throw std::invalid_argument("Unimplemented item");
-    {
-        cout << "AHTUNG! Unimplemented var name in enum2D_toStr!" << endl;
-        int aa;
-        cin >> aa;
-    }
-
-    }
-
-    return "";
-}
 
 
 ////constexpr
@@ -366,6 +285,9 @@ public:
     double etaMin;
     double etaMax;
 
+    int flagTakeMoreVars;  // TAKE OR NOT vars for direct calculations
+
+
 
 
     // e-by-e histograms:
@@ -389,6 +311,12 @@ public:
     TH3D *hDetaDphi; //!
     TH3D *hAllEtaDphi; //!
 
+//    bool *flagsSingleWin; // flags for vars - do we need them or not
+//    bool *flagsWP; // flags for vars - do we need them or not
+    int *idsSingleWin;  // var ids in enums
+    int *idsWP;         // var ids in enums
+    int nUsedSingleWins;
+    int nUsedWPs;
 
     bool flagHistAllWins;
     bool flagHistDetaDphi;
@@ -429,9 +357,112 @@ public:
 
         nEtaWins = 0;
         nPhiWins = 0;
+
+        flagTakeMoreVars = 1;
     }
 
     ~WinPairWrapper() {}
+
+
+
+
+    void setFlagTakeMoreVars( int flag )
+    {
+        flagTakeMoreVars = flag;
+    }
+
+    const char* enum1D_toStr(int e, bool &flag ) //throw()
+    {
+        flag = 0;
+        switch (e)
+        {
+        case _Nevents_      :     { flag = 1;     return "Nevents" ;  }
+        case _Nf_     :           { flag = 1;     return "Nf"    ;    }
+        case _Nb_     :           { flag = 1;     return "Nb"    ;    }
+        case _Nx_     :           { flag = 1;     return "Nx"    ;    }
+        case _Ny_     :           { flag = 1;     return "Ny"    ;    }
+        case _Nf2_    :           { flag = 1;     return "Nf2";       }
+        case _Nb2_    :           { flag = 1;     return "Nb2";       }
+        case _Nx2_    :           { flag = 1;     return "Nx2";       }
+        case _Ny2_    :           { flag = 1;     return "Ny2";       }
+        case _PF_  :              { flag = 1;     return "PF" ;       }
+        case _PB_  :              { flag = 1;     return "PB" ;       }
+        case _nF_PF_ :            { flag = 1;     return "nF*PF";     }
+        case _PX_  :              { flag = 1;     return "PX" ;       }
+        case _PY_  :              { flag = 1;     return "PY" ;       }
+        case _nX_PX_ :            { flag = 1;     return "nX*PX";     }
+        case _PF2_  :             { flag = 1;     return "PF2" ;      }
+        case _PX2_  :             { flag = 1;     return "PX2" ;      }
+        case _piF2_  :            { flag = 1;     return "piF2" ;     }
+        case _piX2_  :            { flag = 1;     return "piX2" ;     }
+        default: //throw std::invalid_argument("Unimplemented item");
+        {
+            cout << "AHTUNG! Unimplemented var name in enum1D_toStr!" << endl;
+            int aa;
+            cin >> aa;
+        }
+
+        }
+
+        return "";
+    }
+
+
+
+    //constexpr
+    const char* enum2D_toStr(int e, bool &flag) //throw()
+    {
+//        const int A = 0;  // TAKE OR NOT vars for direct calculations
+        int A = flagTakeMoreVars;
+        flag = 0;
+        switch (e)
+        {
+    //    case _f_Nevents_    :             { flag = 1;     return "f_Nevents";                    }
+    //    case _x_Nevents_    :             { flag = 1;     return "x_Nevents"  ;                  }
+        case _Nevents_bothWinAcceptance_:   { flag = 1;     return "NeventsBothWin" ;              }
+        case _fb_Nevents_   :               { flag = A;     return "fb_Nevents" ;                  }
+        case _xy_Nevents_   :               { flag = A;     return "xy_Nevents" ;                  }
+    //    case _fy_Nevents_   :             { flag = 1;       return "fy_Nevents" ;                }
+        case _Nf_Nb_  :                     { flag = 1;     return "Nf*Nb" ;                       }
+        case _Nx_Ny_  :                     { flag = 1;     return "Nx*Ny" ;                       }
+        case _Nf_Ny_  :                     { flag = 1;     return "Nf*Ny" ;                       }
+        case _Nb_Nx_  :                     { flag = 1;     return "Nb*Nx" ;                       }
+        case _Nf_OVER_Nx_vs_Nb_OVER_Ny_ :   { flag = A;     return "Nf_OVER_Nx_vs_Nb_OVER_Ny"  ;   }
+        case _Nb_OVER_Ny_vs_avPx_ :         { flag = A;     return "Nb_OVER_Ny_vs_avPx";           }
+        case _Nf_OVER_Nx_               :   { flag = A;     return "Nf_OVER_Nx"                ;   }
+        case _Nb_OVER_Ny_               :   { flag = A;     return "Nb_OVER_Ny"                ;   }
+    //    case _PfNb_Pf_            :       { flag = 1;       return "PfNb_Pf"           ;         }
+        case _nY_PX_             :          { flag = 1;     return "nY*PX"            ;            }
+        case _nB_PX_             :          { flag = 1;     return "nB*PX"            ;            }
+        case _PfPb_avPf_avPb_ :             { flag = A;     return "PfPb_avPf_avPb";               }
+        case _PfPb_avPf_ :                  { flag = A;     return "PfPb_avPf";                    }
+        case _PfPb_avPb_ :                  { flag = A;     return "PfPb_avPb";                    }
+        case _PF_PB_  :                     { flag = 1;     return "PF*PB" ;                       }
+        case _nF_PB_  :                     { flag = 1;     return "nF*PB" ;                       }
+        case _nB_PF_  :                     { flag = 1;     return "nB*PF" ;                       }
+        case _PxPy_avPx_avPy_  :            { flag = A;     return "PxPy_avPx_avPy" ;              }
+        case _PxPy_avPx_  :                 { flag = A;     return "PxPy_avPx" ;                   }
+        case _PxPy_avPy_  :                 { flag = A;     return "PxPy_avPy" ;                   }
+        case _PX_PY_  :                     { flag = 1;     return "PX*PY" ;                       }
+        case _nX_PY_  :                     { flag = 1;     return "nX*PY" ;                       }
+        default: //throw std::invalid_argument("Unimplemented item");
+        {
+            cout << "AHTUNG! Unimplemented var name in enum2D_toStr!" << endl;
+            int aa;
+            cin >> aa;
+        }
+
+        }
+
+        return "";
+    }
+
+
+
+
+
+
+
 
     void setup( const char* strPrefix, int cBin, int nSub,
                 int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *_outputList
@@ -551,6 +582,7 @@ public:
         hMetaInfo = new TH1D( strHistMetaInfo, strHistMetaInfo
                               , 10, -0.5, 10-0.5 );
         int metaBinId = 1;
+        hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "nInstances" );  // to divide by this number after grid jobs merging
         hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "nEtaWins" );
         hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "nPhiWins" );
         hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "etaRangeMin" );
@@ -560,6 +592,7 @@ public:
         hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "ptMin" );
         hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "ptMax" );
         hMetaInfo->GetXaxis()->SetBinLabel( metaBinId++, "fullAcceptanceForDenom" );
+        hMetaInfo->Fill( "nInstances", 1 );
         hMetaInfo->Fill( "nEtaWins", nEtaWins );
         hMetaInfo->Fill( "nPhiWins", nPhiWins );
         hMetaInfo->Fill( "etaRangeMin",  _etaRange[0] );
@@ -578,12 +611,30 @@ public:
 
 
 
+        // count 1D vars to be used
+        int counter1Dvars = 0;
+        for( int i = 0; i < _nVars_1D_; i++ )
+        {
+            bool flagUsedWin = false;
+            const char* _varName = enum1D_toStr( i, flagUsedWin );
+            if ( flagUsedWin )
+                counter1Dvars++;
+        }
 
+        // count 2D vars to be used
+        int counter2Dvars = 0;
+        for( int i = 0; i < _nVars_2D_; i++ )
+        {
+            bool flagUsedWin = false;
+            const char* _varName = enum2D_toStr( i, flagUsedWin );
+            if ( flagUsedWin )
+                counter2Dvars++;
+        }
 
         // single win histos:
         TString strHist1DName = Form("hSingleWin_%s_cBin%d", strAnLevel.Data(), cBin);
         hSingleWin = new TH3D( strHist1DName, strHist1DName
-                              , _nVars_1D_, -0.5, _nVars_1D_-0.5
+                              , counter1Dvars, -0.5, counter1Dvars-0.5
                               , nEtaWins*nPhiWins, -0.5, nEtaWins*nPhiWins-0.5
                               , nSub, -0.5, nSub-0.5
                               );
@@ -599,7 +650,7 @@ public:
         // all window pairs separately:
         if( flagHistAllWins )
             hAllWins = new TH3D( strHistName, strHistName
-                                  , _nVars_2D_, -0.5, _nVars_2D_-0.5
+                                  , counter2Dvars, -0.5, counter2Dvars-0.5
                                   , nAllWPs, -0.5, nAllWPs-0.5
                                   , nSub, -0.5, nSub-0.5
                                   );
@@ -610,7 +661,7 @@ public:
         TString str_dEta_dPhi_HistName = Form("hDetaDphi_%s_cBin%d", strAnLevel.Data(), cBin);
         if( flagHistDetaDphi )
             hDetaDphi = new TH3D( str_dEta_dPhi_HistName, str_dEta_dPhi_HistName
-                              , _nVars_2D_, -0.5, _nVars_2D_-0.5
+                              , counter2Dvars, -0.5, counter2Dvars-0.5
                               , nDetaWP*nDphiWP, -0.5, nDetaWP*nDphiWP-0.5
                               , nSub, -0.5, nSub-0.5
                               );
@@ -622,36 +673,56 @@ public:
         TString str_AllEta_dPhi_HistName = Form("hAllEtaDphi_%s_cBin%d", strAnLevel.Data(), cBin);
         if( flagHistAllEtaDphi )
             hAllEtaDphi = new TH3D( str_AllEta_dPhi_HistName, str_AllEta_dPhi_HistName
-                                          , _nVars_2D_, -0.5, _nVars_2D_-0.5
+                                          , counter2Dvars, -0.5, counter2Dvars-0.5
                                           , nAllEtaDphiWP, -0.5, nAllEtaDphiWP-0.5
                                           , nSub, -0.5, nSub-0.5
                                           );
 
 
+//        flagsSingleWin = new bool[_nVars_1D_];
+//        flagsWP = new bool[_nVars_2D_];
+
+        idsSingleWin = new int[_nVars_1D_];
+        idsWP = new int[_nVars_2D_];
+
+        nUsedSingleWins = 0;
+        nUsedWPs = 0;
 
 
         // set labels x and prepare a map with vars
 //        cout << "_nVars = " << _nVars << endl;
-        for( int i = 0; i < _nVars_1D_; i++ )
-        {
-            const char* _varName = enum1D_toStr(i);
-            if(0)cout << "i = " << i << ", _varName = " << _varName << endl;
-
-            if( hSingleWin )
-                hSingleWin->GetXaxis()->SetBinLabel( i+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
-        }
+        if( hSingleWin )
+            for( int i = 0; i < _nVars_1D_; i++ )
+            {
+                bool flagUsedWin = false;
+                idsSingleWin[i] = -1;
+                const char* _varName = enum1D_toStr( i, flagUsedWin );
+                if(0)cout << "i = " << i << ", _varName = " << _varName << endl;
+                if ( flagUsedWin )
+                {
+                    hSingleWin->GetXaxis()->SetBinLabel( nUsedSingleWins+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+                    idsSingleWin[i] = nUsedSingleWins++;
+                }
+            }
 
         for( int i = 0; i < _nVars_2D_; i++ )
         {
-            const char* _varName = enum2D_toStr(i);
+            bool flagUsedWP = false;
+            idsWP[i] = -1;
+            const char* _varName = enum2D_toStr( i, flagUsedWP );
             if(0)cout << "i = " << i << ", _varName = " << _varName << endl;
 
-            if( flagHistAllWins )
-                hAllWins->GetXaxis()->SetBinLabel( i+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
-            if( flagHistDetaDphi )
-                hDetaDphi->GetXaxis()->SetBinLabel( i+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
-            if( flagHistAllEtaDphi )
-                hAllEtaDphi->GetXaxis()->SetBinLabel( i+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+            if ( flagUsedWP )
+            {
+                if( flagHistAllWins )
+                    hAllWins->GetXaxis()->SetBinLabel( nUsedWPs+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+                if( flagHistDetaDphi )
+                    hDetaDphi->GetXaxis()->SetBinLabel( nUsedWPs+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+                if( flagHistAllEtaDphi )
+                    hAllEtaDphi->GetXaxis()->SetBinLabel( nUsedWPs+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+
+                idsWP[i] = nUsedWPs++;
+            }
         }
 
 
@@ -859,21 +930,25 @@ public:
 
     void fillWithValueHist1D( /*const char *varName,*/ int varId, double value ) //, bool forceFilling = false )
     {
-        if( hSingleWin )
-            hSingleWin->Fill(  varId, currentSingleWinId, currentSubsampleId, value  );
+        if( idsSingleWin[varId] >= 0 )
+//        if( hSingleWin )
+            hSingleWin->Fill(  /*varId*/idsSingleWin[varId], currentSingleWinId, currentSubsampleId, value  );
     }
 
     void fillWithValueHist2D( /*const char *varName,*/ int varId, double value ) //, bool forceFilling = false )
     {
         //                return;
-        if( flagHistAllWins )
-            hAllWins->Fill(  varId, currentWinPairId, currentSubsampleId, value  );
+        if( idsWP[varId] >= 0 )
+        {
+            if( flagHistAllWins )
+                hAllWins->Fill(  /*varId*/idsWP[varId], currentWinPairId, currentSubsampleId, value  );
 
-        if( flagHistDetaDphi )
-            hDetaDphi->Fill(  varId, currentDetaDphiPairId, currentSubsampleId, value  );
+            if( flagHistDetaDphi )
+                hDetaDphi->Fill(  /*varId*/idsWP[varId], currentDetaDphiPairId, currentSubsampleId, value  );
 
-        if( flagHistAllEtaDphi )
-            hAllEtaDphi->Fill(  varId, currentEtaWinsDphiPairId, currentSubsampleId, value  );
+            if( flagHistAllEtaDphi )
+                hAllEtaDphi->Fill(  /*varId*/idsWP[varId], currentEtaWinsDphiPairId, currentSubsampleId, value  );
+        }
     }
 
 
