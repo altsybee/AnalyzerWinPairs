@@ -26,7 +26,7 @@ using namespace std;
 enum vars_1D
 {
     _Nevents_    ,   // 1D var
-//    _f_Nevents_,
+    //    _f_Nevents_,
 
     // ##### ratio-ratio correlations by approx. formula:
     _Nf_    ,   // 1D var
@@ -60,6 +60,15 @@ enum vars_1D
     _piF2_ ,   // 1D var
     _piX2_ ,   // 1D var
 
+
+    _Nc_    ,
+    _Nf_Nx_,
+    _Nf_Nx_Nx_ ,
+    _Nb_Nx_Nx_ ,
+    _Nc_Nx_Nx_ ,
+    _Nx3_ ,
+
+
     // total number of vars:
     _nVars_1D_
 
@@ -70,10 +79,10 @@ enum vars_1D
 enum vars_2D
 {
     _Nevents_bothWinAcceptance_    ,   // 1D var
-//    _x_Nevents_  ,
+    //    _x_Nevents_  ,
     _fb_Nevents_ ,
     _xy_Nevents_ ,
-//    _fy_Nevents_ ,
+    //    _fy_Nevents_ ,
 
     // ##### ratio-ratio correlations by approx. formula:
     _Nf_Nb_ ,       // "pure" 2D var
@@ -89,7 +98,7 @@ enum vars_2D
 
     // ##### for r-Pt
     _Nb_OVER_Ny_vs_avPx_,
-//    _PfNb_Pf_           ,
+    //    _PfNb_Pf_           ,
     //    sumPtAllEvX      , // replaced by PX
     _nY_PX_            ,       // "pure" 2D var
     _nB_PX_            ,       // "pure" 2D var
@@ -111,11 +120,47 @@ enum vars_2D
     _nX_PY_ ,       // "pure" 2D var
     //    nY_PX ,  // added above!
 
+
+
+    _Nc_Nx_,
+//    _Nx_Nb_Nx_ ,       // "pure" 2D var
+//    _Nx_Nx_Nc_ ,       // "pure" 2D var
+
+    // direct:
+    _Nf_OVER_Nx_vs_Nc_OVER_Nz_ ,
+    _Nb_OVER_Ny_vs_Nc_OVER_Nz_ ,
+    _1_OVER_NN_ ,   // to check uncorrelated (Poissonian) baseline!
+
+
     // total number of vars:
     _nVars_2D_
 
 };
 
+
+
+
+// #########################
+// ##### available vars:
+enum vars_3D
+{
+    _Nf_Nb_Nc_ ,       // "pure" 3D var
+    _Nf_Nb_Nx_ ,       // "pure" 3D var
+    _Nf_Nx_Nc_ ,       // "pure" 3D var
+    _Nx_Nb_Nc_ ,       // "pure" 3D var
+
+
+
+    _Nfbc_OVER_NNN_,
+    _1_OVER_NNN_, // to check uncorrelated (Poissonian) baseline!
+
+
+
+
+    // total number of vars:
+    _nVars_3D_
+
+};
 
 
 //// #########################
@@ -274,8 +319,8 @@ public:
     // windows setup:
     int nEtaWins;
     int nPhiWins;
-    int partTypes[4];   // F,B, X,Y  // 0 - NO PID SELECTION
-    int partCharges[4]; // F,B, X,Y  // 0 - NO CHARGE SELECTION
+    int partTypes[4+1];   // F,B, X,Y  // 0 - NO PID SELECTION
+    int partCharges[4+1]; // F,B, X,Y  // 0 - NO CHARGE SELECTION
     double ptWin[2];
 
     // June 2021: new for ratio-ratio when denominator is in full acceptance
@@ -291,13 +336,13 @@ public:
 
 
     // e-by-e histograms:
-    TH2D *hist_n[4]; //!
+    TH2D *hist_n[4+1]; //!
     TH2D *hist_pt[4];  //!
     TH2D *hist_w_wMinus1[4];  //!
     TH2D *hist_w_wMinus1_pt[4];  //!
     TH2D *hist_pt2[4];  //!
 
-    TH2D *QA_hist_n[4];  //!
+    TH2D *QA_hist_n[4+1];  //!
     TH2D *QA_hist_pt[4];  //!
 
 
@@ -307,26 +352,30 @@ public:
     TH3D *hSingleWin; //!
 
     // histos with win PAIR info:
-    TH3D *hAllWins; //!
+    TH3D *hAllWinsPairs; //!
+    TH3D *hAllWinsTriplets; //!
+
     TH3D *hDetaDphi; //!
     TH3D *hAllEtaDphi; //!
 
-//    bool *flagsSingleWin; // flags for vars - do we need them or not
-//    bool *flagsWP; // flags for vars - do we need them or not
+    //    bool *flagsSingleWin; // flags for vars - do we need them or not
+    //    bool *flagsWP; // flags for vars - do we need them or not
     int *idsSingleWin;  // var ids in enums
     int *idsWP;         // var ids in enums
+    int *idsTriplets;
     int nUsedSingleWins;
     int nUsedWPs;
+    int nUsedTriplets;
 
     bool flagHistAllWins;
     bool flagHistDetaDphi;
     bool flagHistAllEtaDphi;
-
+    bool flagHistAllTriplets;
 
     TH2I *hAccMap; //!
-//    TH3D *hSPEC_DetaDphi; //!
+    //    TH3D *hSPEC_DetaDphi; //!
     //    THnD *hDeltaEta; //!
-//    TString strAnLevel;
+    //    TString strAnLevel;
 
     // some vars to make flexible hist filling (i.e. don't fill if bin name is not in varNames array):
     int currentSubsampleId;
@@ -335,8 +384,9 @@ public:
     int currentDetaDphiPairId;
     int currentEtaWinsDphiPairId;
 
+    int currentWinTripletId;
 
-//    TString strListName;
+    //    TString strListName;
 
     // ############
     WinPairWrapper()
@@ -344,7 +394,8 @@ public:
         hMetaInfo = 0x0;
         hSingleWin = 0x0;
 
-        hAllWins = 0x0;
+        hAllWinsPairs = 0x0;
+        hAllWinsTriplets = 0x0;
         hDetaDphi = 0x0;
         hAllEtaDphi = 0x0;
 
@@ -352,6 +403,7 @@ public:
         flagHistDetaDphi = true;
         flagHistAllEtaDphi = true;
 
+        flagHistAllTriplets = false;
 
         hAccMap = 0x0;
 
@@ -374,6 +426,7 @@ public:
     const char* enum1D_toStr(int e, bool &flag ) //throw()
     {
         flag = 0;
+        int B = flagHistAllTriplets;
         switch (e)
         {
         case _Nevents_      :     { flag = 1;     return "Nevents" ;  }
@@ -395,6 +448,16 @@ public:
         case _PX2_  :             { flag = 1;     return "PX2" ;      }
         case _piF2_  :            { flag = 1;     return "piF2" ;     }
         case _piX2_  :            { flag = 1;     return "piX2" ;     }
+
+            // for 3-body
+        case _Nc_     :           { flag = 1;     return "Nc"    ;    }
+        case _Nf_Nx_  :           { flag = B;     return "Nf*Nx" ;      }
+        case _Nf_Nx_Nx_  :        { flag = B;     return "Nf*Nx*Nx" ;                       }
+        case _Nb_Nx_Nx_  :        { flag = B;     return "Nb*Nx*Nx" ;                       }
+        case _Nc_Nx_Nx_  :        { flag = B;     return "Nc*Nx*Nx" ;                       }
+        case _Nx3_  :             { flag = B;     return "Nx3" ;      }
+
+
         default: //throw std::invalid_argument("Unimplemented item");
         {
             cout << "AHTUNG! Unimplemented var name in enum1D_toStr!" << endl;
@@ -412,17 +475,18 @@ public:
     //constexpr
     const char* enum2D_toStr(int e, bool &flag) //throw()
     {
-//        const int A = 0;  // TAKE OR NOT vars for direct calculations
+        //        const int A = 0;  // TAKE OR NOT vars for direct calculations
         int A = flagTakeMoreVars;
+        int B = flagHistAllTriplets;
         flag = 0;
         switch (e)
         {
-    //    case _f_Nevents_    :             { flag = 1;     return "f_Nevents";                    }
-    //    case _x_Nevents_    :             { flag = 1;     return "x_Nevents"  ;                  }
+        //    case _f_Nevents_    :             { flag = 1;     return "f_Nevents";                    }
+        //    case _x_Nevents_    :             { flag = 1;     return "x_Nevents"  ;                  }
         case _Nevents_bothWinAcceptance_:   { flag = 1;     return "NeventsBothWin" ;              }
         case _fb_Nevents_   :               { flag = A;     return "fb_Nevents" ;                  }
         case _xy_Nevents_   :               { flag = A;     return "xy_Nevents" ;                  }
-    //    case _fy_Nevents_   :             { flag = 1;       return "fy_Nevents" ;                }
+            //    case _fy_Nevents_   :             { flag = 1;       return "fy_Nevents" ;                }
         case _Nf_Nb_  :                     { flag = 1;     return "Nf*Nb" ;                       }
         case _Nx_Ny_  :                     { flag = 1;     return "Nx*Ny" ;                       }
         case _Nf_Ny_  :                     { flag = 1;     return "Nf*Ny" ;                       }
@@ -431,7 +495,7 @@ public:
         case _Nb_OVER_Ny_vs_avPx_ :         { flag = A;     return "Nb_OVER_Ny_vs_avPx";           }
         case _Nf_OVER_Nx_               :   { flag = A;     return "Nf_OVER_Nx"                ;   }
         case _Nb_OVER_Ny_               :   { flag = A;     return "Nb_OVER_Ny"                ;   }
-    //    case _PfNb_Pf_            :       { flag = 1;       return "PfNb_Pf"           ;         }
+            //    case _PfNb_Pf_            :       { flag = 1;       return "PfNb_Pf"           ;         }
         case _nY_PX_             :          { flag = 1;     return "nY*PX"            ;            }
         case _nB_PX_             :          { flag = 1;     return "nB*PX"            ;            }
         case _PfPb_avPf_avPb_ :             { flag = A;     return "PfPb_avPf_avPb";               }
@@ -445,6 +509,51 @@ public:
         case _PxPy_avPy_  :                 { flag = A;     return "PxPy_avPy" ;                   }
         case _PX_PY_  :                     { flag = 1;     return "PX*PY" ;                       }
         case _nX_PY_  :                     { flag = 1;     return "nX*PY" ;                       }
+
+
+        case _Nc_Nx_  :                        { flag = B;     return "Nc*Nx" ;                       }
+//        case _Nx_Nb_Nx_  :                     { flag = B;     return "Nx*Nb*Nx" ;                       }
+//        case _Nx_Nx_Nc_  :                     { flag = B;     return "Nx*Nx*Nc" ;                       }
+        case _Nf_OVER_Nx_vs_Nc_OVER_Nz_  :                        { flag = B;     return "Nf_OVER_Nx_vs_Nc_OVER_Nz" ;                       }
+        case _Nb_OVER_Ny_vs_Nc_OVER_Nz_  :                        { flag = B;     return "Nb_OVER_Ny_vs_Nc_OVER_Nz" ;                       }
+
+        case _1_OVER_NN_  :                        { flag = B;     return "1_OVER_NN" ;                       }
+
+
+
+        default: //throw std::invalid_argument("Unimplemented item");
+        {
+            cout << "AHTUNG! Unimplemented var name in enum2D_toStr!" << endl;
+            int aa;
+            cin >> aa;
+        }
+
+        }
+
+        return "";
+    }
+
+
+
+
+    //constexpr
+    const char* enum3D_toStr(int e, bool &flag) //throw()
+    {
+        //        const int A = 0;  // TAKE OR NOT vars for direct calculations
+        int A = flagHistAllTriplets;//flagTakeMoreVars;
+        flag = 0;
+        switch (e)
+        {
+        case _Nf_Nb_Nc_  :                     { flag = A;     return "Nf*Nb*Nc" ;                       }
+        case _Nf_Nb_Nx_  :                     { flag = A;     return "Nf*Nb*Nx" ;                       }
+        case _Nf_Nx_Nc_  :                     { flag = A;     return "Nf*Nx*Nc" ;                       }
+        case _Nx_Nb_Nc_  :                     { flag = A;     return "Nx*Nb*Nc" ;                       }
+
+        case _Nfbc_OVER_NNN_  :                { flag = A;     return "Nfbc_OVER_NNN" ;                       }
+        case _1_OVER_NNN_  :                   { flag = A;     return "1_OVER_NNN" ;                       }
+
+
+
         default: //throw std::invalid_argument("Unimplemented item");
         {
             cout << "AHTUNG! Unimplemented var name in enum2D_toStr!" << endl;
@@ -462,15 +571,13 @@ public:
 
 
 
-
-
     void setup( const char* strPrefix, int cBin, int nSub,
                 int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *_outputList
                 , bool _fullAcceptanceForDenom = false //, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8
             )
     {
-//        strListName = _outputList->GetName();
-//        cout << "TList name: " << strListName << endl;
+        //        strListName = _outputList->GetName();
+        //        cout << "TList name: " << strListName << endl;
 
         nEtaWins = _nEtaWins;
         nPhiWins = _nPhiWins;
@@ -485,7 +592,7 @@ public:
         ptWin[0] = _ptRange[0];
         ptWin[1] = _ptRange[1];
 
-        for( int i = 0; i < 4; i++ )
+        for( int i = 0; i < 4 + (flagHistAllTriplets ? 1 : 0); i++ )
         {
             partTypes[i] = _pTypes[i];
             partCharges[i] = _pCharges[i];
@@ -517,8 +624,8 @@ public:
 
 
         // ############
-//        int _nVars2D = _nVars_2D_;
-        cout << "_nVars_1D_ = " << _nVars_1D_ << ", _nVars_2D_ = " << _nVars_2D_ << endl;
+        //        int _nVars2D = _nVars_2D_;
+        cout << "_nVars_1D_ = " << _nVars_1D_ << ", _nVars_2D_ = " << _nVars_2D_ << ", _nVars_3D_ = " << _nVars_3D_ << endl;
 
 
         TString strAnLevel = Form("%s", strPrefix);
@@ -528,8 +635,8 @@ public:
                 partCharges[0], partCharges[1], partCharges[2], partCharges[3] );
 
         // e-by-e histos:
-        TString strWinLabels[] = { "F", "B", "X", "Y" };
-        for( int i = 0; i < 4; i++ )
+        TString strWinLabels[] = { "F", "B", "X", "Y"    , "C" };
+        for( int i = 0; i < 4 + (flagHistAllTriplets ? 1 : 0); i++ )
         {
             int _nEtaBins = nEtaWins;
             int _nPhiBins = nPhiWins;
@@ -542,6 +649,8 @@ public:
             hist_n[i] = new TH2D( strHistName, strHistName,     _nEtaBins, etaMin, etaMax,   _nPhiBins, 0, TMath::TwoPi() );
             QA_hist_n[i] = new TH2D( strHistName+"QA", strHistName+"QA",     _nEtaBins, etaMin, etaMax,   _nPhiBins, 0, TMath::TwoPi() );
 
+            if(i>3)
+                continue;
             strHistName = Form( "%s_hist_pt_%s_cBin%d_", strPID.Data(), strAnLevel.Data(), cBin) + strWinLabels[i];
             hist_pt[i] = new TH2D( strHistName, strHistName,    _nEtaBins, etaMin, etaMax,   _nPhiBins, 0, TMath::TwoPi() );
             QA_hist_pt[i] = new TH2D( strHistName+"QA", strHistName+"QA",    _nEtaBins, etaMin, etaMax,   _nPhiBins, 0, TMath::TwoPi() );
@@ -563,7 +672,7 @@ public:
             for( int p1 = 0; p1 < nPhiWins; p1++ )
             {
                 cout <<  "   >> F: eBin=" << hist_n[0]->GetXaxis()->GetBinCenter(e1+1)
-                     <<  "   pBin=" << hist_n[0]->GetYaxis()->GetBinCenter(p1+1) << endl;
+                      <<  "   pBin=" << hist_n[0]->GetYaxis()->GetBinCenter(p1+1) << endl;
             }
 
 
@@ -604,10 +713,10 @@ public:
         hMetaInfo->Fill( "fullAcceptanceForDenom", _fullAcceptanceForDenom );
 
 
-//        void setup( const char* strPrefix, int cBin, int nSub,
-//                    int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *_outputList
-//                    , bool _fullAcceptanceForDenom = false //, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8
-//                )
+        //        void setup( const char* strPrefix, int cBin, int nSub,
+        //                    int *_pTypes, int *_pCharges, int _nEtaWins, int _nPhiWins, double *_etaRange, double *_ptRange, bool *whichHistosToTake, TList *_outputList
+        //                    , bool _fullAcceptanceForDenom = false //, double _etaForDenomMin = -0.8, double _etaForDenomMax = 0.8
+        //                )
 
 
 
@@ -631,13 +740,24 @@ public:
                 counter2Dvars++;
         }
 
+        // count 3D vars to be used
+        int counter3Dvars = 0;
+        for( int i = 0; i < _nVars_3D_; i++ )
+        {
+            bool flagUsedWin = false;
+            const char* _varName = enum3D_toStr( i, flagUsedWin );
+            if ( flagUsedWin )
+                counter3Dvars++;
+        }
+
+
         // single win histos:
         TString strHist1DName = Form("hSingleWin_%s_cBin%d", strAnLevel.Data(), cBin);
         hSingleWin = new TH3D( strHist1DName, strHist1DName
-                              , counter1Dvars, -0.5, counter1Dvars-0.5
-                              , nEtaWins*nPhiWins, -0.5, nEtaWins*nPhiWins-0.5
-                              , nSub, -0.5, nSub-0.5
-                              );
+                               , counter1Dvars, -0.5, counter1Dvars-0.5
+                               , nEtaWins*nPhiWins, -0.5, nEtaWins*nPhiWins-0.5
+                               , nSub, -0.5, nSub-0.5
+                               );
 
 
         // win pair info histos:
@@ -649,11 +769,23 @@ public:
 
         // all window pairs separately:
         if( flagHistAllWins )
-            hAllWins = new TH3D( strHistName, strHistName
-                                  , counter2Dvars, -0.5, counter2Dvars-0.5
-                                  , nAllWPs, -0.5, nAllWPs-0.5
-                                  , nSub, -0.5, nSub-0.5
-                                  );
+            hAllWinsPairs = new TH3D( strHistName, strHistName
+                                      , counter2Dvars, -0.5, counter2Dvars-0.5
+                                      , nAllWPs, -0.5, nAllWPs-0.5
+                                      , nSub, -0.5, nSub-0.5
+                                      );
+
+        // all window triplets:
+        TString strHistTripletsName = Form("hAllWinsTriplets_%s_cBin%d", strAnLevel.Data(), cBin);
+        int nAllWTriplets = nEtaWins*nEtaWins*nEtaWins  *nPhiWins*nPhiWins*nPhiWins;
+        if( flagHistAllTriplets )
+            hAllWinsTriplets = new TH3D( strHistTripletsName, strHistTripletsName
+                                         , counter3Dvars, -0.5, counter3Dvars-0.5
+                                         , nAllWTriplets, -0.5, nAllWTriplets-0.5
+                                         , nSub, -0.5, nSub-0.5
+                                         );
+
+
 
         int nDetaWP = 2*nEtaWins-1;
         int nDphiWP = 2*nPhiWins-1;
@@ -661,10 +793,10 @@ public:
         TString str_dEta_dPhi_HistName = Form("hDetaDphi_%s_cBin%d", strAnLevel.Data(), cBin);
         if( flagHistDetaDphi )
             hDetaDphi = new TH3D( str_dEta_dPhi_HistName, str_dEta_dPhi_HistName
-                              , counter2Dvars, -0.5, counter2Dvars-0.5
-                              , nDetaWP*nDphiWP, -0.5, nDetaWP*nDphiWP-0.5
-                              , nSub, -0.5, nSub-0.5
-                              );
+                                  , counter2Dvars, -0.5, counter2Dvars-0.5
+                                  , nDetaWP*nDphiWP, -0.5, nDetaWP*nDphiWP-0.5
+                                  , nSub, -0.5, nSub-0.5
+                                  );
         cout << "nDetaWP = " << nDetaWP << ", min_dEta = " << min_dEta << ", max_dEta = " << max_dEta << endl;
         cout << "nDphiWP = " << nDphiWP << endl;
 
@@ -673,24 +805,26 @@ public:
         TString str_AllEta_dPhi_HistName = Form("hAllEtaDphi_%s_cBin%d", strAnLevel.Data(), cBin);
         if( flagHistAllEtaDphi )
             hAllEtaDphi = new TH3D( str_AllEta_dPhi_HistName, str_AllEta_dPhi_HistName
-                                          , counter2Dvars, -0.5, counter2Dvars-0.5
-                                          , nAllEtaDphiWP, -0.5, nAllEtaDphiWP-0.5
-                                          , nSub, -0.5, nSub-0.5
-                                          );
+                                    , counter2Dvars, -0.5, counter2Dvars-0.5
+                                    , nAllEtaDphiWP, -0.5, nAllEtaDphiWP-0.5
+                                    , nSub, -0.5, nSub-0.5
+                                    );
 
 
-//        flagsSingleWin = new bool[_nVars_1D_];
-//        flagsWP = new bool[_nVars_2D_];
+        //        flagsSingleWin = new bool[_nVars_1D_];
+        //        flagsWP = new bool[_nVars_2D_];
 
         idsSingleWin = new int[_nVars_1D_];
         idsWP = new int[_nVars_2D_];
+        idsTriplets = new int[_nVars_3D_];
 
         nUsedSingleWins = 0;
         nUsedWPs = 0;
+        nUsedTriplets = 0;
 
 
         // set labels x and prepare a map with vars
-//        cout << "_nVars = " << _nVars << endl;
+        //        cout << "_nVars = " << _nVars << endl;
         if( hSingleWin )
             for( int i = 0; i < _nVars_1D_; i++ )
             {
@@ -715,7 +849,7 @@ public:
             if ( flagUsedWP )
             {
                 if( flagHistAllWins )
-                    hAllWins->GetXaxis()->SetBinLabel( nUsedWPs+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+                    hAllWinsPairs->GetXaxis()->SetBinLabel( nUsedWPs+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
                 if( flagHistDetaDphi )
                     hDetaDphi->GetXaxis()->SetBinLabel( nUsedWPs+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
                 if( flagHistAllEtaDphi )
@@ -725,6 +859,21 @@ public:
             }
         }
 
+        if( flagHistAllTriplets )
+            for( int i = 0; i < _nVars_3D_; i++ )
+            {
+                bool flagUsedTriplet = false;
+                idsTriplets[i] = -1;
+                const char* _varName = enum3D_toStr( i, flagUsedTriplet );
+                if(0)cout << "i = " << i << ", _varName = " << _varName << endl;
+
+                if ( flagUsedTriplet )
+                {
+                    hAllWinsTriplets->GetXaxis()->SetBinLabel( nUsedTriplets+1, _varName ); //h_wp->GetXaxis()->GetBinLabel( i+1 ) );
+                    idsTriplets[i] = nUsedTriplets++;
+                }
+
+            }
 
 
         // set labels y for hSingleWin
@@ -744,10 +893,11 @@ public:
                 }
         }
 
-        // set labels y for hAllWins
+        // set labels y for hAllWinsPairs
         if( flagHistAllWins )
         {
             int wpId = 0;
+            int wtripletId = 0;
             for( int e1 = 0; e1 < nEtaWins; e1++ )
                 for( int p1 = 0; p1 < nPhiWins; p1++ )
                 {
@@ -756,7 +906,7 @@ public:
                     double eFmax = hist_n[0]->GetXaxis()->GetBinUpEdge(e1+1);
                     double pFmax = hist_n[0]->GetYaxis()->GetBinUpEdge(p1+1);
 
-//                    int winId1 = nPhiWins*e1 + p1;
+                    //                    int winId1 = nPhiWins*e1 + p1;
 
                     for( int e2 = 0; e2 < nEtaWins; e2++ )
                         for( int p2 = 0; p2 < nPhiWins; p2++ )
@@ -766,12 +916,12 @@ public:
                             double eBmax = hist_n[0]->GetXaxis()->GetBinUpEdge(e2+1);
                             double pBmax = hist_n[0]->GetYaxis()->GetBinUpEdge(p2+1);
 
-//                            int winId2 = nPhiWins*e2 + p2;
+                            //                            int winId2 = nPhiWins*e2 + p2;
 
-                            hAllWins->GetYaxis()->SetBinLabel( wpId+1, Form("etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
-                                                                            , eBmin, eBmax,    pBmin, pBmax
-                                                                            , eFmin, eFmax,    pFmin, pFmax
-                                                                            ) );
+                            hAllWinsPairs->GetYaxis()->SetBinLabel( wpId+1, Form("etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                                                                                 , eBmin, eBmax,    pBmin, pBmax
+                                                                                 , eFmin, eFmax,    pFmin, pFmax
+                                                                                 ) );
 
                             // for QA (alternative binLabelling for hDetaDphi):
                             if(0)
@@ -779,11 +929,34 @@ public:
                                 int id_dEta = nEtaWins-1 + e1-e2;
                                 int id_dPhi = nPhiWins-1 + p1-p2;
                                 int sepId = nDphiWP*id_dEta + id_dPhi;
-    //                            cout << "sepId = " << sepId << endl;
+                                //                            cout << "sepId = " << sepId << endl;
                                 hDetaDphi->GetYaxis()->SetBinLabel( sepId+1, Form("dEta_%.2f_dPhi_%.2f", round( (e1-e2)*etaSize *100 )/100, round( (p1-p2)*phiSize *100 ) / 100 ) );
                             }
 
                             wpId++;
+
+                            // set labels y for hAllWinsTriplets
+                            if( flagHistAllTriplets )
+                            {
+                                for( int e3 = 0; e3 < nEtaWins; e3++ )
+                                    for( int p3 = 0; p3 < nPhiWins; p3++ )
+                                    {
+                                        double eCmin = hist_n[0]->GetXaxis()->GetBinLowEdge(e3+1);
+                                        double pCmin = hist_n[0]->GetYaxis()->GetBinLowEdge(p3+1);
+                                        double eCmax = hist_n[0]->GetXaxis()->GetBinUpEdge(e3+1);
+                                        double pCmax = hist_n[0]->GetYaxis()->GetBinUpEdge(p3+1);
+
+                                        //                            int winId2 = nPhiWins*e2 + p2;
+
+                                        hAllWinsTriplets->GetYaxis()->SetBinLabel( wtripletId+1, Form("etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f_etaC_%.2f_%.2f_phiC_%.2f_%.2f"
+                                                                                                      , eBmin, eBmax,    pBmin, pBmax
+                                                                                                      , eFmin, eFmax,    pFmin, pFmax
+                                                                                                      , eCmin, eCmax,    pCmin, pCmax
+                                                                                                      ) );
+                                        wtripletId++;
+                                    }
+                            }
+
                         }
                 }
         }
@@ -800,7 +973,7 @@ public:
 
 
         // set labels y for hDetaDphi
-//        cout << "was like this:" << endl;
+        //        cout << "was like this:" << endl;
         if( flagHistDetaDphi )
         {
             for( int i = 0; i < nDetaWP; i++ )
@@ -808,16 +981,16 @@ public:
                 {
                     int sepId = nDphiWP*i + j;
                     hDetaDphi->GetYaxis()->SetBinLabel( sepId+1, Form("dEta_%.2f_dPhi_%.2f", min_dEta + etaSize*i, min_dPhi + phiSize*j ) );
-//                    cout << Form("dEta_%.2f_dPhi_%.2f", min_dEta + etaSize*i, min_dPhi + phiSize*j ) << " ";
+                    //                    cout << Form("dEta_%.2f_dPhi_%.2f", min_dEta + etaSize*i, min_dPhi + phiSize*j ) << " ";
 
                     if(0) cout << "i = " << i << ", j = " << j << ", sepId = " << sepId
-                         << ", min_dEta + etaStep*i = " << min_dEta + etaSize*i
-                         << ", min_dPhi + phiSize*j = " << min_dPhi + phiSize*j  << endl;
+                               << ", min_dEta + etaStep*i = " << min_dEta + etaSize*i
+                               << ", min_dPhi + phiSize*j = " << min_dPhi + phiSize*j  << endl;
                 }
         }
-//        cout << endl;
-//        int aa;
-//        cin >> aa;
+        //        cout << endl;
+        //        int aa;
+        //        cin >> aa;
 
 
         // set labels y for hAllEtaDphi
@@ -837,9 +1010,9 @@ public:
                     {
                         int sepId = nDphiWP*(nEtaWins*e1+e2) + j;
                         hAllEtaDphi->GetYaxis()->SetBinLabel( sepId+1, Form("etaB_%.2f_%.2f_etaF_%.2f_%.2f_dPhi_%.2f"
-                                                                        , eBmin, eBmax
-                                                                        , eFmin, eFmax,    min_dPhi + phiSize*j
-                                                                        ) );
+                                                                            , eBmin, eBmax
+                                                                            , eFmin, eFmax,    min_dPhi + phiSize*j
+                                                                            ) );
                     }
                 }
             }
@@ -847,12 +1020,13 @@ public:
 
         _outputList->Add( hMetaInfo );
         _outputList->Add( hSingleWin );
-        if ( flagHistAllWins    )  _outputList->Add( hAllWins );
+        if ( flagHistAllWins    )  _outputList->Add( hAllWinsPairs );
         if ( flagHistDetaDphi   )  _outputList->Add( hDetaDphi );
         if ( flagHistAllEtaDphi )  _outputList->Add( hAllEtaDphi );
+        if ( flagHistAllTriplets )  _outputList->Add( hAllWinsTriplets );
 
 
-//        cout << "end of setup: nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
+        //        cout << "end of setup: nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
     }
     
 
@@ -861,13 +1035,13 @@ public:
     {
         // cout << "in addTrack: nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
         // cout << "TList name: " << strListName << endl;
-//        cout << "pid = " << pid << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+        //        cout << "pid = " << pid << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
         if ( pt < ptWin[0] || pt > ptWin[1] )
             return;
 
         int pidAbs = abs(pid);
 
-//        cout << "pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+        //        cout << "pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
 
 
         // ##### backward window:
@@ -875,7 +1049,7 @@ public:
         if ( partTypes[1]==0 || pidAbs == partTypes[1] )
             if ( partCharges[1]==0 || charge == partCharges[1] )
             {
-//                cout << ">>>>> B: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+                //                cout << ">>>>> B: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[1]->Fill( eta, phi, weight );
                 hist_pt[1]->Fill( eta, phi, pt*weight );
 
@@ -887,23 +1061,23 @@ public:
         if ( partTypes[3]==0 || pidAbs == partTypes[3] )
             if ( partCharges[3]==0 || charge == partCharges[3] )
             {
-//                cout << ">>>>> Y: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+                //                cout << ">>>>> Y: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[3]->Fill( eta, phi, weight );
-//                cout << "hist_n[3]->GetEntries() = " << hist_n[3]->GetEntries() << endl;
+                //                cout << "hist_n[3]->GetEntries() = " << hist_n[3]->GetEntries() << endl;
                 hist_pt[3]->Fill( eta, phi, pt*weight );
 
                 hist_w_wMinus1[3]->Fill( eta, phi, weight*(weight-1) );
             }
 
-//        int aa;
-//        cin >> aa;
+        //        int aa;
+        //        cin >> aa;
 
         // ##### forward window:
         // F
         if ( partTypes[0]==0 || pidAbs == partTypes[0] )
             if ( partCharges[0]==0 || charge == partCharges[0] )
             {
-//                cout << ">>>>> F: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+                //                cout << ">>>>> F: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[0]->Fill( eta, phi, weight );
                 hist_pt[0]->Fill( eta, phi, pt*weight );
 
@@ -915,7 +1089,7 @@ public:
         if ( partTypes[2]==0 || pidAbs == partTypes[2] )
             if ( partCharges[2]==0 || charge == partCharges[2] )
             {
-//                cout << ">>>>> X: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+                //                cout << ">>>>> X: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
                 hist_n[2]->Fill( eta, phi, weight );
                 hist_pt[2]->Fill( eta, phi, pt*weight );
 
@@ -924,14 +1098,33 @@ public:
                 hist_pt2[2]->Fill( eta, phi, pt*pt *weight*weight );
             }
 
-//        int aa;
-//        cin >> aa;
+
+        // C
+        if( flagHistAllTriplets )
+        {
+            if ( partTypes[4]==0 || pidAbs == partTypes[4] )
+                if ( partCharges[4]==0 || charge == partCharges[4] )
+                {
+                    //                cout << ">>>>> X: pidAbs = " << pidAbs << ", eta = " << eta << ", phi = " << phi << ", pt = " << pt << ", charge = " << charge << endl;
+                    hist_n[4]->Fill( eta, phi, weight );
+                    //                    hist_pt[4]->Fill( eta, phi, pt*weight );
+
+                    //                    hist_w_wMinus1[4]->Fill( eta, phi, weight*(weight-1) );
+                    //                    hist_w_wMinus1_pt[4]->Fill( eta, phi, weight*(weight-1)*pt );
+                    //                    hist_pt2[4]->Fill( eta, phi, pt*pt *weight*weight );
+                }
+
+        }
+
+
+        //        int aa;
+        //        cin >> aa;
     }
 
     void fillWithValueHist1D( /*const char *varName,*/ int varId, double value ) //, bool forceFilling = false )
     {
         if( idsSingleWin[varId] >= 0 )
-//        if( hSingleWin )
+            //        if( hSingleWin )
             hSingleWin->Fill(  /*varId*/idsSingleWin[varId], currentSingleWinId, currentSubsampleId, value  );
     }
 
@@ -941,7 +1134,7 @@ public:
         if( idsWP[varId] >= 0 )
         {
             if( flagHistAllWins )
-                hAllWins->Fill(  /*varId*/idsWP[varId], currentWinPairId, currentSubsampleId, value  );
+                hAllWinsPairs->Fill(  /*varId*/idsWP[varId], currentWinPairId, currentSubsampleId, value  );
 
             if( flagHistDetaDphi )
                 hDetaDphi->Fill(  /*varId*/idsWP[varId], currentDetaDphiPairId, currentSubsampleId, value  );
@@ -951,6 +1144,15 @@ public:
         }
     }
 
+    void fillWithValueHist3D( /*const char *varName,*/ int varId, double value ) //, bool forceFilling = false )
+    {
+        //                return;
+        if( idsTriplets[varId] >= 0 )
+        {
+            if( flagHistAllTriplets )
+                hAllWinsTriplets->Fill(  /*varId*/idsTriplets[varId], currentWinTripletId, currentSubsampleId, value  );
+        }
+    }
 
 
 
@@ -961,7 +1163,7 @@ public:
 
         int nDphiWP = 2*nPhiWins-1;
 
-//         cout << "in finishEvent(): nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
+        //         cout << "in finishEvent(): nEtaWins = " << nEtaWins << ", nPhiWins = " << nPhiWins << endl;
         // cout << "TList name: " << strListName << endl;
         //
         // cout << "finishEvent():   hist_n[0]->GetEntries() = " << hist_n[0]->GetEntries() << ", integral: " << hist_n[0]->Integral() << endl;
@@ -969,8 +1171,8 @@ public:
         // cout << "finishEvent():   hist_n[2]->GetEntries() = " << hist_n[2]->GetEntries() << ", integral: " << hist_n[2]->Integral()<< endl;
         // cout << "finishEvent():   hist_n[3]->GetEntries() = " << hist_n[3]->GetEntries() << ", integral: " << hist_n[3]->Integral()<< endl;
 
-//        int aa;
-//        cin >> aa;
+        //        int aa;
+        //        cin >> aa;
 
         int singleWinId = 0;
         for( int e1 = 0; e1 < nEtaWins; e1++ )
@@ -983,7 +1185,7 @@ public:
 
                 if( hAccMap && ( !hAccMap->GetBinContent( e1+1, p1+1 )  ) )
                 {
-//                    cout << "hAccMap CHECK!!!" << endl;
+                    //                    cout << "hAccMap CHECK!!!" << endl;
                     singleWinId++;   // IMPORTANT!!!
                     continue;
                 }
@@ -1027,15 +1229,15 @@ public:
                 double ptB2 = hist_pt2[1]->GetBinContent(e1+1, p1+1);
                 double ptY2 = hist_pt2[3]->GetBinContent(e1Den+1, p1Den+1);
 
-//                double meanPtF = -1;
-//                double meanPtB = -1;
-//                double meanPtX = -1;
-//                double meanPtY = -1;
+                //                double meanPtF = -1;
+                //                double meanPtB = -1;
+                //                double meanPtX = -1;
+                //                double meanPtY = -1;
 
-//                if ( nF > 0 ) { meanPtF = ptF / nF; }
-//                if ( nB > 0 ) { meanPtB = ptB / nB; }
-//                if ( nX > 0 ) { meanPtX = ptX / nX; }
-//                if ( nY > 0 ) { meanPtY = ptY / nY; }
+                //                if ( nF > 0 ) { meanPtF = ptF / nF; }
+                //                if ( nB > 0 ) { meanPtB = ptB / nB; }
+                //                if ( nX > 0 ) { meanPtX = ptX / nX; }
+                //                if ( nY > 0 ) { meanPtY = ptY / nY; }
 
 
 
@@ -1054,20 +1256,20 @@ public:
                 fillWithValueHist1D( _Nb_    ,   nB             );
                 fillWithValueHist1D( _Nf2_  ,   nF * nF - w_wMinus1_F     );
                 fillWithValueHist1D( _Nb2_  ,   nB * nB - w_wMinus1_B     );
-//                fillHistWithValue( _Nf_Nb_ ,   nF * nB      );
+                //                fillHistWithValue( _Nf_Nb_ ,   nF * nB      );
 
                 // NxNy:
                 fillWithValueHist1D( _Nx_      ,   nX             );
                 fillWithValueHist1D( _Ny_      ,   nY             );
                 fillWithValueHist1D( _Nx2_     ,   nX * nX - w_wMinus1_X   ); // !fullEtaForDenom ? _nX*_nX  : _nX*_nX - _w_wMinus1_X   );
                 fillWithValueHist1D( _Ny2_     ,   nY * nY - w_wMinus1_Y   ); // !fullEtaForDenom ? _nY*_nY  : _nY*_nY - _w_wMinus1_Y   );
-//                fillHistWithValue( _Nx_Ny_   ,   nX * nY      );
+                //                fillHistWithValue( _Nx_Ny_   ,   nX * nY      );
 
-//                fillHistWithValue( _PF_PB_ ,      ptF*ptB );
+                //                fillHistWithValue( _PF_PB_ ,      ptF*ptB );
                 fillWithValueHist1D( _PF_ ,              ptF );
                 fillWithValueHist1D( _PB_ ,              ptB );
 
-//                fillHistWithValue( _PX_PY_ ,      ptX*ptY );
+                //                fillHistWithValue( _PX_PY_ ,      ptX*ptY );
                 fillWithValueHist1D( _PX_ ,              ptX );
                 fillWithValueHist1D( _PY_ ,              ptY );
 
@@ -1082,6 +1284,21 @@ public:
                 fillWithValueHist1D( _piF2_ , ptF2 );
                 fillWithValueHist1D( _piX2_ , ptX2 );
 
+                // for 3-body:
+                if( flagHistAllTriplets )
+                {
+                    double nC = hist_n[4]->GetBinContent(e1+1, p1+1);
+
+                    fillWithValueHist1D( _Nc_ , nC      );
+
+                    fillWithValueHist1D( _Nf_Nx_ , nF*nX      );
+                    fillWithValueHist1D( _Nx3_ ,   nX*nX*nX      );
+
+                    fillWithValueHist1D( _Nf_Nx_Nx_ ,   nF*nX*nX      );
+                    fillWithValueHist1D( _Nb_Nx_Nx_ ,   nX*nB*nX      );  // temporary, VALID ONLY IF USE FULL-ETA DENOM (X)!
+                    fillWithValueHist1D( _Nc_Nx_Nx_ ,   nX*nX*nC      );  // temporary, VALID ONLY IF USE FULL-ETA DENOM (X)!
+
+                }
 
                 singleWinId++;
             }
@@ -1093,29 +1310,30 @@ public:
             for( int p1 = 0; p1 < nPhiWins; p1++ )
             {
                 cout <<  "   >> F: eBin=" << hist_n[0]->GetXaxis()->GetBinCenter(e1+1)
-                     <<  "   pBin=" << hist_n[0]->GetYaxis()->GetBinCenter(p1+1)
-                     << "  bin content: " << hist_n[0]->GetBinContent(e1+1, p1+1) << "    ";
+                      <<  "   pBin=" << hist_n[0]->GetYaxis()->GetBinCenter(p1+1)
+                       << "  bin content: " << hist_n[0]->GetBinContent(e1+1, p1+1) << "    ";
                 cout <<  "   >> B: eBin=" << hist_n[1]->GetXaxis()->GetBinCenter(e1+1)
-                     <<  "   pBin=" << hist_n[1]->GetYaxis()->GetBinCenter(p1+1)
-                     << "  bin content: " << hist_n[1]->GetBinContent(e1+1, p1+1) << "    ";
+                      <<  "   pBin=" << hist_n[1]->GetYaxis()->GetBinCenter(p1+1)
+                       << "  bin content: " << hist_n[1]->GetBinContent(e1+1, p1+1) << "    ";
                 cout <<  "   >> X: eBin=" << hist_n[2]->GetXaxis()->GetBinCenter(e1+1)
-                     <<  "   pBin=" << hist_n[2]->GetYaxis()->GetBinCenter(p1+1)
-                     << "  bin content: " << hist_n[2]->GetBinContent(e1+1, p1+1) << "    ";
+                      <<  "   pBin=" << hist_n[2]->GetYaxis()->GetBinCenter(p1+1)
+                       << "  bin content: " << hist_n[2]->GetBinContent(e1+1, p1+1) << "    ";
                 cout <<  "   >> Y: eBin=" << hist_n[3]->GetXaxis()->GetBinCenter(e1+1)
-                     <<  "   pBin=" << hist_n[3]->GetYaxis()->GetBinCenter(p1+1)
-                     << "  bin content: " << hist_n[3]->GetBinContent(e1+1, p1+1) << endl;
+                      <<  "   pBin=" << hist_n[3]->GetYaxis()->GetBinCenter(p1+1)
+                       << "  bin content: " << hist_n[3]->GetBinContent(e1+1, p1+1) << endl;
 
             }
 
 
-//        cout << endl;
+        //        cout << endl;
 
-//        int aa;
-//        cin >> aa;
+        //        int aa;
+        //        cin >> aa;
 
 
         // fill TH3D with win pairs info
         int wpId = 0;
+        int tripletId = 0;
         for( int e1 = 0; e1 < nEtaWins; e1++ )  // 1==Forward
         {
             double center_e1 = hist_n[0]->GetXaxis()->GetBinCenter(e1+1);
@@ -1147,31 +1365,31 @@ public:
 
 
                 // QA check
-//                if( hAccMap && hAccMap->GetBinContent( e1+1, p1+1 ) )
-//                {
-//                    QA_hist_n[0]->Fill( center_e1, center_p1, nF );
-//                    QA_hist_pt[0]->Fill( center_e1, center_p1, ptF );
-//                }
+                //                if( hAccMap && hAccMap->GetBinContent( e1+1, p1+1 ) )
+                //                {
+                //                    QA_hist_n[0]->Fill( center_e1, center_p1, nF );
+                //                    QA_hist_pt[0]->Fill( center_e1, center_p1, ptF );
+                //                }
 
 
                 // loop over pairing windows:
                 for( int e2 = 0; e2 < nEtaWins; e2++ )  // 2==Backward
                 {
-//                    double center_e2 = hist_n[0]->GetXaxis()->GetBinCenter(e2+1);
-//                    double etaSep = center_e2 - center_e1;
+                    //                    double center_e2 = hist_n[0]->GetXaxis()->GetBinCenter(e2+1);
+                    //                    double etaSep = center_e2 - center_e1;
 
                     for( int p2 = 0; p2 < nPhiWins; p2++ )
                     {
                         // check if we take this bin or not!
                         if( hAccMap && ( !hAccMap->GetBinContent( e1+1, p1+1 ) || !hAccMap->GetBinContent( e2+1, p2+1 ) ) )
                         {
-//                            cout << "hAccMap CHECK!!!" << endl;
+                            //                            cout << "hAccMap CHECK!!!" << endl;
                             wpId++;   // IMPORTANT!!!
                             continue;
                         }
 
-//                        double center_p2 = hist_n[0]->GetYaxis()->GetBinCenter(p2+1);
-//                        double phiSep = center_p2 - center_p1;
+                        //                        double center_p2 = hist_n[0]->GetYaxis()->GetBinCenter(p2+1);
+                        //                        double phiSep = center_p2 - center_p1;
                         //                        continue;
 
                         //                        cout << "e1, p1, e2, p2 = " << e1 << ", " << p1 << ", " << e2 << ", " << p2 << endl;
@@ -1182,7 +1400,7 @@ public:
                         int id_dPhi = nPhiWins-1 + p1-p2;
                         currentDetaDphiPairId = nDphiWP*id_dEta + id_dPhi;
 
-//                        int sepId = nDphiWP*(nEtaWins*e1+e2) + j;
+                        //                        int sepId = nDphiWP*(nEtaWins*e1+e2) + j;
                         currentEtaWinsDphiPairId = nDphiWP*(nEtaWins*e1+e2) + id_dPhi;
 
 
@@ -1203,8 +1421,8 @@ public:
                         }
 
 
-//                        if ( currentDetaDphiPairId >= sizeOfMap )
-//                            cout << "AHTUNG!!! currentDetaDphiPairId > map_DetaDphi_bin.size() !" << endl;
+                        //                        if ( currentDetaDphiPairId >= sizeOfMap )
+                        //                            cout << "AHTUNG!!! currentDetaDphiPairId > map_DetaDphi_bin.size() !" << endl;
 
                         int e2Den = !fullAcceptanceForDenom ? e2 : 0;
                         int p2Den = !fullAcceptanceForDenom ? p2 : 0;
@@ -1226,7 +1444,7 @@ public:
 
 
 
-//                        continue;
+                        //                        continue;
 
                         double meanPtF = -1;
                         double meanPtB = -1;
@@ -1239,23 +1457,23 @@ public:
                         if ( nY > 0 ) { meanPtY = ptY / nY; }
 
 
-//                        cout << " >>> nF = " << nF << ", nB = " << nB << ", ptF = " << ptF << ", ptB = " << ptB << endl;
+                        //                        cout << " >>> nF = " << nF << ", nB = " << nB << ", ptF = " << ptF << ", ptB = " << ptB << endl;
 
-//                        fillHistWithValue( _Nevents_, 1 );//, true ); // last argument - forcing filling the 0th bin of the hist
+                        //                        fillHistWithValue( _Nevents_, 1 );//, true ); // last argument - forcing filling the 0th bin of the hist
                         fillWithValueHist2D( _Nevents_bothWinAcceptance_ ,   1      );
 
                         // NfNb:
-//                        fillHistWithValue( _Nf_    ,   nF             );
-//                        fillHistWithValue( _Nb_    ,   nB             );
-//                        fillHistWithValue( _Nf2_  ,   nF * nF - w_wMinus1_F     );
-//                        fillHistWithValue( _Nb2_  ,   nB * nB - w_wMinus1_B     );
+                        //                        fillHistWithValue( _Nf_    ,   nF             );
+                        //                        fillHistWithValue( _Nb_    ,   nB             );
+                        //                        fillHistWithValue( _Nf2_  ,   nF * nF - w_wMinus1_F     );
+                        //                        fillHistWithValue( _Nb2_  ,   nB * nB - w_wMinus1_B     );
                         fillWithValueHist2D( _Nf_Nb_ ,   nF * nB      );
 
                         // NxNy:
-//                        fillHistWithValue( _Nx_      ,   nX             );
-//                        fillHistWithValue( _Ny_      ,   nY             );
-//                        fillHistWithValue( _Nx2_     ,   nX * nX - w_wMinus1_X   ); // !fullEtaForDenom ? _nX*_nX  : _nX*_nX - _w_wMinus1_X   );
-//                        fillHistWithValue( _Ny2_     ,   nY * nY - w_wMinus1_Y   ); // !fullEtaForDenom ? _nY*_nY  : _nY*_nY - _w_wMinus1_Y   );
+                        //                        fillHistWithValue( _Nx_      ,   nX             );
+                        //                        fillHistWithValue( _Ny_      ,   nY             );
+                        //                        fillHistWithValue( _Nx2_     ,   nX * nX - w_wMinus1_X   ); // !fullEtaForDenom ? _nX*_nX  : _nX*_nX - _w_wMinus1_X   );
+                        //                        fillHistWithValue( _Ny2_     ,   nY * nY - w_wMinus1_Y   ); // !fullEtaForDenom ? _nY*_nY  : _nY*_nY - _w_wMinus1_Y   );
                         fillWithValueHist2D( _Nx_Ny_   ,   nX * nY      );
 
 
@@ -1290,12 +1508,12 @@ public:
 
                         // to check VV comparison ptpt vs dptdpt: special terms:
                         fillWithValueHist2D( _PF_PB_ ,      ptF*ptB );
-//                        fillHistWithValue( _PF_ ,              ptF );
-//                        fillHistWithValue( _PB_ ,              ptB );
+                        //                        fillHistWithValue( _PF_ ,              ptF );
+                        //                        fillHistWithValue( _PB_ ,              ptB );
 
                         fillWithValueHist2D( _PX_PY_ ,      ptX*ptY );
-//                        fillHistWithValue( _PX_ ,              ptX );
-//                        fillHistWithValue( _PY_ ,              ptY );
+                        //                        fillHistWithValue( _PX_ ,              ptX );
+                        //                        fillHistWithValue( _PY_ ,              ptY );
 
 
                         // for new ratio-pt (April 2021)
@@ -1307,14 +1525,14 @@ public:
                         //                        fillHistWithValue( _nF_PY_ , nF*ptY );
                         fillWithValueHist2D( _nX_PY_ , nX*ptY );
 
-//                        fillHistWithValue( _nF_PF_ , nF*ptF - w_wMinus1_PF );
-//                        fillHistWithValue( _nX_PX_ , nX*ptX - w_wMinus1_PX );
+                        //                        fillHistWithValue( _nF_PF_ , nF*ptF - w_wMinus1_PF );
+                        //                        fillHistWithValue( _nX_PX_ , nX*ptX - w_wMinus1_PX );
 
-//                        fillHistWithValue( _PF2_ , ptF*ptF ); //- w_wMinus1_PF );
-//                        fillHistWithValue( _PX2_ , ptX*ptX ); //- w_wMinus1_PX );
+                        //                        fillHistWithValue( _PF2_ , ptF*ptF ); //- w_wMinus1_PF );
+                        //                        fillHistWithValue( _PX2_ , ptX*ptX ); //- w_wMinus1_PX );
 
-//                        fillHistWithValue( _piF2_ , ptF2 );
-//                        fillHistWithValue( _piX2_ , ptX2 );
+                        //                        fillHistWithValue( _piF2_ , ptF2 );
+                        //                        fillHistWithValue( _piX2_ , ptX2 );
 
                         if ( nY > 0 )
                         {
@@ -1366,7 +1584,7 @@ public:
                         // PfNb:
                         if ( nF > 0 )
                         {
-//                            fillWithValueHist2D( _f_Nevents_ ,    1                  );
+                            //                            fillWithValueHist2D( _f_Nevents_ ,    1                  );
 
                             //                            fillHistWithValue( _PfNb_avPf_ ,         meanPtF           );
                             //                            if(0) fillHistWithValue( _PfNb_Nb_ ,        nB            );
@@ -1442,7 +1660,7 @@ public:
                         // x:
                         if ( nX > 0 )
                         {
-//                            fillWithValueHist2D( _x_Nevents_ ,    1                  );
+                            //                            fillWithValueHist2D( _x_Nevents_ ,    1                  );
 
                             //                            if(0) fillHistWithValue( _PxNy_avPx_ ,         meanPtX           );
                             //                            if(0) fillHistWithValue( _PxNy_Ny_ ,        nY            );
@@ -1490,7 +1708,7 @@ public:
                         // fy:
                         if ( nF > 0 && nY > 0 )
                         {
-//                            fillHistWithValue( _fy_Nevents_ ,   1                  );
+                            //                            fillHistWithValue( _fy_Nevents_ ,   1                  );
 
                             //                            if(0) fillHistWithValue( _avPf_avPy_ ,   meanPtF*meanPtY      );
                             //                            if(0) fillHistWithValue( _Nx_OVER_Nf_vs_avPy_ ,   nX/(double)nF *meanPtY      );
@@ -1515,8 +1733,71 @@ public:
                         }
 
 
+                        // for 3-body:
+                        if( flagHistAllTriplets )
+                        {
+                            double nC = hist_n[4]->GetBinContent(e2+1, p2+1);
+
+//                            cout << "test: nC = " << nC << ", nF = " << nF << endl;
+                            fillWithValueHist2D( _Nc_Nx_ ,   nC*nX      );
+//                            fillWithValueHist2D( _Nf_Nx_Nx_ ,   nF*nX*nX      );
+//                            fillWithValueHist2D( _Nx_Nb_Nx_ ,   nX*nB*nX      );
+//                            fillWithValueHist2D( _Nx_Nx_Nc_ ,   nX*nX*nC      );
+
+                            if ( nX > 0 )
+                            {
+                                fillWithValueHist2D( _Nf_OVER_Nx_vs_Nc_OVER_Nz_ ,   nF/(double)nX * nC/(double)nX      ); // full denom here! temporary use X instead of Y and Z
+                                double nB_spec = hist_n[1]->GetBinContent(e1+1, p1+1); // F-->B for BC pairing!
+                                fillWithValueHist2D( _Nb_OVER_Ny_vs_Nc_OVER_Nz_ ,   nB_spec/(double)nX * nC/(double)nX      );
+
+                                fillWithValueHist2D( _1_OVER_NN_ ,  1 /(double)nX /(double)nX      );
+                            }
+
+
+                        }
 
                         wpId++;
+
+
+                        // loop to form triplets:
+                        if( flagHistAllTriplets )
+                        {
+                            for( int e3 = 0; e3 < nEtaWins; e3++ )
+                            {
+                                for( int p3 = 0; p3 < nPhiWins; p3++ )
+                                {
+                                    double nC = hist_n[4]->GetBinContent(e3+1, p3+1);
+                                    // check if we take this bin or not!
+                                    if( hAccMap && ( !hAccMap->GetBinContent( e1+1, p1+1 ) || !hAccMap->GetBinContent( e2+1, p2+1 )
+                                            || !hAccMap->GetBinContent( e3+1, p3+1 ) ) )
+                                    {
+                                        //                            cout << "hAccMap CHECK!!!" << endl;
+                                        tripletId++;   // IMPORTANT!!!
+                                        continue;
+                                    }
+
+                                    currentWinTripletId = tripletId;
+
+                                    fillWithValueHist3D( _Nf_Nb_Nc_ ,   nF*nB*nC      );
+                                    fillWithValueHist3D( _Nf_Nb_Nx_ ,   nF*nB*nX      );
+                                    fillWithValueHist3D( _Nf_Nx_Nc_ ,   nF*nX*nC      );
+                                    fillWithValueHist3D( _Nx_Nb_Nc_ ,   nX*nB*nC      );
+
+                                    if( nX > 0 )
+                                    {
+                                        fillWithValueHist3D( _Nfbc_OVER_NNN_ ,   nF*nB*nC / (double)nX / (double)nX / (double)nX      );
+                                        fillWithValueHist3D( _1_OVER_NNN_ ,   1 / (double)nX / (double)nX / (double)nX      );
+                                    }
+
+
+
+
+
+                                    tripletId++;
+
+                                }
+                            }
+                        }
                     } // end of p2 loop
                 } // end of e2 loop
             } // end of p1 loop
@@ -1533,22 +1814,18 @@ public:
             hist_w_wMinus1_pt[i]->Reset();
             hist_pt2[i]->Reset();
         }
+        if( flagHistAllTriplets )
+            hist_n[4]->Reset();
 
     }   // end of finishEvent
 
 
-//    ClassDef(WinPairWrapper, 1);
+    //    ClassDef(WinPairWrapper, 1);
 
 };
 
 
 #endif
-
-
-
-
-
-
 
 
 

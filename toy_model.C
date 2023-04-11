@@ -153,7 +153,7 @@ const int nSubsamples = 3;//5;//3;//10;//3;//15;//3;//10;//8;//20;//4;//20;//15;
 
 
 const int nEtaBins = 8;//8;
-const int nPhiBins = 2;//8;//8;//8;
+const int nPhiBins = 1;//2;//8;//8;//8;
 
 double eRange[] = { -0.8, 0.8 };
 
@@ -161,8 +161,8 @@ double eRange[] = { -0.8, 0.8 };
 //const double eRange = 0.8; //1.0;//1.4;//1.6;//0.8;
 
 const int nPtBins = 1;
-//double ptRange[] = { 0., 100 };
-double ptRange[] = { 0.2, 2.0 };
+double ptRange[] = { 0., 100 };
+//double ptRange[] = { 0.2, 2.0 };
 
 
 
@@ -172,7 +172,7 @@ double ptRange[] = { 0.2, 2.0 };
 
 
 //
-const int nPartTypes = 5;//3;//4;
+const int nPartTypes = 1;//5;//3;//4;
 int arrPartTypes[nPartTypes][4] =
 { // F,B, X,Y
   //  { /*421*/0, 0, 0, 0 },         // 0
@@ -181,10 +181,10 @@ int arrPartTypes[nPartTypes][4] =
   //  { 321, 321, 211, 211 }, // 6
 
   { 321, 321, 211, 211 }, // 7
-  { 321, 321, 211, 211 }, // 8
-  { 321, 321, 211, 211 }, // 9
-  { 321, 321, 211, 211 }, // 8
-  { 321, 321, 211, 211 }, // 9
+  //  { 321, 321, 211, 211 }, // 8
+  //  { 321, 321, 211, 211 }, // 9
+  //  { 321, 321, 211, 211 }, // 8
+  //  { 321, 321, 211, 211 }, // 9
 
   //  { 0, 321, 0, 211 }, // 7
   //  { 0, 321, 0, 211 }, // 8
@@ -194,11 +194,45 @@ int arrPartTypes[nPartTypes][4] =
 int arrCharges[nPartTypes][4] =
 { // F,B, X,Y
   {  0,  0,  0,  0 },
-  { +1, +1, +1, +1 },
-  { -1, -1, -1, -1 },
-  { +1, -1, +1, -1 },
-  { -1, +1, -1, +1 },
+  //  { +1, +1, +1, +1 },
+  //  { -1, -1, -1, -1 },
+  //  { +1, -1, +1, -1 },
+  //  { -1, +1, -1, +1 },
 };
+
+
+
+int arrPartTypesTRIPLETS[nPartTypes][5] =
+{ // F,B, X,Y
+  //  { /*421*/0, 0, 0, 0 },         // 0
+  //  { 0, 0, 0, 0 },         // 1
+  //  { 0, 0, 0, 0 },         // 2
+  //  { 321, 321, 211, 211 }, // 6
+
+  { 321, 321, 211, 211, 321 }, // 7
+  //  { 321, 321, 211, 211, 321 }, // 8
+  //  { 321, 321, 211, 211, 321 }, // 9
+  //  { 321, 321, 211, 211, 321 }, // 8
+  //  { 321, 321, 211, 211, 321 }, // 9
+
+  //  { 0, 321, 0, 211 }, // 7
+  //  { 0, 321, 0, 211 }, // 8
+  //  { 0, 321, 0, 211 }, // 9
+};
+
+int arrChargesTRIPLETS[nPartTypes][5] =
+{ // F,B, X,Y
+  {  0,  0,  0,  0,  0 },
+  //  { +1, +1, +1, +1, +1 },
+  //  { -1, -1, -1, -1, -1 },
+  //  { +1, -1, +1, -1, +1 },
+  //  { -1, +1, -1, +1, -1 },
+};
+
+
+
+
+
 
 
 const int nCW = 1;
@@ -208,7 +242,7 @@ const double cBinWidths[] = { 100 }; // in %
 
 
 
-TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
+TString strAnLevels[] = { "GEN" };//, "REC", "CORRECTED" };
 //TString strAnLevels[] = { "REC" };
 const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
@@ -225,7 +259,7 @@ WinPairWrapper winPairWrapper_FULL_ETA_NUM_AND_DENOM[N_AN_LEVELS][nPartTypes][nC
 
 
 // ########################
-void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
+void toy_model( int _nEv = 40e4 //25e3 //15000 //25000 //1e3 //800 //50000 //25000 //25000 //3e2 //250000
         )
 {
 
@@ -262,8 +296,8 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
     TF1 *fSlopeEta = new TF1( "slopeEta", "[0]+x*[1]", -1.5, 1.5 );
     fSlopeEta->SetParameters( 3, -1 );
 
-//    fSlopeEta->Draw();
-//    return;
+    //    fSlopeEta->Draw();
+    //    return;
 
 
     TList* fOutputWinPairsLists[nPartTypes];       //! output list
@@ -292,11 +326,11 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
     TH2I *histAccMap = new TH2I( "histAccMap", "histAccMap;#eta;#varphi", nEtaBins, eRange[0], eRange[1], nPhiBins, 0, TMath::TwoPi() );
     for( int e1 = 0; e1 < nEtaBins; e1++ )
         for( int p1 = 0; p1 < nPhiBins; p1++ )
-//            histAccMap->SetBinContent( e1+1, p1+1, 1 );
+            //            histAccMap->SetBinContent( e1+1, p1+1, 1 );
             histAccMap->SetBinContent( e1+1, p1+1, gRandom->Uniform() > 0.2 ? 1 : 0 );
 
     // ##### prepare efficiency map:
-//    TCanvas *canv_eff_map = new TCanvas( "canv_eff_map", "canv_eff_map", 20,30,800,600 );
+    //    TCanvas *canv_eff_map = new TCanvas( "canv_eff_map", "canv_eff_map", 20,30,800,600 );
     const int nPtEffBins = 4;
     TH3D *histEffMap[4]; // eff per each particle specie
     for( int i = 0; i < 4; i++ )
@@ -310,19 +344,19 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
         for( int e1 = 0; e1 < nEtaBins; e1++ )
             for( int p1 = 0; p1 < nPhiBins; p1++ )
             {
-//                double eff = gRandom->Uniform(0.2, 0.8);
+                //                double eff = gRandom->Uniform(0.2, 0.8);
                 histEffMap[0]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.3, 0.8) );
                 histEffMap[1]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.25, 0.73) );
                 histEffMap[2]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.18, 0.68) );
                 histEffMap[3]->SetBinContent( ptBin+1, e1+1, p1+1, gRandom->Uniform(0.22, 0.56) );
-//                cout << eff << endl;
+                //                cout << eff << endl;
             }
     }
 
-//    histAccMap->Fill( -0.6, 4.8, -1 );
-//    histAccMap->Fill( 0.2, 2.5, -1 );
+    //    histAccMap->Fill( -0.6, 4.8, -1 );
+    //    histAccMap->Fill( 0.2, 2.5, -1 );
 
-//return;
+    //return;
 
     // ### FB:
     for ( int iAnLevel = 0; iAnLevel < N_AN_LEVELS; ++iAnLevel )
@@ -331,6 +365,7 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
                 for ( int cBin = 0; cBin < /*nCentrBins[iCW]*/nCentrBins; ++cBin )
                     for ( int iPt = 0; iPt < nPtBins; ++iPt )
                     {
+                        //                        winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].flagHistAllTriplets = true;
                         winPairWrapper[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel], cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType] );
                         if ( strAnLevels[iAnLevel].Contains( "REC" ) || strAnLevels[iAnLevel].Contains( "CORRECTED" ) )   //iAnLevel == 1 ) // TEST ACC MAP FOR RECO!!
                         {
@@ -342,7 +377,8 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
                         }
 
                         // ##### FULL ETA FOR DENOM:
-                        winPairWrapper_FULL_ETA_DENOM[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel]+"_FULL_ETA_DENOM", cBin, nSubsamples, arrPartTypes[iType], arrCharges[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType], true );
+                        winPairWrapper_FULL_ETA_DENOM[iAnLevel][iType][iCW][cBin][iPt].flagHistAllTriplets = true;
+                        winPairWrapper_FULL_ETA_DENOM[iAnLevel][iType][iCW][cBin][iPt].setup( strAnLevels[iAnLevel]+"_FULL_ETA_DENOM", cBin, nSubsamples, arrPartTypesTRIPLETS[iType], arrChargesTRIPLETS[iType], nEtaBins, nPhiBins, eRange, ptRange, whichHistos, fOutputWinPairsLists[iType], true );
 
                         // ##### FULL ETA FOR both Num and Denom: to calc nu_dyn!
                         bool whichHistosFullAcceptance[] = { true, false, false };   // flags for hAllWins, hDetaDphi, hAllEtaDphi
@@ -380,6 +416,7 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
     TH1D *h_pid_REC = new TH1D("h_pid_REC", ";pid_REC;entries", 10001, -5000.5, 5000.5);
 
 
+    TH1D *h_nSources = new TH1D("h_nSources", ";n sources;entries", 100, -0.5, 99.5);
 
     // ### SIM:
     int _nYBins = 800;
@@ -466,6 +503,19 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
 
         //        cout << "event " << iEv << ": npart = " << npart << ", impact_b = " << impact_b << ", isEmpty = " << emptyEv << endl;
 
+
+        // loop over sources
+//        int nSources = 1;//10;//gRandom->Poisson(10);
+//        int nSources =  1 + gRandom->Integer(8);
+//        int nSources =  1;//gRandom->Gaus(12, 1);
+        int nSources = gRandom->Poisson(3);
+        if( nSources<1 )
+            continue;
+
+        h_nSources->Fill( nSources );
+
+
+
         //        h_bImp->Fill(impact_b);
 
         // number of particles in this event
@@ -474,9 +524,11 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
         //        int nPart = gRandom->Gaus(50,2);//0.00001);
         //        int nPart = 80;//gRandom->Gaus(50/2,2/2) * 2; // to have even an number
         //        int nPart = gRandom->Gaus(80/2,4/2) * 2; // to have even an number
-        int nPart = gRandom->Gaus( 450, 20 );//5 );
+        //        int nPart = gRandom->Gaus( 450, 20 );//5 );
+        //        int nPart = gRandom->Gaus( 8,1);//20, 3 );//5 );
         //        int nPart = gRandom->Gaus( 15, 1 );//5 );
-        //        const int nPions = gRandom->Poisson(400);
+//        int nPart = gRandom->Poisson(5);
+        int pCounter = 0;
         //        const int nKaons = 200;//6;
         //        int nPart = nPions+nKaons;
         //        int nPart = gRandom->Gaus(750,20);
@@ -485,18 +537,18 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
         //        int nPart = gRandom->Gaus(1000,1);
         //        int nPart = gRandom->Gaus(500,15);
         //        int nPart = gRandom->Gaus(500,50);
-        if ( nPart < 1 )
-            continue;
+        //        if ( nPart < 1 )
+        //            continue;
 
         //        double collectivity_degree = 0.8;
         //        double collectivity_degree = gRandom->Gaus(0.8, 0.02);
         //        const double av_collectivity = 0.7; //0.65;
         const double av_collectivity = 0.65;//0.8; //0.65;
         //        double collectivity_degree = av_collectivity;
-        //        double collectivity_degree = gRandom->Gaus( av_collectivity, 0.02 );
-        double collectivity_degree = gRandom->Gaus( av_collectivity, 0.03 ); //0.03 );//0.04 );
+//                double collectivity_degree = gRandom->Gaus( av_collectivity, 0.05 );
+        double collectivity_degree = av_collectivity;//gRandom->Gaus( av_collectivity, 0.06 ); //0.03 );//0.04 );
         //        double collectivity_degree = gRandom->Uniform( 0.75, 0.85 );
-        //        double collectivity_degree = 0.8;
+        //        double collectivity_degree = 0.7;
         //        double collectivity_degree = gRandom->Gaus(0.8, -(nPart-500.)/500. );
 
         if( collectivity_degree<0 || collectivity_degree>1 )
@@ -505,8 +557,8 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
         h_QA_collectivity_degree->Fill( collectivity_degree );
 
         //                double meanPt = 0.5 * (1 - 2*(collectivity_degree-0.65) ) ;
-        //        double meanPt = 0.6;
-        double meanPt = 0.6 * (1 - 4*( collectivity_degree - av_collectivity) );
+        double meanPt = 0.6;
+        //        double meanPt = 0.6 * (1 - 4*( collectivity_degree - av_collectivity) );
         //        double meanPt = gRandom->Gaus( 0.6, 0.08 );
         //        while ( meanPt < 0.2 )
         //            meanPt = gRandom->Gaus( 0.6, 0.08 );
@@ -542,6 +594,7 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
             }
         }
 
+        //        int nPart = 0;
 
         double prevEta = 0;
         double prevPhi = 0;
@@ -549,309 +602,363 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
         double prevPdg = 0;
         double prevCharge = 0;
 
-        if(0) // NEW MODEL Fall 2021 for NUCLEUS 2021:
+
+        for (int iSource = 0; iSource < nSources; iSource++)
         {
-            // ### track pre-loop:
-            //        int nParticlesForTrigger = 0;
-            //        int nTracksForMultCentrality = 0;
-            //        cout << nPart << endl;
 
-
-            // pre-loop to define pdgs
-            double arr_eta_K_plus[MAX_N_PART];
-            double arr_eta_pi_plus[MAX_N_PART];
-            double arr_eta_K_minus[MAX_N_PART];
-            double arr_eta_pi_minus[MAX_N_PART];
-
-            int nK_plus = 0;
-            int npi_plus = 0;
-
-            for (int i = 0; i < nPart/2; i++) // create only positive particles
+            if(0) // NEW MODEL Fall 2021 for NUCLEUS 2021:
             {
-                int pdg = gRandom->Uniform() > collectivity_degree ? 321 : 211;
-                //                        int pdg = i < 0.2*(nPart/2) ? 321 : 211;
-                //            int pdg = i < (1-collectivity_degree)*(nPart/2) ? 321 : 211;
-                //            arr_pdg[i] = pdg;
-                if (pdg == 321)
-                    nK_plus++;
-                else
-                    npi_plus++;
-            }
+                // ### track pre-loop:
+                //        int nParticlesForTrigger = 0;
+                //        int nTracksForMultCentrality = 0;
+                //        cout << nPart << endl;
 
-            // loop to define positions of KAONS in eta
-            for (int i = 0; i < nK_plus; i++)
-            {
-                //                double eta = gRandom->Uniform( -2., 2. );
-                double eta = gRandom->Uniform( -1, 1 );
-                if(0) // if we want repulsion for pairs of KAONS
+
+                // pre-loop to define pdgs
+                double arr_eta_K_plus[MAX_N_PART];
+                double arr_eta_pi_plus[MAX_N_PART];
+                double arr_eta_K_minus[MAX_N_PART];
+                double arr_eta_pi_minus[MAX_N_PART];
+
+                int nK_plus = 0;
+                int npi_plus = 0;
+                    int nPart=0; // TMP
+                for (int i = 0; i < nPart/2; i++) // create only positive particles
                 {
-                    if ( i%2 == 0 )
-                        prevEta = eta;
+                    int pdg = gRandom->Uniform() > collectivity_degree ? 321 : 211;
+                    //                        int pdg = i < 0.2*(nPart/2) ? 321 : 211;
+                    //            int pdg = i < (1-collectivity_degree)*(nPart/2) ? 321 : 211;
+                    //            arr_pdg[i] = pdg;
+                    if (pdg == 321)
+                        nK_plus++;
                     else
-                    {
-                        double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.25) );  // REPULSION of a pair of same-sign charges
-                        while( fabs(eta-prevEta) < sepEta )
-                        {
-                            //                            cout << "check dEta = " << fabs(eta-prevEta) << endl;
-                            eta = gRandom->Uniform( -2., 2. );
-                        }
-                    }
+                        npi_plus++;
                 }
-                arr_eta_K_plus[i] = eta;
 
-                // now opp. sign pairing:
-                double randWhere = gRandom->Uniform();
-                double etaPartner = 0;
-                if(0) // if we want opp sign SR correlations for some fraction of pairs:
+                // loop to define positions of KAONS in eta
+                for (int i = 0; i < nK_plus; i++)
                 {
-                    if ( randWhere < 0.25 ) // opposite-sign SR correlation (25% prob.)
-                        etaPartner = gRandom->Gaus(eta,0.25);
-                    else // somewhere else
-                        etaPartner = gRandom->Uniform( -2., 2. );
-                }
-                else // always random eta
-                    etaPartner = gRandom->Uniform( -2., 2. );
-
-
-                arr_eta_K_minus[i] = etaPartner;
-            }
-
-            // loop to define positions of PIONS in eta
-            for (int i = 0; i < npi_plus; i++)
-            {
-                double eta = gRandom->Uniform( -2., 2. );
-                if(0) // if we want repulsion for pairs of PIONS
-                {
-                    if ( i%2 == 0 )
-                        prevEta = eta;
-                    else
+                    //                double eta = gRandom->Uniform( -2., 2. );
+                    double eta = gRandom->Uniform( -1, 1 );
+                    if(0) // if we want repulsion for pairs of KAONS
                     {
-                        double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.3) );  // REPULSION of a pair of same-sign charges
-                        while( fabs(eta-prevEta) < sepEta )
+                        if ( i%2 == 0 )
+                            prevEta = eta;
+                        else
                         {
-                            //                            cout << "check dEta = " << fabs(eta-prevEta) << endl;
-                            eta = gRandom->Uniform( -2., 2. );
-                        }
-                    }
-                }
-                arr_eta_pi_plus[i] = eta;
-
-                // now opp. sign pairing:
-                double randWhere = gRandom->Uniform();
-                double etaPartner = 0;
-                if(0) // if we want opp sign SR correlations for some fraction of pairs:
-                {
-                    if ( randWhere < 0.25 ) // opposite-sign SR correlation (25% prob.)
-                        etaPartner = gRandom->Gaus(eta,0.4);
-                    else // somewhere else
-                        etaPartner = gRandom->Uniform( -2., 2. );
-                }
-                else // always random eta
-                    etaPartner = gRandom->Uniform( -2., 2. );
-
-
-                arr_eta_pi_minus[i] = etaPartner;
-            }
-
-            // now combine all K and pi
-            int counter = 0;
-            // K:
-            for (int i = 0; i < nK_plus; i++)
-            {
-                arr_eta[counter] = arr_eta_K_plus[i];
-                arr_pdg[counter] = 321;
-                arr_charge[counter] = +1;
-                arr_pt[counter] = 0.6;
-                arr_phi[counter] = 0.2;
-                counter++;
-
-                arr_eta[counter] = arr_eta_K_minus[i];
-                arr_pdg[counter] = -321;
-                arr_charge[counter] = -1;
-                arr_pt[counter] = 0.6;
-                arr_phi[counter] = 0.2;
-                counter++;
-            }
-            // pi:
-            for (int i = 0; i < npi_plus; i++)
-            {
-                arr_eta[counter] = arr_eta_pi_plus[i];
-                arr_pdg[counter] = 211;
-                arr_charge[counter] = +1;
-                arr_pt[counter] = 0.6;
-                arr_phi[counter] = 0.2;
-                counter++;
-
-                arr_eta[counter] = arr_eta_pi_minus[i];
-                arr_pdg[counter] = -211;
-                arr_charge[counter] = -1;
-                arr_pt[counter] = 0.6;
-                arr_phi[counter] = 0.2;
-                counter++;
-            }
-        } // end of new model Fall 2021
-
-
-        // ########
-        else if(1) // PREVIOUS MODEL
-        {
-            for (int i = 0; i < nPart; i++)
-            {
-                //            if ( track_charge[itrack] == 0 )
-                //                continue;
-
-                int charge = gRandom->Uniform() > 0.5 ? +1 : -1;
-                //                int charge = i%2 ? +1 : -1;
-                //            double pt = gRandom->Exp(0.5); // TMath::Sqrt(px*px + py*py);
-                double pt = gRandom->Exp( meanPt ); // TMath::Sqrt(px*px + py*py);
-                //            double pt = my_func_BW->GetRandom();
-                //            double eta = gRandom->Uniform(-2, 2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-                //            double eta = gRandom->Uniform(-1.2, 1.2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-//                double eta = gRandom->Uniform( -0.8, 0.8 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-                double eta = gRandom->Uniform( -1.5, 1.5 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-//                double eta = fSlopeEta->GetRandom();
-                double phi = gRandom->Uniform( 0, TMath::TwoPi() );
-
-                // !!!
-                double pdg = gRandom->Uniform() > collectivity_degree ? 321 : 211;
-                //                double pdg = ( i < nPions ) ? 211 : 321;
-                //                double pdg = i < 0.2*nPart ? 321 : 211;
-                if ( charge < 0 )
-                    pdg *= -1;
-
-                // ### "SRC":
-                if(1)
-                {
-                    //            if ( i%2 == 0 )
-                    if ( i%2 == 0 )
-                    {
-                        prevEta = eta;
-                        prevPhi = phi;
-                        prevPt = pt;
-                        prevPdg = pdg;
-                        prevCharge = charge;
-                    }
-                    //            else
-                    //                else if ( abs(prevPdg) == 321 )
-                    //                {
-                    //                    eta = gRandom->Gaus(prevEta,0.2);
-                    //                    pdg = -prevPdg;
-                    //                    charge = -prevCharge;
-                    //                    //                charge *= -1;
-                    //                }
-                    else
-                    {
-                        //                        double randWhat = gRandom->Uniform();
-                        //                        if ( randWhat < 0.25 ) // opposite-sign correlation (25% prob.)
-                        {
-                            eta = gRandom->Gaus(prevEta,0.32);
-                            phi = gRandom->Gaus(prevPhi,0.32);
-                            if( phi < 0 )
-                                phi += TMath::TwoPi();
-                            else if( phi > TMath::TwoPi() )
-                                phi -= TMath::TwoPi();
-                            pt = gRandom->Gaus(prevPt, 0.02);
-                            pdg = -prevPdg;
-                            //charge = -prevCharge;
-                            //                charge *= -1;
-                        }
-                        if(0)//else if ( randWhat < 0.8 && abs(prevPdg) == 321 ) // same-sign correlation (25% prob.)
-                        {
-                            double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.4) );
+                            double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.25) );  // REPULSION of a pair of same-sign charges
                             while( fabs(eta-prevEta) < sepEta )
                             {
                                 //                            cout << "check dEta = " << fabs(eta-prevEta) << endl;
                                 eta = gRandom->Uniform( -2., 2. );
                             }
-                            pdg = prevPdg;
-                            charge = prevCharge;
-                            //                charge *= -1;
                         }
                     }
-                } // end of if SRC
+                    arr_eta_K_plus[i] = eta;
+
+                    // now opp. sign pairing:
+                    double randWhere = gRandom->Uniform();
+                    double etaPartner = 0;
+                    if(0) // if we want opp sign SR correlations for some fraction of pairs:
+                    {
+                        if ( randWhere < 0.25 ) // opposite-sign SR correlation (25% prob.)
+                            etaPartner = gRandom->Gaus(eta,0.25);
+                        else // somewhere else
+                            etaPartner = gRandom->Uniform( -2., 2. );
+                    }
+                    else // always random eta
+                        etaPartner = gRandom->Uniform( -2., 2. );
 
 
-                //            double pdg = gRandom->Uniform() > collectivity_degree ? 321 : 211;
-                //            if ( charge < 0 )
-                //                pdg *= -1;
+                    arr_eta_K_minus[i] = etaPartner;
+                }
+
+                // loop to define positions of PIONS in eta
+                for (int i = 0; i < npi_plus; i++)
+                {
+                    double eta = gRandom->Uniform( -2., 2. );
+                    if(0) // if we want repulsion for pairs of PIONS
+                    {
+                        if ( i%2 == 0 )
+                            prevEta = eta;
+                        else
+                        {
+                            double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.3) );  // REPULSION of a pair of same-sign charges
+                            while( fabs(eta-prevEta) < sepEta )
+                            {
+                                //                            cout << "check dEta = " << fabs(eta-prevEta) << endl;
+                                eta = gRandom->Uniform( -2., 2. );
+                            }
+                        }
+                    }
+                    arr_eta_pi_plus[i] = eta;
+
+                    // now opp. sign pairing:
+                    double randWhere = gRandom->Uniform();
+                    double etaPartner = 0;
+                    if(0) // if we want opp sign SR correlations for some fraction of pairs:
+                    {
+                        if ( randWhere < 0.25 ) // opposite-sign SR correlation (25% prob.)
+                            etaPartner = gRandom->Gaus(eta,0.4);
+                        else // somewhere else
+                            etaPartner = gRandom->Uniform( -2., 2. );
+                    }
+                    else // always random eta
+                        etaPartner = gRandom->Uniform( -2., 2. );
 
 
-                arr_charge[i] = charge;
-                arr_pt[i] = pt;
-                arr_eta[i] = eta;
-                arr_phi[i] = phi;
-                arr_pdg[i] = pdg;
+                    arr_eta_pi_minus[i] = etaPartner;
+                }
 
-                if( fabs(eta) < 0.05 )
-                    counterNpartIn01Win++;
+                // now combine all K and pi
+                int counter = 0;
+                // K:
+                for (int i = 0; i < nK_plus; i++)
+                {
+                    arr_eta[counter] = arr_eta_K_plus[i];
+                    arr_pdg[counter] = 321;
+                    arr_charge[counter] = +1;
+                    arr_pt[counter] = 0.6;
+                    arr_phi[counter] = 0.2;
+                    counter++;
 
-                //            if ( fabs(eta) < 1 )
-                //                nParticlesForTrigger++;
+                    arr_eta[counter] = arr_eta_K_minus[i];
+                    arr_pdg[counter] = -321;
+                    arr_charge[counter] = -1;
+                    arr_pt[counter] = 0.6;
+                    arr_phi[counter] = 0.2;
+                    counter++;
+                }
+                // pi:
+                for (int i = 0; i < npi_plus; i++)
+                {
+                    arr_eta[counter] = arr_eta_pi_plus[i];
+                    arr_pdg[counter] = 211;
+                    arr_charge[counter] = +1;
+                    arr_pt[counter] = 0.6;
+                    arr_phi[counter] = 0.2;
+                    counter++;
 
-                //            if( fabs( eta ) < 1.0 && ( pt > 0.15) ) //&& ( fnTPChits[iP] > 30 ) )
-                //                nTracksForMultCentrality++;
-
-
-
-
-                //            // ALTERNATIVE SRC:
-                //            if( 1 && i<nPart-1 )
-                //            {
-
-                //                double randWhat = gRandom->Uniform();
-                //                if ( randWhat < 0.25 ) // opposite-sign correlation (25% prob.)
-                //                {
-                //                    prevEta = eta;
-                //                    prevPdg = pdg;
-                //                    prevCharge = charge;
-
-                //                    i++;
-
-                //                    eta = gRandom->Gaus(prevEta,0.25);
-                //                    pdg = -prevPdg;
-                //                    charge = -prevCharge;
-                //                    //                charge *= -1;
-                //                }
-                //                else if ( randWhat < 0.8 && abs(prevPdg) == 321 ) // same-sign correlation (25% prob.)
-                //                {
-                //                    prevEta = eta;
-                //                    prevPdg = pdg;
-                //                    prevCharge = charge;
-
-                //                    i++;
-
-                //                    double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.4) );
-                //                    while( fabs(eta-prevEta) < sepEta )
-                //                    {
-                ////                            cout << "check dEta = " << fabs(eta-prevEta) << endl;
-                //                        eta = gRandom->Uniform( -2., 2. );
-                //                    }
-                //                    pdg = prevPdg;
-                //                    charge = prevCharge;
-                //                    //                charge *= -1;
-                //                }
+                    arr_eta[counter] = arr_eta_pi_minus[i];
+                    arr_pdg[counter] = -211;
+                    arr_charge[counter] = -1;
+                    arr_pt[counter] = 0.6;
+                    arr_phi[counter] = 0.2;
+                    counter++;
+                }
+            } // end of new model Fall 2021
 
 
+            // ########
+            else if(1) // PREVIOUS MODEL
+            {
+                            for (int type = 0; type < 1/*2*/; type++)
+                            {
+//                                int this_PID_nPart = ( type==0 ? gRandom->Poisson(3) : /*gRandom->Poisson(3)*/2 );
+//                                int this_PID_nPart = ( type==0 ? gRandom->Poisson(/*30*//*17*/5) : gRandom->Poisson(2/*20*/)  );
+//                                int this_PID_nPart = 25;//50;//100;//8;//( type==0 ? 5 : 3  );
+                                int this_PID_nPart = gRandom->Poisson(2);//40);
+                //                nPart += this_PID_nPart;
 
-                //                int charge = gRandom->Uniform() > 0.5 ? +1 : -1;
-                //                //            double pt = gRandom->Exp(0.5); // TMath::Sqrt(px*px + py*py);
-                //                double pt = gRandom->Exp( meanPt ); // TMath::Sqrt(px*px + py*py);
-                //                //            double pt = my_func_BW->GetRandom();
-                //                //            double eta = gRandom->Uniform(-2, 2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-                //                //            double eta = gRandom->Uniform(-1.2, 1.2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-                //                double eta = gRandom->Uniform( -2., 2. ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
-                //                double phi = gRandom->Uniform( 0, TMath::TwoPi() );
+//                int nPartInSource = 3;
+//                int nPartInSource = gRandom->Poisson(2);
+                for (int i = 0; i < this_PID_nPart /*nPart*//*nPartInSource*/; i++)
+                {
+                    //            if ( track_charge[itrack] == 0 )
+                    //                continue;
 
-                //                arr_charge[i] = charge;
-                //                arr_pt[i] = pt;
-                //                arr_eta[i] = eta;
-                //                arr_phi[i] = phi;
-                //                arr_pdg[i] = pdg;
-                //            }
+                    int charge = gRandom->Uniform() > 0.5 ? +1 : -1;
+                    //                int charge = i%2 ? +1 : -1;
+                    //            double pt = gRandom->Exp(0.5); // TMath::Sqrt(px*px + py*py);
+                    double pt = gRandom->Exp( meanPt ); // TMath::Sqrt(px*px + py*py);
+                    //            double pt = my_func_BW->GetRandom();
+                    //            double eta = gRandom->Uniform(-2, 2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    //            double eta = gRandom->Uniform(-1.2, 1.2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    //                double eta = gRandom->Uniform( -0.8, 0.8 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    //                double eta = gRandom->Uniform( -1.5, 1.5 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    double eta = gRandom->Uniform( -1.5, 1.5 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+//                    double eta = gRandom->Uniform( -0.8, 0.8 ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    //                double eta = fSlopeEta->GetRandom();
+                    double phi = gRandom->Uniform( 0, TMath::TwoPi() );
+
+                    // !!!
+                    double pdg = gRandom->Uniform() >  collectivity_degree   ? 321 : 211;
+//                                    double pdg = ( type==1 ? 321 : 211 );
+                    //                double pdg = ( i < nPions ) ? 211 : 321;
+                    //                double pdg = i < 0.2*nPart ? 321 : 211;
+                    if ( charge < 0 )
+                        pdg *= -1;
 
 
-            } // end of particle loop
-        } // end of "old" model
+                    arr_charge[pCounter] = charge;
+                    arr_pt[pCounter] = pt;
+                    arr_eta[pCounter] = eta;
+                    arr_phi[pCounter] = phi;
+                    arr_pdg[pCounter] = pdg;
+
+                    pCounter++;
+
+
+
+
+                    // ### "SRC":
+                    if( 1)//type==1 )
+                    {
+                        //            if ( i%2 == 0 )
+                        if(0) //if ( i==0)//i%2 == 0 )
+                        {
+                            prevEta = eta;
+                            prevPhi = phi;
+                            prevPt = pt;
+                            prevPdg = pdg;
+                            prevCharge = charge;
+                        }
+                        //            else
+                        //                else if ( abs(prevPdg) == 321 )
+                        //                {
+                        //                    eta = gRandom->Gaus(prevEta,0.2);
+                        //                    pdg = -prevPdg;
+                        //                    charge = -prevCharge;
+                        //                    //                charge *= -1;
+                        //                }
+                        else
+                        {
+                            //                        double randWhat = gRandom->Uniform();
+                            //                        if ( randWhat < 0.25 ) // opposite-sign correlation (25% prob.)
+                            {
+                                //                            eta = gRandom->Gaus(prevEta,0.32);
+                                //                            phi = gRandom->Gaus(prevPhi,0.32);
+
+                                prevEta = eta;
+                                prevPhi = phi;
+                                prevPt = pt;
+                                prevPdg = pdg;
+                                prevCharge = charge;
+
+
+                                // ##### Decay products:
+                                for (int iDecayProd = 0; iDecayProd < 2; iDecayProd++)
+                                {
+                                    eta = gRandom->Gaus(prevEta,0.3);
+                                    phi = gRandom->Gaus(prevPhi,0.3);
+                                    if( phi < 0 )
+                                        phi += TMath::TwoPi();
+                                    else if( phi > TMath::TwoPi() )
+                                        phi -= TMath::TwoPi();
+                                    pt = gRandom->Gaus(prevPt, 0.02);
+//                                    pdg = -prevPdg;
+                                    double pdg = gRandom->Uniform() >  collectivity_degree   ? 321 : 211;
+
+                                    charge = -prevCharge;
+
+
+                                    arr_charge[pCounter] = charge;
+                                    arr_pt[pCounter] = pt;
+                                    arr_eta[pCounter] = eta;
+                                    arr_phi[pCounter] = phi;
+                                    arr_pdg[pCounter] = pdg;
+
+                                    pCounter++;
+
+                                }
+
+
+                                //                charge *= -1;
+                            }
+                            if(0)//else if ( randWhat < 0.8 && abs(prevPdg) == 321 ) // same-sign correlation (25% prob.)
+                            {
+                                double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.4) );
+                                while( fabs(eta-prevEta) < sepEta )
+                                {
+                                    //                            cout << "check dEta = " << fabs(eta-prevEta) << endl;
+                                    eta = gRandom->Uniform( -2., 2. );
+                                }
+                                pdg = prevPdg;
+                                charge = prevCharge;
+                                //                charge *= -1;
+                            }
+                        }
+                    } // end of if SRC
+
+
+                    //            double pdg = gRandom->Uniform() > collectivity_degree ? 321 : 211;
+                    //            if ( charge < 0 )
+                    //                pdg *= -1;
+
+
+
+                    if( fabs(eta) < 0.05 )
+                        counterNpartIn01Win++;
+
+                    //            if ( fabs(eta) < 1 )
+                    //                nParticlesForTrigger++;
+
+                    //            if( fabs( eta ) < 1.0 && ( pt > 0.15) ) //&& ( fnTPChits[iP] > 30 ) )
+                    //                nTracksForMultCentrality++;
+
+
+
+
+                    //            // ALTERNATIVE SRC:
+                    //            if( 1 && i<nPart-1 )
+                    //            {
+
+                    //                double randWhat = gRandom->Uniform();
+                    //                if ( randWhat < 0.25 ) // opposite-sign correlation (25% prob.)
+                    //                {
+                    //                    prevEta = eta;
+                    //                    prevPdg = pdg;
+                    //                    prevCharge = charge;
+
+                    //                    i++;
+
+                    //                    eta = gRandom->Gaus(prevEta,0.25);
+                    //                    pdg = -prevPdg;
+                    //                    charge = -prevCharge;
+                    //                    //                charge *= -1;
+                    //                }
+                    //                else if ( randWhat < 0.8 && abs(prevPdg) == 321 ) // same-sign correlation (25% prob.)
+                    //                {
+                    //                    prevEta = eta;
+                    //                    prevPdg = pdg;
+                    //                    prevCharge = charge;
+
+                    //                    i++;
+
+                    //                    double sepEta = 0.2 + fabs( gRandom->Gaus(0,0.4) );
+                    //                    while( fabs(eta-prevEta) < sepEta )
+                    //                    {
+                    ////                            cout << "check dEta = " << fabs(eta-prevEta) << endl;
+                    //                        eta = gRandom->Uniform( -2., 2. );
+                    //                    }
+                    //                    pdg = prevPdg;
+                    //                    charge = prevCharge;
+                    //                    //                charge *= -1;
+                    //                }
+
+
+
+                    //                int charge = gRandom->Uniform() > 0.5 ? +1 : -1;
+                    //                //            double pt = gRandom->Exp(0.5); // TMath::Sqrt(px*px + py*py);
+                    //                double pt = gRandom->Exp( meanPt ); // TMath::Sqrt(px*px + py*py);
+                    //                //            double pt = my_func_BW->GetRandom();
+                    //                //            double eta = gRandom->Uniform(-2, 2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    //                //            double eta = gRandom->Uniform(-1.2, 1.2); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    //                double eta = gRandom->Uniform( -2., 2. ); // 0.5 * TMath::Log( ( p + pz )/( p - pz ) );
+                    //                double phi = gRandom->Uniform( 0, TMath::TwoPi() );
+
+                    //                arr_charge[i] = charge;
+                    //                arr_pt[i] = pt;
+                    //                arr_eta[i] = eta;
+                    //                arr_phi[i] = phi;
+                    //                arr_pdg[i] = pdg;
+                    //            }
+
+
+                } // end of particle loop
+                            } // end of particle type
+            } // end of "old" model
+        } // end of loop over sources
 
 
 
@@ -865,6 +972,7 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
         //        h_QA_event->Fill(1);
 
 
+        int nPart = pCounter;
         // fill some histos:
         //        h_nTracksForMultCentrality->Fill( nTracksForMultCentrality );
         //        h_bImpTriggered->Fill(impact_b);
@@ -938,7 +1046,8 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
             if( fabs(eta)>0.8 )
                 continue;
 
-            if( pt < 0.2 || pt > 2.0 )
+            //            if( pt < 0.2 || pt > 2.0 )
+            if( pt < 0.  || pt > 100.0 )
                 continue;
 
             nSimTracksInCuts++;
@@ -961,7 +1070,7 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
                         winPairWrapper_FULL_ETA_NUM_AND_DENOM[0][iType][iCW][cBinId[iCW]][iPt].addTrack( pdg, eta, phi, pt, charge, /*weight*/1.0 );
                     }
 
-
+            continue;
 
             // artificial efficiency:
             //            if ( gRandom->Uniform() > eff )
@@ -1001,7 +1110,7 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
                 else if( pdg == -211 ) whichEffHist = 1;
                 else if( pdg == 321 ) whichEffHist = 2;
                 else if( pdg == -321 ) whichEffHist = 3;
-//                cout << "whichEffHist = " << whichEffHist << endl;
+                //                cout << "whichEffHist = " << whichEffHist << endl;
 
                 if ( whichEffHist >= 0 )
                 {
@@ -1155,6 +1264,8 @@ void toy_model( int _nEv = 2e2 //25e3 //15000 //25000 //1e3 //800 //50000 //2500
 
     printf("RealTime=%f seconds, CpuTime=%f seconds\n",rtime,ctime);
 
+    TCanvas *canv_h_nSources = new TCanvas( "canv_h_nSources", "canv_h_nSources", 20,30,800,600 );
+    h_nSources->DrawCopy();
 
 
 

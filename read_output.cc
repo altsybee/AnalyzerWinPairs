@@ -89,12 +89,11 @@ int read_output()
     //    TString fileName = "toy_output_fraction_K_fraction_fixed_0.2_SRC_OSonly_nPartGaus80_4_nEv500k.root";
     //    TString fileName = "toy_output_fraction_K_fraction_binomial_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
     //    TString fileName = "toy_output_fraction_K_fraction_fixed_0.2_SRC_SS_OS_nPartGaus80_4_nEv500k.root";
-//    TString fileName = "toy_output_gaus_500_10.root";
-    TString fileName = "output_toy.root";
-//    TString fileName = "output_toy_e8_p1_250k.root";
-//    TString fileName = "output_toy_BEFORE_VAR_SELECTION.root";
-//    TString fileName = "output_toy_e8_p8_25kEvents.root";
-//    TString fileName = "before_phi_output_toy.root";
+    //    TString fileName = "toy_output_gaus_500_10.root";
+    //    TString fileName = "output_toy_e8_p1_250k.root";
+    //    TString fileName = "output_toy_BEFORE_VAR_SELECTION.root";
+    //    TString fileName = "output_toy_e8_p8_25kEvents.root";
+    //    TString fileName = "before_phi_output_toy.root";
     //    TString fileName = "toy_output_gaus_500_10_BEFORE_CHANGES.root";
     //    TString fileName = "toy_output_FIST.root";
     //    TString fileName = "output_heavy_ions_test_10k.root";
@@ -102,6 +101,20 @@ int read_output()
     //    TString fileName = "MergedOutput_output_heavy_ions_4.5mln_events_pt0_100_nSub10.root";
     //    TString fileName = "MergedOutput_output_heavy_ions_8.8mln_events_pt02_20_nSub15.root";
     //    TString fileName = "MergedOutput_10mln_pt_02_20_manyEtaBins.root";
+
+    //    TString fileName = "output_toy_Poisson8_collectivity_065_006.root";
+
+    TString fileName = "output_toy.root";
+//        TString fileName = "output_toy_nSourcesGaus_12_1_nPartiFixed25_avCollFluct_065_005.root";
+//        TString fileName = "output_toy_nSourcesGaus_12_2_nPartiFixed25_avCollFluct_065_005.root";
+
+
+//    TString fileName = "output_toy_nSourcesInteger1_8_nPartiFixed25_avCollFluct_065_005.root";
+//    TString fileName = "output_toy_nSourcesInteger1_3_nPartiFixed50_avCollFluct_065_005.root";
+//    TString fileName = "output_toy_nSources1_nPartiFixed100_avCollFluct_065_005.root";
+
+    //    TString fileName = "output_toy_nSourcesPoisson10_nPi3_nK2.root";
+//    TString fileName = "output_toy_nSourcesFixed1_nPi30_nK20.root";
 
 
     TFile *fIn = new TFile( dirName+"/"+fileName );
@@ -136,7 +149,7 @@ int read_output()
 
     //const int nPhiWins = 16;
     //const int nEtaBins = /*2**/nPhiWins;//23; //(eRange-eSize) / eStep + 2;//1;
-//    const int nEtaBins = (eRange-eSize) / eStep + 1 + 0.0000001;//2;//1;
+    //    const int nEtaBins = (eRange-eSize) / eStep + 1 + 0.0000001;//2;//1;
     //const int nEtaBins = 1;
     //const int nEtaBins = /* +1 - for full eta! */ 1 + (eRange-eSize) / eStep + 1 + 0.0000001;//2;//1;
 
@@ -144,13 +157,13 @@ int read_output()
     const int nPtBins = 1;
     //    double ptmin[nPtBins] = { 0 }; //0.2 };//0.1,  };//0.2 }; //0.3, };//0.2 };
     //    double ptmax[nPtBins] = { 100 }; //2.0,};// 2.0 }; //1.5,};// 5.0 };
-//    double ptmin[nPtBins] = { 0. };
-//    double ptmax[nPtBins] = { 100.0 };
+    //    double ptmin[nPtBins] = { 0. };
+    //    double ptmax[nPtBins] = { 100.0 };
 
 
 
     //
-    const int nPartTypes = 5;//10;//6;//3;//4;
+    const int nPartTypes = 1;//10;//6;//3;//4;
     int arrPartTypes[nPartTypes][4] =
     { // F,B, X,Y
       //  { /*421*/0, 0, 0, 0 },         // 0
@@ -166,10 +179,10 @@ int read_output()
 
 
       { 321, 321, 211, 211 }, // 7
-      { 321, 321, 211, 211 }, // 8
-      { 321, 321, 211, 211 }, // 9
-      { 321, 321, 211, 211 }, // 8
-      { 321, 321, 211, 211 }, // 9
+//      { 321, 321, 211, 211 }, // 8
+//      { 321, 321, 211, 211 }, // 9
+//      { 321, 321, 211, 211 }, // 8
+//      { 321, 321, 211, 211 }, // 9
 
 
       //  { 0, 321, 0, 211 }, // 7
@@ -180,17 +193,17 @@ int read_output()
     int arrCharges[/*nPartTypes*/][4] =
     { // F,B, X,Y
       {  0,  0,  0,  0 },
-      { +1, +1, +1, +1 },
-      { -1, -1, -1, -1 },
-      { +1, -1, +1, -1 },
-      { -1, +1, -1, +1 },
+//      { +1, +1, +1, +1 },
+//      { -1, -1, -1, -1 },
+//      { +1, -1, +1, -1 },
+//      { -1, +1, -1, +1 },
     };
 
     const double pSize = TMath::TwoPi()/8;
 
 
-    TString strAnLevels[] = { "GEN", "REC", "CORRECTED" };
-//    TString strAnLevels[] = { "REC" };
+    TString strAnLevels[] = { "GEN" };//, "REC", "CORRECTED" };
+    //    TString strAnLevels[] = { "REC" };
     const int N_AN_LEVELS = sizeof(strAnLevels)/sizeof(*strAnLevels);
 
 
@@ -205,7 +218,7 @@ int read_output()
 
 
     // NEW WRAPPER:
-//    TList* fOutputWinPairsLists[nPartTypes];
+    //    TList* fOutputWinPairsLists[nPartTypes];
 
     CalcWithSubsamples observables[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins];
     CalcWithSubsamples observables_FULL_ETA_DENOM[N_AN_LEVELS][nPartTypes][nCW][ nCentrBins[nCW-1] ][nPtBins];
@@ -224,11 +237,11 @@ int read_output()
                                        arrPartTypes[iType][0], arrPartTypes[iType][1], arrPartTypes[iType][2], arrPartTypes[iType][3],
                         arrCharges[iType][0], arrCharges[iType][1], arrCharges[iType][2], arrCharges[iType][3] );
 
-//                fOutputWinPairsLists[iType] = new TList();
-//                fOutputWinPairsLists[iType] = (TList*)gDirectory->Get("list_PIDcorr_"+strPID );
+                //                fOutputWinPairsLists[iType] = new TList();
+                //                fOutputWinPairsLists[iType] = (TList*)gDirectory->Get("list_PIDcorr_"+strPID );
                 TList *inList = (TList*)gDirectory->Get("list_PIDcorr_"+strPID );
                 cout << "taking list " << strPID << ": " << inList << endl;
-//                fOutputWinPairsLists[iType]->ls();
+                //                fOutputWinPairsLists[iType]->ls();
 
                 bool ifIdent = ifIdenticalParticlesFB( arrPartTypes[iType], arrCharges[iType] );
                 cout << "ifIdentical = " << ifIdent << endl;
@@ -243,7 +256,7 @@ int read_output()
                         // FULL ETA DENOM:
                         calcObj = &observables_FULL_ETA_DENOM[iAnLevel][iType][iCW][ cBin ][iPt];
                         strPostfix = Form("%s_FULL_ETA_DENOM_cBin%d", strAnLevels[iAnLevel].Data(), cBin);
-                        calcObj->calc( inList, strPostfix, ifIdent, whichInputHist );
+                        calcObj->calc( inList, strPostfix, ifIdent, whichInputHist, true );
 
 
                         // FULL ETA FOR both Num and Denom: to calc nu_dyn!
@@ -255,9 +268,9 @@ int read_output()
     }
     cout << "##### End of reading win info from histograms." << endl;
 
-//    const int nEtaBins = observables[0][0][0][ 0 ][0].h3D->GetYaxis()->GetNbins();
-//    cout << "nEtaBins = " << nEtaBins << endl;
-//    return 0;
+    //    const int nEtaBins = observables[0][0][0][ 0 ][0].h3D->GetYaxis()->GetNbins();
+    //    cout << "nEtaBins = " << nEtaBins << endl;
+    //    return 0;
 
 
     // ### End of file reading. Time:
@@ -266,7 +279,48 @@ int read_output()
     Double_t ctime = timer.CpuTime();
     printf("End of calc: RealTime=%f seconds, CpuTime=%f seconds\n",rtime,ctime);
 
-    //    return 0;
+
+
+
+    TCanvas *canv_gr_c3 = new TCanvas("canv_gr_c3","canv_gr_c3",220,55,800,600);
+    TGraphErrors *gr_c3 = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraphVsTripletIdQA( "c3" );
+    drawGraph( gr_c3, 20, kRed, "APL" );
+
+
+    // rrr
+    TCanvas *canv_gr_TwoGap0_vs_Third = new TCanvas("canv_gr_TwoGap0_vs_Third","canv_gr_TwoGap0_vs_Third",220,55,800,600);
+    TGraphErrors *gr_TwoGap0_vs_Third = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraphTriplets_TwoGap0_vs_Third( "c3" );
+    drawGraph( gr_TwoGap0_vs_Third, 20, kRed, "APz" );
+
+    TGraphErrors *grDirect_TwoGap0_vs_Third = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraphTriplets_TwoGap0_vs_Third( "c3_direct" );
+    drawGraph( grDirect_TwoGap0_vs_Third, 24, kBlue, "Pz" );
+
+    TGraphErrors *grDirectPoisson_TwoGap0_vs_Third = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraphTriplets_TwoGap0_vs_Third( "c3_direct_Poisson" );
+    drawGraph( grDirectPoisson_TwoGap0_vs_Third, 27, kGreen+1, "Pz" );
+
+    gPad->SetGridy();
+
+    // rr
+    TCanvas *canv_rr_formula_fullDenom_ = new TCanvas("canv_rr_formula_fullDenom","canv_rr_formula_fullDenom",100,55,800,600);
+    TGraphErrors *gr0_rr_formula_fullDenom_ = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" );
+    drawGraph( gr0_rr_formula_fullDenom_, 20, kRed, "APz" );
+    gr0_rr_formula_fullDenom_->Fit( "pol0", "", "", -1.5, 1.5 );
+
+    TGraphErrors *gr0_rr_direct_fullDenom_ = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );
+    drawGraph( gr0_rr_direct_fullDenom_, 24, kBlue, "Pz" );
+//    gr0_rr_direct_fullDenom_->Fit( "pol0", "", "", -1.5, 1.5 );
+
+
+
+    TGraphErrors *gr0_rr_formula = observables[0][0][0][0][0].getGraph( "corr_rr_formula" );
+    drawGraph( gr0_rr_formula, 27, kGreen+1, "Pz" );
+//    gr0_rr_direct_fullDenom_->Fit( "pol0", "", "", -1.5, 1.5 );
+
+
+
+    gPad->SetGridy();
+
+        return 0;
 
 
 
@@ -276,9 +330,9 @@ int read_output()
 
 
     // QA: nF vs centrality:
-//    TCanvas *canv_nF = new TCanvas("canv_nF","canv_nF",0,0,800,600);
-//    tuneCanvas( canv_nF );
-//    drawGraph( gr_nF[ 0 ][0][0][0], 20, kRed, "APz" );
+    //    TCanvas *canv_nF = new TCanvas("canv_nF","canv_nF",0,0,800,600);
+    //    tuneCanvas( canv_nF );
+    //    drawGraph( gr_nF[ 0 ][0][0][0], 20, kRed, "APz" );
 
 
 
@@ -617,40 +671,46 @@ int read_output()
 
 
     // RECONSTRUCTED R2:
-    TGraphErrors *gr0_R2_aa_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr1_R2_bb_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr2_R2_ab_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr3_R2_ba_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 1 ][1][0][0];
+    if ( N_AN_LEVELS > 1 )
+    {
+        TGraphErrors *gr0_R2_aa_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 1 ][1][0][0];
+        TGraphErrors *gr1_R2_bb_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 1 ][1][0][0];
+        TGraphErrors *gr2_R2_ab_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 1 ][1][0][0];
+        TGraphErrors *gr3_R2_ba_vs_winId_REC = observables[1][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 1 ][1][0][0];
 
-    gr0_R2_aa_vs_winId_REC->GetYaxis()->SetRangeUser(-2, 2);
+        gr0_R2_aa_vs_winId_REC->GetYaxis()->SetRangeUser(-2, 2);
 
-    shiftPointX( gr0_R2_aa_vs_winId_REC, 0.04 );
-    shiftPointX( gr1_R2_bb_vs_winId_REC, 0.04 );
-    shiftPointX( gr2_R2_ab_vs_winId_REC, 0.04 );
-    shiftPointX( gr3_R2_ba_vs_winId_REC, 0.04 );
+        shiftPointX( gr0_R2_aa_vs_winId_REC, 0.04 );
+        shiftPointX( gr1_R2_bb_vs_winId_REC, 0.04 );
+        shiftPointX( gr2_R2_ab_vs_winId_REC, 0.04 );
+        shiftPointX( gr3_R2_ba_vs_winId_REC, 0.04 );
 
-    drawGraph( gr0_R2_aa_vs_winId_REC, 5, kRed,       "Pz", 1.5 );
-    drawGraph( gr1_R2_bb_vs_winId_REC, 5, kBlue,      "Pz", 1.5 );
-    drawGraph( gr2_R2_ab_vs_winId_REC, 5, kMagenta,   "Pz", 1.5 );
-    drawGraph( gr3_R2_ba_vs_winId_REC, 5, kGray+2,    "Pz", 1.5 );
+        drawGraph( gr0_R2_aa_vs_winId_REC, 5, kRed,       "Pz", 1.5 );
+        drawGraph( gr1_R2_bb_vs_winId_REC, 5, kBlue,      "Pz", 1.5 );
+        drawGraph( gr2_R2_ab_vs_winId_REC, 5, kMagenta,   "Pz", 1.5 );
+        drawGraph( gr3_R2_ba_vs_winId_REC, 5, kGray+2,    "Pz", 1.5 );
+
+    }
 
 
     // CORRECTED:
-    TGraphErrors *gr0_R2_aa_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr1_R2_bb_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr2_R2_ab_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr3_R2_ba_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 2 ][1][0][0];
+    if ( N_AN_LEVELS > 2 )
+    {
+        TGraphErrors *gr0_R2_aa_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 2 ][1][0][0];
+        TGraphErrors *gr1_R2_bb_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 2 ][1][0][0];
+        TGraphErrors *gr2_R2_ab_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 2 ][1][0][0];
+        TGraphErrors *gr3_R2_ba_vs_winId_CORR = observables[2][whichBasicToDraw][0][0][0].getGraphVsWinIdQA( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 2 ][1][0][0];
 
-    shiftPointX( gr0_R2_aa_vs_winId_CORR, 0.04 );
-    shiftPointX( gr1_R2_bb_vs_winId_CORR, 0.04 );
-    shiftPointX( gr2_R2_ab_vs_winId_CORR, 0.04 );
-    shiftPointX( gr3_R2_ba_vs_winId_CORR, 0.04 );
+        shiftPointX( gr0_R2_aa_vs_winId_CORR, 0.04 );
+        shiftPointX( gr1_R2_bb_vs_winId_CORR, 0.04 );
+        shiftPointX( gr2_R2_ab_vs_winId_CORR, 0.04 );
+        shiftPointX( gr3_R2_ba_vs_winId_CORR, 0.04 );
 
-    drawGraph( gr0_R2_aa_vs_winId_CORR, 27, kRed,       "Pz", 1.5 );
-    drawGraph( gr1_R2_bb_vs_winId_CORR, 27, kBlue,      "Pz", 1.5 );
-    drawGraph( gr2_R2_ab_vs_winId_CORR, 27, kMagenta,   "Pz", 1.5 );
-    drawGraph( gr3_R2_ba_vs_winId_CORR, 27, kGray+2,    "Pz", 1.5 );
-
+        drawGraph( gr0_R2_aa_vs_winId_CORR, 27, kRed,       "Pz", 1.5 );
+        drawGraph( gr1_R2_bb_vs_winId_CORR, 27, kBlue,      "Pz", 1.5 );
+        drawGraph( gr2_R2_ab_vs_winId_CORR, 27, kMagenta,   "Pz", 1.5 );
+        drawGraph( gr3_R2_ba_vs_winId_CORR, 27, kGray+2,    "Pz", 1.5 );
+    }
 
 
 
@@ -692,42 +752,50 @@ int read_output()
 
 
     // RECONSTRUCTED R2:
-    TGraphErrors *gr0_R2_aa_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr1_R2_bb_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr2_R2_ab_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr3_R2_ba_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 1 ][1][0][0];
+    if ( N_AN_LEVELS > 1 )
+    {
+        TGraphErrors *gr0_R2_aa_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 1 ][1][0][0];
+        TGraphErrors *gr1_R2_bb_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 1 ][1][0][0];
+        TGraphErrors *gr2_R2_ab_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 1 ][1][0][0];
+        TGraphErrors *gr3_R2_ba_REC = observables[1][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 1 ][1][0][0];
 
-    gr0_R2_aa_REC->GetYaxis()->SetRangeUser(-2, 2);
+        gr0_R2_aa_REC->GetYaxis()->SetRangeUser(-2, 2);
 
-    shiftPointX( gr0_R2_aa_REC, 0.04 );
-    shiftPointX( gr1_R2_bb_REC, 0.04 );
-    shiftPointX( gr2_R2_ab_REC, 0.04 );
-    shiftPointX( gr3_R2_ba_REC, 0.04 );
+        shiftPointX( gr0_R2_aa_REC, 0.04 );
+        shiftPointX( gr1_R2_bb_REC, 0.04 );
+        shiftPointX( gr2_R2_ab_REC, 0.04 );
+        shiftPointX( gr3_R2_ba_REC, 0.04 );
 
-    drawGraph( gr0_R2_aa_REC, 5, kRed,       "Pz", 1.5 );
-    drawGraph( gr1_R2_bb_REC, 5, kBlue,      "Pz", 1.5 );
-    drawGraph( gr2_R2_ab_REC, 5, kMagenta,   "Pz", 1.5 );
-    drawGraph( gr3_R2_ba_REC, 5, kGray+2,    "Pz", 1.5 );
+        drawGraph( gr0_R2_aa_REC, 5, kRed,       "Pz", 1.5 );
+        drawGraph( gr1_R2_bb_REC, 5, kBlue,      "Pz", 1.5 );
+        drawGraph( gr2_R2_ab_REC, 5, kMagenta,   "Pz", 1.5 );
+        drawGraph( gr3_R2_ba_REC, 5, kGray+2,    "Pz", 1.5 );
+
+    }
 
 
     // CORRECTED:
-    TGraphErrors *gr0_R2_aa_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr1_R2_bb_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr2_R2_ab_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr3_R2_ba_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 2 ][1][0][0];
+    if ( N_AN_LEVELS > 2 )
+    {
+        TGraphErrors *gr0_R2_aa_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_aa" );  // gr_corr_R2_aa_VS_ETA[ 2 ][1][0][0];
+        TGraphErrors *gr1_R2_bb_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_bb" );  // gr_corr_R2_bb_VS_ETA[ 2 ][1][0][0];
+        TGraphErrors *gr2_R2_ab_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ab" );  // gr_corr_R2_ab_VS_ETA[ 2 ][1][0][0];
+        TGraphErrors *gr3_R2_ba_CORR = observables[2][whichBasicToDraw][0][0][0].getGraph( "corr_R2_ba" );  // gr_corr_R2_ba_VS_ETA[ 2 ][1][0][0];
 
-    shiftPointX( gr0_R2_aa_CORR, 0.04 );
-    shiftPointX( gr1_R2_bb_CORR, 0.04 );
-    shiftPointX( gr2_R2_ab_CORR, 0.04 );
-    shiftPointX( gr3_R2_ba_CORR, 0.04 );
+        shiftPointX( gr0_R2_aa_CORR, 0.04 );
+        shiftPointX( gr1_R2_bb_CORR, 0.04 );
+        shiftPointX( gr2_R2_ab_CORR, 0.04 );
+        shiftPointX( gr3_R2_ba_CORR, 0.04 );
 
-    drawGraph( gr0_R2_aa_CORR, 27, kRed,       "Pz", 1.5 );
-    drawGraph( gr1_R2_bb_CORR, 27, kBlue,      "Pz", 1.5 );
-    drawGraph( gr2_R2_ab_CORR, 27, kMagenta,   "Pz", 1.5 );
-    drawGraph( gr3_R2_ba_CORR, 27, kGray+2,    "Pz", 1.5 );
+        drawGraph( gr0_R2_aa_CORR, 27, kRed,       "Pz", 1.5 );
+        drawGraph( gr1_R2_bb_CORR, 27, kBlue,      "Pz", 1.5 );
+        drawGraph( gr2_R2_ab_CORR, 27, kMagenta,   "Pz", 1.5 );
+        drawGraph( gr3_R2_ba_CORR, 27, kGray+2,    "Pz", 1.5 );
+    }
 
 
 
+    cout << "test: before Sigma VS winId" << endl;
 
 
 
@@ -815,6 +883,7 @@ int read_output()
     }
 
 
+    cout << "test: before Sigma VS dEta" << endl;
 
 
 
@@ -876,35 +945,35 @@ int read_output()
 
     // ###### Draw dEta-dPhi 2D
     for ( int iAnLevel = 0; iAnLevel < N_AN_LEVELS; ++iAnLevel )
-    for ( int iType = 0; iType < 1/*nPartTypes*/; iType++)
-    {
-        TString strPID = Form( "pid_%d_%d_%d_%d_charge_%d_%d_%d_%d",
-                               arrPartTypes[iType][0], arrPartTypes[iType][1], arrPartTypes[iType][2], arrPartTypes[iType][3],
-                arrCharges[iType][0], arrCharges[iType][1], arrCharges[iType][2], arrCharges[iType][3] );
+        for ( int iType = 0; iType < 1/*nPartTypes*/; iType++)
+        {
+            TString strPID = Form( "pid_%d_%d_%d_%d_charge_%d_%d_%d_%d",
+                                   arrPartTypes[iType][0], arrPartTypes[iType][1], arrPartTypes[iType][2], arrPartTypes[iType][3],
+                    arrCharges[iType][0], arrCharges[iType][1], arrCharges[iType][2], arrCharges[iType][3] );
 
-        TString strCanvName = Form( "canv_Graph2D_type_%s_%s", strPID.Data(), strAnLevels[iAnLevel].Data() );
-        TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas( strCanvName, strCanvName, 10+30*iType,10 +30*iType,800,800);
-        canv_ratio_ratio_VS_ETA_Graph2D->Divide(2,2);
+            TString strCanvName = Form( "canv_Graph2D_type_%s_%s", strPID.Data(), strAnLevels[iAnLevel].Data() );
+            TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas( strCanvName, strCanvName, 10+30*iType,10 +30*iType,800,800);
+            canv_ratio_ratio_VS_ETA_Graph2D->Divide(2,2);
 
-        canv_ratio_ratio_VS_ETA_Graph2D->cd(1);
-//        TGraph2D *gr2D_0_rr = observables[0][iType][0][0][0].getGraph2D( "corr_rr_formula" );
-        TH2D *gr2D_0_sigmaXY = observables[iAnLevel][iType][0][0][0].getHist2D( "sigma_XY" );
-        gr2D_0_sigmaXY->Draw("surf1");
+            canv_ratio_ratio_VS_ETA_Graph2D->cd(1);
+            //        TGraph2D *gr2D_0_rr = observables[0][iType][0][0][0].getGraph2D( "corr_rr_formula" );
+            TH2D *gr2D_0_sigmaXY = observables[iAnLevel][iType][0][0][0].getHist2D( "sigma_XY" );
+            gr2D_0_sigmaXY->Draw("surf1");
 
 
-        canv_ratio_ratio_VS_ETA_Graph2D->cd(2);
-        TH2D *gr2D_0_rr = observables[iAnLevel][iType][0][0][0].getHist2D( "corr_rr_formula" );
-        gr2D_0_rr->Draw("surf1");
+            canv_ratio_ratio_VS_ETA_Graph2D->cd(2);
+            TH2D *gr2D_0_rr = observables[iAnLevel][iType][0][0][0].getHist2D( "corr_rr_formula" );
+            gr2D_0_rr->Draw("surf1");
 
-        canv_ratio_ratio_VS_ETA_Graph2D->cd(3);
-        TH2D *gr2D_0_rPt = observables[iAnLevel][iType][0][0][0].getHist2D( "corr_rPt_formula" );
-        gr2D_0_rPt->Draw("surf1");
+            canv_ratio_ratio_VS_ETA_Graph2D->cd(3);
+            TH2D *gr2D_0_rPt = observables[iAnLevel][iType][0][0][0].getHist2D( "corr_rPt_formula" );
+            gr2D_0_rPt->Draw("surf1");
 
-        canv_ratio_ratio_VS_ETA_Graph2D->cd(4);
-        TH2D *gr2D_0_PtPt = observables[iAnLevel][iType][0][0][0].getHist2D( "avPtF_avPtB_formula" );
-        gr2D_0_PtPt->Draw("surf1");
+            canv_ratio_ratio_VS_ETA_Graph2D->cd(4);
+            TH2D *gr2D_0_PtPt = observables[iAnLevel][iType][0][0][0].getHist2D( "avPtF_avPtB_formula" );
+            gr2D_0_PtPt->Draw("surf1");
 
-    }
+        }
 
 
 
@@ -926,20 +995,20 @@ int read_output()
     // #####################################################
     if (0)
     {
-//        TCanvas *canv_ratio_ratio = new TCanvas("canv_ratio_ratio","canv_ratio_ratio",120,55,800,600);
-//        tuneCanvas( canv_ratio_ratio );
-//        gPad->SetGridy();
+        //        TCanvas *canv_ratio_ratio = new TCanvas("canv_ratio_ratio","canv_ratio_ratio",120,55,800,600);
+        //        tuneCanvas( canv_ratio_ratio );
+        //        gPad->SetGridy();
 
-//        ////    TGraphErrors *grRatioPt = gr_ptpt_bcorr[ 1 ][0][1];
-//        tuneGraphAxisLabels( gr_corr_rr_formula[ 0 ][0][0][0] );
-//        gr_corr_rr_formula[ 0 ][0][0][0]->GetYaxis()->SetRangeUser(-0.03, 0.03 );
-//        drawGraph( gr_corr_rr_formula[ 0 ][0][0][0], 20, kRed, "APz" );
-//        drawGraph( gr_corr_rr_formula[ 0 ][1][0][0], 24, kBlue, "Pz" );
-//        drawGraph( gr_corr_rr_formula[ 0 ][3][0][0], 24, kMagenta, "Pz" );
+        //        ////    TGraphErrors *grRatioPt = gr_ptpt_bcorr[ 1 ][0][1];
+        //        tuneGraphAxisLabels( gr_corr_rr_formula[ 0 ][0][0][0] );
+        //        gr_corr_rr_formula[ 0 ][0][0][0]->GetYaxis()->SetRangeUser(-0.03, 0.03 );
+        //        drawGraph( gr_corr_rr_formula[ 0 ][0][0][0], 20, kRed, "APz" );
+        //        drawGraph( gr_corr_rr_formula[ 0 ][1][0][0], 24, kBlue, "Pz" );
+        //        drawGraph( gr_corr_rr_formula[ 0 ][3][0][0], 24, kMagenta, "Pz" );
 
-//        drawGraph( gr_corr_rr_direct[ 0 ][0][0][0], 20, kRed, "Lz" );
-//        drawGraph( gr_corr_rr_direct[ 0 ][1][0][0], 24, kBlue, "Lz" );
-//        drawGraph( gr_corr_rr_direct[ 0 ][3][0][0], 24, kMagenta, "Lz" );
+        //        drawGraph( gr_corr_rr_direct[ 0 ][0][0][0], 20, kRed, "Lz" );
+        //        drawGraph( gr_corr_rr_direct[ 0 ][1][0][0], 24, kBlue, "Lz" );
+        //        drawGraph( gr_corr_rr_direct[ 0 ][3][0][0], 24, kMagenta, "Lz" );
     }
 
 
@@ -953,16 +1022,16 @@ int read_output()
         fileWithGraphsVsCentr->mkdir("formula")->cd();
         for ( int iType = 0; iType < nPartTypes; iType++)
         {
-//            gr_corr_rr_formula[ 0 ][iType][0][0]->SetName( strGrNames[iType] );
-//            gr_corr_rr_formula[ 0 ][iType][0][0]->Write();
+            //            gr_corr_rr_formula[ 0 ][iType][0][0]->SetName( strGrNames[iType] );
+            //            gr_corr_rr_formula[ 0 ][iType][0][0]->Write();
             observables[0][iType][0][0][0].getGraph( "corr_rr_formula" )->SetName( strGrNames[iType] );  // [iAnLevel][iType][iCW][cBin][ptBinForAn]
             observables[0][iType][0][0][0].getGraph( "corr_rr_formula" )->Write();
         }
         fileWithGraphsVsCentr->mkdir("direct")->cd();
         for ( int iType = 0; iType < nPartTypes; iType++)
         {
-//            gr_corr_rr_direct[ 0 ][iType][0][0]->SetName( strGrNames[iType] );
-//            gr_corr_rr_direct[ 0 ][iType][0][0]->Write();
+            //            gr_corr_rr_direct[ 0 ][iType][0][0]->SetName( strGrNames[iType] );
+            //            gr_corr_rr_direct[ 0 ][iType][0][0]->Write();
             observables[0][iType][0][0][0].getGraph( "corr_rr_direct" )->SetName( strGrNames[iType] );
             observables[0][iType][0][0][0].getGraph( "corr_rr_direct" )->Write();
         }
@@ -992,12 +1061,12 @@ int read_output()
 
 
     // formula:
-//    TGraphErrors *gr0 = gr_corr_rr_formula_VS_ETA[ 0 ][0][0][0];
-//    //    TGraphErrors *gr1 = gr_corr_rr_formula_VS_ETA[ 1 ][0][0][0];
-//    TGraphErrors *gr1 = gr_corr_rr_formula_VS_ETA[ 0 ][1][0][0];
-//    TGraphErrors *gr2 = gr_corr_rr_formula_VS_ETA[ /*2*/0 ][2][0][0];
-//    TGraphErrors *gr3 = gr_corr_rr_formula_VS_ETA[ /*2*/0 ][3][0][0];
-//    TGraphErrors *gr4 = gr_corr_rr_formula_VS_ETA[ /*2*/0 ][4][0][0];
+    //    TGraphErrors *gr0 = gr_corr_rr_formula_VS_ETA[ 0 ][0][0][0];
+    //    //    TGraphErrors *gr1 = gr_corr_rr_formula_VS_ETA[ 1 ][0][0][0];
+    //    TGraphErrors *gr1 = gr_corr_rr_formula_VS_ETA[ 0 ][1][0][0];
+    //    TGraphErrors *gr2 = gr_corr_rr_formula_VS_ETA[ /*2*/0 ][2][0][0];
+    //    TGraphErrors *gr3 = gr_corr_rr_formula_VS_ETA[ /*2*/0 ][3][0][0];
+    //    TGraphErrors *gr4 = gr_corr_rr_formula_VS_ETA[ /*2*/0 ][4][0][0];
 
 
     TGraphErrors *gr0_corr_rr_formula = observables[0][0][0][0][0].getGraph( "corr_rr_formula" ); // [iAnLevel][iType][iCW][cBin][ptBinForAn]
@@ -1086,8 +1155,8 @@ int read_output()
             fileWithGraphsVsEta->mkdir( Form("formula_cBin%d", iBin) )->cd();
             for ( int iType = 0; iType < nPartTypes; iType++)
             {
-//                gr_corr_rr_formula_VS_ETA[ 0 ][iType][0][iBin]->SetName( strGrNames[iType] );
-//                gr_corr_rr_formula_VS_ETA[ 0 ][iType][0][iBin]->Write();
+                //                gr_corr_rr_formula_VS_ETA[ 0 ][iType][0][iBin]->SetName( strGrNames[iType] );
+                //                gr_corr_rr_formula_VS_ETA[ 0 ][iType][0][iBin]->Write();
                 observables[0][iType][0][iBin][0].getGraph( "corr_rr_formula" )->SetName( strGrNames[iType] ); // [iAnLevel][iType][iCW][cBin][ptBinForAn]
                 observables[0][iType][0][iBin][0].getGraph( "corr_rr_formula" )->Write();
             }
@@ -1099,8 +1168,8 @@ int read_output()
             fileWithGraphsVsEta->mkdir( Form("direct_cBin%d", iBin) )->cd();
             for ( int iType = 0; iType < nPartTypes; iType++)
             {
-//                gr_corr_rr_direct_VS_ETA[ 0 ][iType][0][iBin]->SetName( strGrNames[iType] );
-//                gr_corr_rr_direct_VS_ETA[ 0 ][iType][0][iBin]->Write();
+                //                gr_corr_rr_direct_VS_ETA[ 0 ][iType][0][iBin]->SetName( strGrNames[iType] );
+                //                gr_corr_rr_direct_VS_ETA[ 0 ][iType][0][iBin]->Write();
                 observables[0][iType][0][iBin][0].getGraph( "corr_rr_direct" )->SetName( strGrNames[iType] ); // [iAnLevel][iType][iCW][cBin][ptBinForAn]
                 observables[0][iType][0][iBin][0].getGraph( "corr_rr_direct" )->Write();
             }
@@ -1132,17 +1201,17 @@ int read_output()
 
 
 
-//    gr0_corr_rr_formula->Fit("pol0");
-//    gr0_corr_rr_formula->GetFunction("pol0")->Draw("same");
+    //    gr0_corr_rr_formula->Fit("pol0");
+    //    gr0_corr_rr_formula->GetFunction("pol0")->Draw("same");
 
 
     // direct:
     //    gr0 = gr_corr_rr_direct_VS_ETA[ 0 ][0][0];
     //    gr1 = gr_corr_rr_direct_VS_ETA[ 1 ][0][0];
     //    gr2 = gr_corr_rr_direct_VS_ETA[ 2 ][0][0];
-//    gr0 = gr_corr_rr_direct_VS_ETA[ 0 ][0][0][0];
-//    gr1 = gr_corr_rr_direct_VS_ETA[ 0 ][1][0][0];
-//    gr2 = gr_corr_rr_direct_VS_ETA[ 0 ][2][0][0];
+    //    gr0 = gr_corr_rr_direct_VS_ETA[ 0 ][0][0][0];
+    //    gr1 = gr_corr_rr_direct_VS_ETA[ 0 ][1][0][0];
+    //    gr2 = gr_corr_rr_direct_VS_ETA[ 0 ][2][0][0];
 
     TGraphErrors *gr0_corr_rr_direct = observables[0][0][0][0][0].getGraph( "corr_rr_direct" );
     TGraphErrors *gr1_corr_rr_direct = observables[0][1][0][0][0].getGraph( "corr_rr_direct" );
@@ -1207,55 +1276,70 @@ int read_output()
 
 
     // r-r RECONSTRUCTED:
-    TGraphErrors *gr0_rr_REC = observables[1][0][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][0][0][0];
-    TGraphErrors *gr1_rr_REC = observables[1][1][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][1][0][0];
-    TGraphErrors *gr2_rr_REC = observables[1][2][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][2][0][0];
-    TGraphErrors *gr3_rr_REC = observables[1][3][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][3][0][0];
-    TGraphErrors *gr4_rr_REC = observables[1][4][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][4][0][0];
+    TGraphErrors *gr0_rr_REC;
+    TGraphErrors *gr1_rr_REC;
+    TGraphErrors *gr2_rr_REC;
+    TGraphErrors *gr3_rr_REC;
+    TGraphErrors *gr4_rr_REC;
+    if ( N_AN_LEVELS > 1 )
+    {
+        gr0_rr_REC = observables[1][0][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][0][0][0];
+        gr1_rr_REC = observables[1][1][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][1][0][0];
+        gr2_rr_REC = observables[1][2][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][2][0][0];
+        gr3_rr_REC = observables[1][3][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][3][0][0];
+        gr4_rr_REC = observables[1][4][0][0][0].getGraph( "corr_rr_formula" );  // gr_corr_rr_formula_VS_ETA[ 1 ][4][0][0];
 
-    gr0_rr_REC->GetYaxis()->SetRangeUser(-2, 2);
+        gr0_rr_REC->GetYaxis()->SetRangeUser(-2, 2);
 
-    shiftPointX( gr0_rr_REC, 0.04 );
-    shiftPointX( gr1_rr_REC, 0.04 );
-    shiftPointX( gr2_rr_REC, 0.04 );
-    shiftPointX( gr3_rr_REC, 0.04 );
-    shiftPointX( gr4_rr_REC, 0.04 );
+        shiftPointX( gr0_rr_REC, 0.04 );
+        shiftPointX( gr1_rr_REC, 0.04 );
+        shiftPointX( gr2_rr_REC, 0.04 );
+        shiftPointX( gr3_rr_REC, 0.04 );
+        shiftPointX( gr4_rr_REC, 0.04 );
 
-    drawGraph( gr0_rr_REC, 24, kGreen+1,   "Pz", 1.5 );
-    drawGraph( gr1_rr_REC, 24, kRed,       "Pz", 1.5 );
-    drawGraph( gr2_rr_REC, 24, kRed+1,     "Pz", 1.5 );
-    drawGraph( gr3_rr_REC, 24, kBlue,      "Pz", 1.5 );
-    drawGraph( gr4_rr_REC, 24, kBlue+1,    "Pz", 1.5 );
+        drawGraph( gr0_rr_REC, 24, kGreen+1,   "Pz", 1.5 );
+        drawGraph( gr1_rr_REC, 24, kRed,       "Pz", 1.5 );
+        drawGraph( gr2_rr_REC, 24, kRed+1,     "Pz", 1.5 );
+        drawGraph( gr3_rr_REC, 24, kBlue,      "Pz", 1.5 );
+        drawGraph( gr4_rr_REC, 24, kBlue+1,    "Pz", 1.5 );
+    }
 
 
     // r-r CORRECTED:
-    TGraphErrors *gr0_rr_CORR = observables[2][0][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][0][0][0];
-    TGraphErrors *gr1_rr_CORR = observables[2][1][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][1][0][0];
-    TGraphErrors *gr2_rr_CORR = observables[2][2][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][2][0][0];
-    TGraphErrors *gr3_rr_CORR = observables[2][3][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][3][0][0];
-    TGraphErrors *gr4_rr_CORR = observables[2][4][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][4][0][0];
+    TGraphErrors *gr0_rr_CORR;
+    TGraphErrors *gr1_rr_CORR;
+    TGraphErrors *gr2_rr_CORR;
+    TGraphErrors *gr3_rr_CORR;
+    TGraphErrors *gr4_rr_CORR;
+    if ( N_AN_LEVELS > 2 )
+    {
+        gr0_rr_CORR = observables[2][0][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][0][0][0];
+        gr1_rr_CORR = observables[2][1][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][1][0][0];
+        gr2_rr_CORR = observables[2][2][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][2][0][0];
+        gr3_rr_CORR = observables[2][3][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][3][0][0];
+        gr4_rr_CORR = observables[2][4][0][0][0].getGraph( "corr_rr_formula" );  //gr_corr_rr_formula_VS_ETA[ 2 ][4][0][0];
 
-    shiftPointX( gr0_rr_CORR, 0.04 );
-    shiftPointX( gr1_rr_CORR, 0.04 );
-    shiftPointX( gr2_rr_CORR, 0.04 );
-    shiftPointX( gr3_rr_CORR, 0.04 );
-    shiftPointX( gr4_rr_CORR, 0.04 );
+        shiftPointX( gr0_rr_CORR, 0.04 );
+        shiftPointX( gr1_rr_CORR, 0.04 );
+        shiftPointX( gr2_rr_CORR, 0.04 );
+        shiftPointX( gr3_rr_CORR, 0.04 );
+        shiftPointX( gr4_rr_CORR, 0.04 );
 
-    drawGraph( gr0_rr_CORR, 25, kGreen+1,   "Pz", 1.5 );
-    drawGraph( gr1_rr_CORR, 25, kRed,       "Pz", 1.5 );
-    drawGraph( gr2_rr_CORR, 25, kRed+1,     "Pz", 1.5 );
-    drawGraph( gr3_rr_CORR, 25, kBlue,      "Pz", 1.5 );
-    drawGraph( gr4_rr_CORR, 25, kBlue+1,    "Pz", 1.5 );
-
+        drawGraph( gr0_rr_CORR, 25, kGreen+1,   "Pz", 1.5 );
+        drawGraph( gr1_rr_CORR, 25, kRed,       "Pz", 1.5 );
+        drawGraph( gr2_rr_CORR, 25, kRed+1,     "Pz", 1.5 );
+        drawGraph( gr3_rr_CORR, 25, kBlue,      "Pz", 1.5 );
+        drawGraph( gr4_rr_CORR, 25, kBlue+1,    "Pz", 1.5 );
+    }
 
 
 
     // #### now FULL DENOM formula:
-//    TGraphErrors *gr0_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][0][0][0];
-//    TGraphErrors *gr1_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][1][0][0];
-//    TGraphErrors *gr2_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][2][0][0];
-//    TGraphErrors *gr3_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][3][0][0]; // !!! Note OS!
-//    TGraphErrors *gr4_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][4][0][0]; // !!! Note OS!
+    //    TGraphErrors *gr0_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][0][0][0];
+    //    TGraphErrors *gr1_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][1][0][0];
+    //    TGraphErrors *gr2_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_SS[ 0 ][2][0][0];
+    //    TGraphErrors *gr3_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][3][0][0]; // !!! Note OS!
+    //    TGraphErrors *gr4_fullDenom = gr_corr_rr_formula_FullEtaInDenom_VS_ETA_OS[ 0 ][4][0][0]; // !!! Note OS!
 
     TGraphErrors *gr0_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][0][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" );
     TGraphErrors *gr1_rr_formula_fullDenom = observables_FULL_ETA_DENOM[0][1][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_formula" );
@@ -1284,17 +1368,17 @@ int read_output()
     TGraphErrors *gr3_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][3][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );  // !!! Note OS!
     TGraphErrors *gr4_rr_direct_fullDenom = observables_FULL_ETA_DENOM[0][4][0][0][0].getGraph( "corr_rr_FULL_ETA_DENOM_direct" );  // !!! Note OS!
 
-//    shiftPointX( gr0_rr_direct_fullDenom, 0.04 );
-//    shiftPointX( gr1_rr_direct_fullDenom, 0.04 );
-//    shiftPointX( gr2_rr_direct_fullDenom, 0.04 );
-//    shiftPointX( gr3_rr_direct_fullDenom, 0.04 );
-//    shiftPointX( gr4_rr_direct_fullDenom, 0.04 );
+    //    shiftPointX( gr0_rr_direct_fullDenom, 0.04 );
+    //    shiftPointX( gr1_rr_direct_fullDenom, 0.04 );
+    //    shiftPointX( gr2_rr_direct_fullDenom, 0.04 );
+    //    shiftPointX( gr3_rr_direct_fullDenom, 0.04 );
+    //    shiftPointX( gr4_rr_direct_fullDenom, 0.04 );
 
-//    drawGraph( gr0_rr_direct_fullDenom, 21, kGreen+1, "L", 0.8 );
-//    drawGraph( gr1_rr_direct_fullDenom, 21, kRed, "L", 0.8 );
-//    drawGraph( gr2_rr_direct_fullDenom, 21, kRed+1, "L", 0.8 );
-//    drawGraph( gr3_rr_direct_fullDenom, 21, kBlue, "L", 0.8 );
-//    drawGraph( gr4_rr_direct_fullDenom, 21, kBlue+1, "L", 0.8 );
+    //    drawGraph( gr0_rr_direct_fullDenom, 21, kGreen+1, "L", 0.8 );
+    //    drawGraph( gr1_rr_direct_fullDenom, 21, kRed, "L", 0.8 );
+    //    drawGraph( gr2_rr_direct_fullDenom, 21, kRed+1, "L", 0.8 );
+    //    drawGraph( gr3_rr_direct_fullDenom, 21, kBlue, "L", 0.8 );
+    //    drawGraph( gr4_rr_direct_fullDenom, 21, kBlue+1, "L", 0.8 );
 
     gr0_rr_direct_fullDenom->SetFillColor( kGreen+1 );
     gr1_rr_direct_fullDenom->SetFillColor( kRed );
@@ -1330,42 +1414,174 @@ int read_output()
 
     drawGraph( gr0_corr_rr_formula, 27, kGreen+1,   "APz" );
     drawGraph( gr1_corr_rr_formula, 20, kRed,       "Pz" );
-//    drawGraph( gr2_corr_rr_formula, 24, kRed+2,     "Pz" );
+    //    drawGraph( gr2_corr_rr_formula, 24, kRed+2,     "Pz" );
     drawGraph( gr3_corr_rr_formula, 21, kBlue,      "Pz" );
-//    drawGraph( gr4_corr_rr_formula, 25, kBlue+2,    "Pz" );
+    //    drawGraph( gr4_corr_rr_formula, 25, kBlue+2,    "Pz" );
 
     drawGraph( gr0_corr_rr_direct, 1, kGreen+1, "le3" );
     drawGraph( gr1_corr_rr_direct, 1, kRed, "le3" );
-//    drawGraph( gr2_corr_rr_direct, 1, kRed+2, "le3" );
+    //    drawGraph( gr2_corr_rr_direct, 1, kRed+2, "le3" );
     drawGraph( gr3_corr_rr_direct, 1, kBlue, "le3" );
-//    drawGraph( gr4_corr_rr_direct, 1, kBlue+2, "le3" );
+    //    drawGraph( gr4_corr_rr_direct, 1, kBlue+2, "le3" );
 
 
-    drawGraph( gr0_rr_REC, 24, kGreen+1,   "Pz", 1.5 );
-    drawGraph( gr1_rr_REC, 24, kRed,       "Pz", 1.5 );
-//    drawGraph( gr2_rr_REC, 24, kRed+1,     "Pz", 1.5 );
-    drawGraph( gr3_rr_REC, 24, kBlue,      "Pz", 1.5 );
-//    drawGraph( gr4_rr_REC, 24, kBlue+1,    "Pz", 1.5 );
+    if ( N_AN_LEVELS > 1 )
+    {
+        drawGraph( gr0_rr_REC, 24, kGreen+1,   "Pz", 1.5 );
+        drawGraph( gr1_rr_REC, 24, kRed,       "Pz", 1.5 );
+        //    drawGraph( gr2_rr_REC, 24, kRed+1,     "Pz", 1.5 );
+        drawGraph( gr3_rr_REC, 24, kBlue,      "Pz", 1.5 );
+        //    drawGraph( gr4_rr_REC, 24, kBlue+1,    "Pz", 1.5 );
+    }
 
 
-    drawGraph( gr0_rr_CORR, 25, kGreen+1,   "Pz", 1.5 );
-    drawGraph( gr1_rr_CORR, 25, kRed,       "Pz", 1.5 );
-//    drawGraph( gr2_rr_CORR, 25, kRed+1,     "Pz", 1.5 );
-    drawGraph( gr3_rr_CORR, 25, kBlue,      "Pz", 1.5 );
-//    drawGraph( gr4_rr_CORR, 25, kBlue+1,    "Pz", 1.5 );
+    if ( N_AN_LEVELS > 2 )
+    {
+        drawGraph( gr0_rr_CORR, 25, kGreen+1,   "Pz", 1.5 );
+        drawGraph( gr1_rr_CORR, 25, kRed,       "Pz", 1.5 );
+        //    drawGraph( gr2_rr_CORR, 25, kRed+1,     "Pz", 1.5 );
+        drawGraph( gr3_rr_CORR, 25, kBlue,      "Pz", 1.5 );
+        //    drawGraph( gr4_rr_CORR, 25, kBlue+1,    "Pz", 1.5 );
 
-
+    }
     drawGraph( gr0_rr_formula_fullDenom, 30, kGreen+1, "Pz", 1.5 );
     drawGraph( gr1_rr_formula_fullDenom, 30, kRed, "Pz", 1.5 );
-//    drawGraph( gr2_rr_formula_fullDenom, 30, kRed+2, "Pz", 1.5 );
+    //    drawGraph( gr2_rr_formula_fullDenom, 30, kRed+2, "Pz", 1.5 );
     drawGraph( gr3_rr_formula_fullDenom, 30, kBlue, "Pz", 1.5 );
-//    drawGraph( gr4_rr_formula_fullDenom, 30, kBlue+2, "Pz", 1.5 );
+    //    drawGraph( gr4_rr_formula_fullDenom, 30, kBlue+2, "Pz", 1.5 );
 
 
 
 
 
-        return 0;
+
+
+    // ############## ratio_ratio BIS HISTOS (!)
+    int canvW = 1400;
+    int canvH = 750;
+    gStyle->SetOptStat(0);
+    TLegend *leg_ratio_ratio_centrWins_formula = new TLegend( 0.02,0.70,0.98,0.95 );
+    TLegend *leg_ratio_ratio_centrWins_fullDen = new TLegend( 0.02,0.45,0.98,0.70 );
+    TLegend *leg_ratio_ratio_centrWins_direct  = new TLegend( 0.02,0.20,0.98,0.45 );
+    tuneLegend( leg_ratio_ratio_centrWins_formula );
+    tuneLegend( leg_ratio_ratio_centrWins_fullDen );
+    tuneLegend( leg_ratio_ratio_centrWins_direct );
+    TCanvas *canv_ratio_ratio_VS_ETA_bis_bis_HISTO = new TCanvas("canv_ratio_ratio_VS_ETA_bis_bis_HISTO","canv_ratio_ratio_VS_ETA_bis_bis_HISTO",0,0,canvW,canvH);
+    canv_ratio_ratio_VS_ETA_bis_bis_HISTO->Divide(2,2,0.003,0.003);
+
+    int cBin = 1;
+    double cBinWidth = 20;
+    bool flagSaveCanvases = false;
+
+    TFile *fileWithGraphsVsEta = new TFile(  arrPartTypes[0][0] == 321 ? "rr_K_pi.root" : "rr_p_pi.root", "RECREATE" );
+    for ( int cBin = 0; cBin < nCentrBins[0]; ++cBin )
+    {
+        fileWithGraphsVsEta->mkdir( Form("%.0f-%.0f%%", cBin*cBinWidth, (cBin+1)*cBinWidth ) );
+        fileWithGraphsVsEta->cd( Form("%.0f-%.0f%%", cBin*cBinWidth, (cBin+1)*cBinWidth ) );
+
+
+        canv_ratio_ratio_VS_ETA_bis_bis_HISTO->cd( cBin+1 )->SetGridy();
+        gPad->SetTopMargin(0.008);
+        gPad->SetRightMargin(0.02);
+        gPad->SetBottomMargin(0.085);
+
+
+
+        TH1D *hist = observables[0][1][0][cBin][0].getHist2D( "corr_rr_formula" )->ProjectionX( Form( "rr_pp_cBin%d", cBin ) );
+//        hist->GetYaxis()->SetRangeUser(-0.035, 0.048);
+        hist->GetYaxis()->SetRangeUser(-1.1, 1.1);
+//        hist->GetYaxis()->SetRangeUser(-0.35, 1.1);
+        drawHist( hist, 24, kRed, "", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_formula->AddEntry( hist, "+ +" , "p" );
+
+        hist = observables[0][2][0][cBin][0].getHist2D( "corr_rr_formula" )->ProjectionX( Form( "rr_mm_cBin%d", cBin ) );
+        drawHist( hist, 25, kRed+2, "same", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_formula->AddEntry( hist, "#minus #minus" , "p" );
+
+        hist = observables[0][3][0][cBin][0].getHist2D( "corr_rr_formula" )->ProjectionX( Form( "rr_pm_cBin%d", cBin ) );
+        drawHist( hist, 24, kBlue, "same", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_formula->AddEntry( hist, "+ #minus" , "p" );
+
+        hist = observables[0][4][0][cBin][0].getHist2D( "corr_rr_formula" )->ProjectionX( Form( "rr_mp_cBin%d", cBin ) );
+        drawHist( hist, 25, kBlue+2, "same", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_formula->AddEntry( hist, "#minus +" , "p" );
+
+
+        // direct calc:
+        if(0)
+        {
+            hist = observables[0][1][0][cBin][0].getHist2D( "corr_rr_direct" )->ProjectionX( Form( "rr_pp_direct_cBin%d", cBin ) );
+            drawHist( hist, 27, kRed, "L same", 1.5, 2 );
+            hist->Write();
+            if(cBin==0) leg_ratio_ratio_centrWins_direct->AddEntry( hist, "+ +" , "p" );
+
+            hist = observables[0][2][0][cBin][0].getHist2D( "corr_rr_direct" )->ProjectionX( Form( "rr_mm_direct_cBin%d", cBin ) );
+            drawHist( hist, 27, kRed+2, "L same", 1.5, 2 );
+            hist->Write();
+            if(cBin==0) leg_ratio_ratio_centrWins_direct->AddEntry( hist, "#minus #minus" , "p" );
+
+            hist = observables[0][3][0][cBin][0].getHist2D( "corr_rr_direct" )->ProjectionX( Form( "rr_pm_direct_cBin%d", cBin ) );
+            drawHist( hist, 27, kBlue, "L same", 1.5, 2 );
+            hist->Write();
+            if(cBin==0) leg_ratio_ratio_centrWins_direct->AddEntry( hist, "+ #minus" , "p" );
+
+            hist = observables[0][4][0][cBin][0].getHist2D( "corr_rr_direct" )->ProjectionX( Form( "rr_mp_direct_cBin%d", cBin ) );
+            drawHist( hist, 27, kBlue+2, "L same", 1.5, 2 );
+            hist->Write();
+            if(cBin==0) leg_ratio_ratio_centrWins_direct->AddEntry( hist, "#minus +" , "p" );
+
+        }
+
+        // full eta denom:
+        hist = observables_FULL_ETA_DENOM[0][1][0][cBin][0].getHist2D( "corr_rr_FULL_ETA_DENOM_formula" )->ProjectionX( Form( "rr_FULL_DENOM_pp_cBin%d", cBin ) );
+        drawHist( hist, 20, kMagenta, "same", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_fullDen->AddEntry( hist, "+ +" , "p" );
+
+        hist = observables_FULL_ETA_DENOM[0][2][0][cBin][0].getHist2D( "corr_rr_FULL_ETA_DENOM_formula" )->ProjectionX( Form( "rr_FULL_DENOM_mm_cBin%d", cBin ) );
+        drawHist( hist, 21, kMagenta+1, "same", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_fullDen->AddEntry( hist, "#minus #minus" , "p" );
+
+        hist = observables_FULL_ETA_DENOM[0][3][0][cBin][0].getHist2D( "corr_rr_formula" )->ProjectionX( Form( "rr_FULL_DENOM_pm_cBin%d", cBin ) );
+        drawHist( hist, 20, kCyan, "same", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_fullDen->AddEntry( hist, "+ #minus" , "p" );
+
+        hist = observables_FULL_ETA_DENOM[0][4][0][cBin][0].getHist2D( "corr_rr_formula" )->ProjectionX( Form( "rr_FULL_DENOM_mp_cBin%d", cBin ) );
+        drawHist( hist, 21, kCyan+1, "same", 1, 2 );
+        hist->Write();
+        if(cBin==0) leg_ratio_ratio_centrWins_fullDen->AddEntry( hist, "#minus +" , "p" );
+
+        TLatex *texCentr = new TLatex(0.16,0.91, Form("%.0f-%.0f%%", cBin*cBinWidth, (cBin+1)*cBinWidth ) );
+        texCentr->SetNDC();
+        texCentr->SetTextFont(42);
+        texCentr->SetTextSize(0.075);
+        texCentr->SetLineWidth(2);
+        texCentr->Draw();
+
+    }
+    fileWithGraphsVsEta->Close();
+    // draw legend on the separate panel:
+    canv_ratio_ratio_VS_ETA_bis_bis_HISTO->cd( nCentrBins[0]+1 );
+    leg_ratio_ratio_centrWins_formula->SetHeader("approx.");
+    leg_ratio_ratio_centrWins_direct->SetHeader("direct");
+    leg_ratio_ratio_centrWins_fullDen->SetHeader("approx. full denom.");
+    leg_ratio_ratio_centrWins_formula->SetNColumns(4);
+    leg_ratio_ratio_centrWins_direct->SetNColumns(4);
+    leg_ratio_ratio_centrWins_fullDen->SetNColumns(4);
+    leg_ratio_ratio_centrWins_formula->Draw();
+    leg_ratio_ratio_centrWins_direct->Draw();
+    leg_ratio_ratio_centrWins_fullDen->Draw();
+    if(flagSaveCanvases) canv_ratio_ratio_VS_ETA_bis_bis_HISTO->SaveAs( arrPartTypes[0][0] == 321 ? "rr_K_pi.pdf" : "rr_p_pi.pdf" );
+
+
+
+    return 0;
 
 
 
@@ -1555,8 +1771,8 @@ int read_output()
         shiftPointX( gr3_avPtavPt_CORR, 0.04 );
         shiftPointX( gr4_avPtavPt_CORR, 0.04 );
 
-//        gr1_avPtavPt_CORR->SetLineStyle(2);
-//        gr2_avPtavPt_CORR->SetLineStyle(9);
+        //        gr1_avPtavPt_CORR->SetLineStyle(2);
+        //        gr2_avPtavPt_CORR->SetLineStyle(9);
         drawGraph( gr0_avPtavPt_CORR, 25, kGreen+1,   "Pz", 1.5 );
         drawGraph( gr1_avPtavPt_CORR, 25, kRed,       "PLz", 1.5 );
         drawGraph( gr2_avPtavPt_CORR, 25, kRed+3,     "PLz", 1.5 );
@@ -1583,13 +1799,13 @@ int read_output()
 
 
 
-//    // ###### Draw Graph 2D
-//    TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas("canv_ratio_ratio_VS_ETA_Graph2D","canv_ratio_ratio_VS_ETA_Graph2D",140,75,800,600);
-//    TGraph2D *gr2D_0_rr_GEN = observables[0][0][0][0][0].getGraph2D( "corr_rr_formula" );
-//    gr2D_0_rr_GEN->Draw("surf1");
-//    gr2D_0_rr_GEN->SetMarkerStyle(24);
-//    gr2D_0_rr_GEN->SetMarkerColor( kRed );
-//    gr2D_0_rr_GEN->Draw("same P");
+    //    // ###### Draw Graph 2D
+    //    TCanvas *canv_ratio_ratio_VS_ETA_Graph2D = new TCanvas("canv_ratio_ratio_VS_ETA_Graph2D","canv_ratio_ratio_VS_ETA_Graph2D",140,75,800,600);
+    //    TGraph2D *gr2D_0_rr_GEN = observables[0][0][0][0][0].getGraph2D( "corr_rr_formula" );
+    //    gr2D_0_rr_GEN->Draw("surf1");
+    //    gr2D_0_rr_GEN->SetMarkerStyle(24);
+    //    gr2D_0_rr_GEN->SetMarkerColor( kRed );
+    //    gr2D_0_rr_GEN->Draw("same P");
 
 
 

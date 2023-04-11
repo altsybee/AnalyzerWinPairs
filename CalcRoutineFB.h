@@ -25,7 +25,10 @@ using namespace std;
 bool DO_GLOBAL_QA = false;//true;
 bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_1D = true;
 bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_2D = true;
+bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D = true;
+bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D_bis = true;
 bool FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_Obs = true;
+bool FLAG_QA_TRIPLETS = true;
 
 
 // names of final quantities
@@ -104,6 +107,13 @@ const char *obsNames[] =
     "corr_rPt_formula",   // new ratio-meanPt - July 2022: when expansion for <pT> is done as <nB*PX>/.. + <nY*nX>/.. - <nB*nX>/.. - <nY*PX>/..
     "corr_rPt_direct",
 
+
+
+    // ### March 2023: C3
+//    "c3",
+
+
+
     // new ratio-pt - April 2021: when pt is not averaged in each event
 //    "corr_rSumPt_formula",
 //    "corr_rSumPt_direct",
@@ -120,6 +130,19 @@ const int nObs = sizeof(obsNames)/sizeof(*obsNames); // number of observables
 
 
 
+// names of final quantities
+const char *obsTripletNames[] =
+{
+    // ### March 2023: C3
+    "c3",
+    "c3_direct",
+    "c3_direct_Poisson",
+};
+const int nTripletObs = sizeof(obsTripletNames)/sizeof(*obsTripletNames); // number of observables
+
+
+
+
 
 // ################################################
 // check if particles are identical: F==B, X==Y
@@ -129,6 +152,10 @@ bool ifIdenticalParticlesFB( int *_pTypes, int *_pCharges )
     if( _pTypes[2] != _pTypes[3] ) return false;
     if( _pCharges[0] != _pCharges[1] ) return false;
     if( _pCharges[2] != _pCharges[3] ) return false;
+
+//    if( h3D_winTripletsInfo )   // March 15: something should be done here for triplets! more complex combinatorics...
+
+
     return true;
 }
 
@@ -144,18 +171,28 @@ struct CalcWithSubsamples
 
     TH3D *h3D_singleWinInfo; // incoming hist with variables
     TH3D *h3D_winPairInfo; // incoming hist with variables
+    TH3D *h3D_winTripletsInfo; //
     map<string, int> mapVarIdByNameSingleWin;
     map<string, int> mapVarIdByNameWinPairs;
+    map<string, int> mapVarIdByNameWinTriplets;
 
     // current status vars:
     int currentWinPairId;
     int currentDetaDphiPairId;
     int currentEtaWinsDphiPairId;
 
+    int currentWinTripletId;
+
 
     int currentSubId;
     double currenEtaSep;
     double currenPhiSep;
+
+
+    double currenEtaSepFB;
+    double currenEtaSepFC;
+    double currenEtaSepBC;
+
 
     int nEtaWins;
     int nPhiWins;
@@ -166,6 +203,15 @@ struct CalcWithSubsamples
     //    int current_pWinId;
     int current_winIdF;
     int current_winIdB;
+    int current_winIdC;
+
+    int current_wp_for_triplets_FB;
+    int current_wp_for_triplets_FC;
+    int current_wp_for_triplets_BC;
+
+    int current_wp_for_triplets_BF;
+    int current_wp_for_triplets_CF;
+    int current_wp_for_triplets_CB;
 
 
     TGraphErrors *grVsWinId[nObs];
@@ -177,12 +223,25 @@ struct CalcWithSubsamples
     //    TH2D *hist2D_dEta_dPhi[nObs];
     double integrals[nObs];
 
+    TGraphErrors *grVsTripletId[nObs];
+    TGraphErrors *grTriplets_TwoGap0_vs_Third[nObs];
+    TGraphErrors *grTriplets_TwoGap1_vs_Third[nObs];
+    TGraphErrors *grTriplets_TwoGap2_vs_Third[nObs];
+
     //    int nVars;
     int nWinPairs;
+    int nWinTriplets;
+
     int nSubs;
 
     TH3D *histCalcObs;   // hist with calculated observables
     map<string, int> mapObsIdByName;   // observable name-binId correspondance
+
+
+    TH3D *histCalcTripletObs;   // hist with calculated observables
+    map<string, int> mapTripletObsIdByName;   // observable name-binId correspondance
+
+
 
     double eSizeNum;
     double eSizeDenom;
@@ -198,6 +257,7 @@ struct CalcWithSubsamples
     {
         h3D_singleWinInfo = 0x0;
         h3D_winPairInfo = 0x0;
+        h3D_winTripletsInfo = 0x0;
 
         QA_FLAG = false;
 //        nArrSizeZeroWinsByHand = 0;
@@ -214,6 +274,19 @@ struct CalcWithSubsamples
         int idObs = mapObsIdByName[strName];
         return grVsWinId[idObs];
     }
+
+    TGraphErrors *getGraphVsTripletIdQA( const char *strName )
+    {
+        int idObs = mapTripletObsIdByName[strName];
+        return grVsTripletId[idObs];
+    }
+
+    TGraphErrors *getGraphTriplets_TwoGap0_vs_Third( const char *strName )
+    {
+        int idObs = mapTripletObsIdByName[strName];
+        return grTriplets_TwoGap0_vs_Third[idObs];
+    }
+
 
     TGraph2D *getGraph2D( const char *strName )
     {
@@ -319,9 +392,117 @@ struct CalcWithSubsamples
     }
 
 
-    // #####################
-    void calc( TList *inputList, /*const char *strAnLevel, int cBin,*/ TString strPostfix, bool _if_Identical_FB_XY, int _whichInputHist ) //  double _eSizeNum, double _eSizeDenom, bool _if_Identical_FB_XY, double _pSize )
+
+
+
+    // ###########
+    void takeWinsForTriplets( int _iTriplet )
     {
+//        double _etaSep = -1000;
+//        double _phiSep = -1000;
+
+        TString strEtaBin;
+        if ( h3D_winTripletsInfo )
+            strEtaBin = h3D_winTripletsInfo->GetYaxis()->GetBinLabel( _iTriplet + 1 );
+
+        if(0) cout << "strEtaBin: " << strEtaBin << endl;
+
+//        if ( whichInputHist == 0 )   //strEtaBin.Contains("etaB") ) // i.e. we do pair-by-pair hist3D
+
+            float eBounds[6];
+            float phiBounds[6];
+            //            sscanf( strEtaBin.Data(), "eB_%f_%f_eF_%f_%f", &eBounds[0], &eBounds[1], &eBounds[2], &eBounds[3] );
+            sscanf( strEtaBin.Data(), "etaB_%f_%f_phiB_%f_%f_etaF_%f_%f_phiF_%f_%f_etaC_%f_%f_phiC_%f_%f"
+                    , &eBounds[0], &eBounds[1], &phiBounds[0], &phiBounds[1]
+                    , &eBounds[2], &eBounds[3], &phiBounds[2], &phiBounds[3]
+                    , &eBounds[4], &eBounds[5], &phiBounds[4], &phiBounds[5]
+                    );
+
+
+            if(0)for ( int k = 0; k < 4; k++ )
+            {
+                //                    eBounds[k] = round( eBounds[k]*100 ) / 100;
+                cout << "eBounds[" << k << "] = " << eBounds[k]  << endl;
+            }
+            //            eSize = eBounds[1] - eBounds[0];
+            double eBpos = ( eBounds[0] + eBounds[1] )/2;
+            double eFpos = ( eBounds[2] + eBounds[3] )/2;
+            double eCpos = ( eBounds[5] + eBounds[4] )/2;
+            currenEtaSepFB = round( (eFpos - eBpos)*100 ) / 100;  // ="1 - 2"
+            currenEtaSepFC = round( (eFpos - eCpos)*100 ) / 100;  // ="1 - 2"
+            currenEtaSepBC = round( (eBpos - eCpos)*100 ) / 100;  // ="1 - 2"
+
+
+//            double phiBpos = ( phiBounds[0] + phiBounds[1] )/2;
+//            double phiFpos = ( phiBounds[2] + phiBounds[3] )/2;
+//            _phiSep = round( (phiFpos - phiBpos)*100 ) / 100;  // ="1 - 2"
+
+
+
+            // single wins:
+            TString strBinF = Form( "eta_%.2f_%.2f_phi_%.2f_%.2f", eBounds[2], eBounds[3], phiBounds[2], phiBounds[3] );
+            TString strBinB = Form( "eta_%.2f_%.2f_phi_%.2f_%.2f", eBounds[0], eBounds[1], phiBounds[0], phiBounds[1] );
+            TString strBinC = Form( "eta_%.2f_%.2f_phi_%.2f_%.2f", eBounds[4], eBounds[5], phiBounds[4], phiBounds[5] );
+            //            cout << "strBinF = " << strBinF << ", strBinB = " << strBinB << endl;
+            current_winIdF = h3D_singleWinInfo->GetYaxis()->FindBin( strBinF.Data() ) - 1;
+            current_winIdB = h3D_singleWinInfo->GetYaxis()->FindBin( strBinB.Data() ) - 1;
+            current_winIdC = h3D_singleWinInfo->GetYaxis()->FindBin( strBinC.Data() ) - 1;
+
+
+
+            //
+            TString strBinFB = Form( "etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                                     , eBounds[0], eBounds[1], phiBounds[0], phiBounds[1]
+                                     , eBounds[2], eBounds[3], phiBounds[2], phiBounds[3]
+                    );
+            TString strBinFC = Form( "etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                                     , eBounds[4], eBounds[5], phiBounds[4], phiBounds[5]
+                                     , eBounds[2], eBounds[3], phiBounds[2], phiBounds[3]
+                    );
+            TString strBinBC = Form( "etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                                     , eBounds[4], eBounds[5], phiBounds[4], phiBounds[5]
+                                     , eBounds[0], eBounds[1], phiBounds[0], phiBounds[1]
+                    );
+            //
+            TString strBinBF = Form( "etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                                     , eBounds[2], eBounds[3], phiBounds[2], phiBounds[3]
+                                     , eBounds[0], eBounds[1], phiBounds[0], phiBounds[1]
+                    );
+            TString strBinCF = Form( "etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                                     , eBounds[2], eBounds[3], phiBounds[2], phiBounds[3]
+                                     , eBounds[4], eBounds[5], phiBounds[4], phiBounds[5]
+                    );
+            TString strBinCB = Form( "etaB_%.2f_%.2f_phiB_%.2f_%.2f_etaF_%.2f_%.2f_phiF_%.2f_%.2f"
+                                     , eBounds[0], eBounds[1], phiBounds[0], phiBounds[1]
+                                     , eBounds[4], eBounds[5], phiBounds[4], phiBounds[5]
+                    );
+
+            current_wp_for_triplets_FB = h3D_winPairInfo->GetYaxis()->FindBin( strBinFB.Data() ) - 1;
+            current_wp_for_triplets_FC = h3D_winPairInfo->GetYaxis()->FindBin( strBinFC.Data() ) - 1;
+            current_wp_for_triplets_BC = h3D_winPairInfo->GetYaxis()->FindBin( strBinBC.Data() ) - 1;
+
+            current_wp_for_triplets_BF = h3D_winPairInfo->GetYaxis()->FindBin( strBinBF.Data() ) - 1;
+            current_wp_for_triplets_CF = h3D_winPairInfo->GetYaxis()->FindBin( strBinCF.Data() ) - 1;
+            current_wp_for_triplets_CB = h3D_winPairInfo->GetYaxis()->FindBin( strBinCB.Data() ) - 1;
+
+//        if ( _etaSep < -999 ) { cout << "AHTUNG!!!  _etaSep < -999!" << endl; int aa; cin>>aa; }
+//        if ( _phiSep < -999 ) { cout << "AHTUNG!!!  _phiSep < -999!" << endl; int aa; cin>>aa; }
+
+//        currenEtaSep = _etaSep;
+//        currenPhiSep = _phiSep;
+
+    }
+
+
+
+
+
+
+    // #####################
+    void calc( TList *inputList, /*const char *strAnLevel, int cBin,*/ TString strPostfix, bool _if_Identical_FB_XY, int _whichInputHist, bool _calcTriplets = false ) //  double _eSizeNum, double _eSizeDenom, bool _if_Identical_FB_XY, double _pSize )
+    {
+//        cout << "_calcTriplets = " << _calcTriplets << endl;
+
         // extract meta info:
         TH1D *hMetaInfo = (TH1D*)inputList->FindObject( Form("hMetaInfo_%s", strPostfix.Data() ) );
 //        cout << "hMetaInfo = " << hMetaInfo << endl;
@@ -358,6 +539,15 @@ struct CalcWithSubsamples
             gr2D_dEta_dPhi[iObs] = new TGraph2DErrors;
         }
 
+        for( int iObs = 0; iObs < nTripletObs; iObs++ )
+        {
+            grVsTripletId[iObs] = new TGraphErrors;
+            grTriplets_TwoGap0_vs_Third[iObs] = new TGraphErrors;
+            grTriplets_TwoGap1_vs_Third[iObs] = new TGraphErrors;
+            grTriplets_TwoGap2_vs_Third[iObs] = new TGraphErrors;
+        }
+
+
 
         int nVars1D = -1;
         h3D_singleWinInfo = (TH3D*) inputList->FindObject( Form("hSingleWin_%s", strPostfix.Data() ) );
@@ -385,6 +575,13 @@ struct CalcWithSubsamples
             h3D_winPairInfo = (TH3D*) inputList->FindObject( Form("hAllEtaDphi_%s", strPostfix.Data() ) );
 
 
+        if( _calcTriplets )
+        {
+            cout << "### Calculating triplets!" << endl;
+            h3D_winTripletsInfo = (TH3D*) inputList->FindObject( Form("hAllWinsTriplets_%s", strPostfix.Data() ) );
+        }
+
+
         // calc integral for F, B, X, Y
 //        {
 //            double value = 0;
@@ -405,6 +602,9 @@ struct CalcWithSubsamples
             nWinPairs = h3D_winPairInfo->GetNbinsY();
             nSubs = h3D_winPairInfo->GetNbinsZ();
         }
+
+
+
 
         cout << "##### nObs = " << nObs << ", nVars1D = " << nVars1D << ", nVars2D = " << nVars2D << ", nSubs = " << nSubs << ", nWinPairs = " << nWinPairs << ", eSizeNum = " << eSizeNum << ", eSizeDenom = " << eSizeDenom << ", nSubs = " << nSubs << endl;
 
@@ -525,6 +725,189 @@ struct CalcWithSubsamples
 
 
 
+
+        // ##### calculate TRIPLET observables (March 2023)
+        if( h3D_winTripletsInfo )
+        {
+            cout << "### Calculating triplets - test point here" << endl;
+
+
+            int nVars3D = h3D_winTripletsInfo->GetNbinsX();
+            nWinTriplets = h3D_winTripletsInfo->GetNbinsY();
+
+            cout << "##### nTripletObs = " << nTripletObs << ", nVars3D = " << nVars3D << ", nWinTriplets = " << nWinTriplets << endl;
+
+
+            TString strHistTripletObsTitle = Form( "%s_observables", h3D_winTripletsInfo->GetName() );
+            histCalcTripletObs = new TH3D( strHistTripletObsTitle, strHistTripletObsTitle  //strAccumHistName , strAccumHistName //"histAccumulatedValues"
+                                           , nTripletObs,-0.5, nTripletObs-0.5
+                                           , nWinTriplets, -0.5, nWinTriplets-0.5
+                                           , nSubs+1, -0.5, nSubs-0.5 + 1  // +1 more for full calc (=sum of subsamples)
+                                           );
+
+            // set x labels for final hist with observables
+            for( int i=0; i < nTripletObs; i++ )
+            {
+                mapTripletObsIdByName.insert( pair<string, int>( obsTripletNames[i], i ) );
+                histCalcTripletObs->GetXaxis()->SetBinLabel( i+1, obsTripletNames[i] );
+            }
+            cout << "##### nTripletObs = " << nTripletObs << ", nVars1D = " << nVars1D << ", nVars2D = " << nVars2D << ", nSubs = " << nSubs << ", nWinPairs = " << nWinPairs << ", eSizeNum = " << eSizeNum << ", eSizeDenom = " << eSizeDenom << ", nSubs = " << nSubs << endl;
+
+
+            // loop over TROPLETS:
+            for ( int iTriplet = 0; iTriplet < nWinTriplets; iTriplet++ )
+            {
+                //            cout << "###### STARTING iTriplet = " << iTriplet << endl;
+
+                // find out eSep, phiSep:
+                takeWinsForTriplets( iTriplet );
+                //            cout << "eSep = " << currenEtaSep << ", currenPhiSep = " << currenPhiSep << endl;
+
+                //            cout << "current_winIdF = " << current_winIdF << endl;
+                //            cout << "current_winIdB = " << current_winIdB << endl;
+
+                //            int aa;
+                //            cin >> aa;
+
+
+                //            current_eWinId = iWinPair / nEtaWins;
+                //            current_pWinId = iWinPair % nEtaWins;
+//                cout << "triplet id = " << iTriplet << ", win ids: F = " << current_winIdF << ", B = " << current_winIdB << ", C = " << current_winIdC << endl;
+//                int aa;
+//                cin >> aa;
+
+
+                currentWinTripletId = iTriplet;
+                currentSubId = nSubs; // i.e. calc for sum of all subsamples
+
+                if( DO_GLOBAL_QA )
+                {
+                    cout << "   " << endl;
+                    cout << "   " << endl;
+                    cout << "##### WIN PAIR " << h3D_winPairInfo->GetYaxis()->GetBinLabel( currentWinPairId+1 ) << endl;
+                }
+                //            if ( valueByNameWP( "Nf*Nb" ) < 0.00001 )
+                //                continue;
+                FLAG_QA_TRIPLETS = true;
+                bool isGoodCalc = finalCalcPerTriplet(); // in case of holes in the acceptance - win pair will be skipped
+                if ( !isGoodCalc )
+                    continue;
+                FLAG_QA_TRIPLETS = false;
+
+
+
+                // subsamples
+                for ( int iSub = 0; iSub < nSubs; iSub++ )
+                {
+                    // cout << "iSub=" << iSub << ", iType=" << iType << ", iCW=" << iCW << ", iWinPair=" << iWinPair << endl;
+                    currentSubId = iSub;
+                    finalCalcPerTriplet();
+                }
+
+                // calc mean and errors:
+                for( int iObs = 0; iObs < nTripletObs; iObs++ )
+                {
+                    // mean
+                    double mean = histCalcTripletObs->GetBinContent( iObs+1, iTriplet+1, nSubs+1 );
+
+                    // stdDev:
+                    double std_dev = 0;
+                    for ( int iSub = 0; iSub < nSubs; iSub++)
+                    {
+                        double value = histCalcTripletObs->GetBinContent( iObs+1, iTriplet+1, iSub+1 );
+                        float diff = value - mean;
+                        std_dev += diff*diff;
+                    }
+                    std_dev = sqrt(std_dev / nSubs / (nSubs-1) );
+
+                    //                cout << "iObs = " << iObs << ", obs = " << obsNames[iObs] << ": mean +/- std_dev: " << mean << "   " << std_dev << endl;
+
+                    histCalcTripletObs->SetBinError( iObs+1, iTriplet+1, nSubs+1, std_dev );
+
+                    //                cout << wpObs[iWinPair]->histCalcObs->GetXaxis()->GetBinLabel( bin+1 ) << " = " << mean << ", std_dev = " << std_dev << endl;
+
+                    cout << ">>> eta separations: FB = " << currenEtaSepFB << ", FC = " << currenEtaSepFC << ", BC = " << currenEtaSepBC
+                         << ", c3 = " << mean << " +- " << std_dev //<< endl;
+                      << ", win ids: F = " << current_winIdF << ", B = " << current_winIdB << ", C = " << current_winIdC
+                        << endl;
+
+
+                    // add points to graphs:
+                    int nGrP = grVsTripletId[iObs]->GetN();
+                    grVsTripletId[iObs]->SetPoint( nGrP, iTriplet, mean );
+                    grVsTripletId[iObs]->SetPointError( nGrP, 0, std_dev );
+
+
+                    // TRIPLET WIN SEPARATIONS:
+                    int w1 = -1;
+                    int w2 = -1;
+                    int wMoving = -1;
+                    if( fabs( current_winIdF - current_winIdB) == 1 && current_winIdC != current_winIdF && current_winIdC != current_winIdB )
+                    {
+                        w1 = current_winIdF;
+                        w2 = current_winIdB;
+                        wMoving = current_winIdC;
+                    }
+                    if( fabs( current_winIdF - current_winIdC) == 1 && current_winIdB != current_winIdF && current_winIdB != current_winIdC )
+                    {
+                        w1 = current_winIdF;
+                        w2 = current_winIdC;
+                        wMoving = current_winIdB;
+                    }
+                    if( fabs( current_winIdB - current_winIdC) == 1 && current_winIdF != current_winIdB && current_winIdF != current_winIdC )
+                    {
+                        w1 = current_winIdB;
+                        w2 = current_winIdC;
+                        wMoving = current_winIdF;
+                    }
+
+
+                    if( fabs( w1 - w2) == 1 )
+                    {
+                        double middleId = (w1 + w2) / 2;
+                        double xPosOfThirdWin = wMoving - middleId;
+                        int nGrP = grTriplets_TwoGap0_vs_Third[iObs]->GetN();
+                        grTriplets_TwoGap0_vs_Third[iObs]->SetPoint( nGrP, xPosOfThirdWin, mean );
+                        grTriplets_TwoGap0_vs_Third[iObs]->SetPointError( nGrP, 0, std_dev );
+                    };
+
+
+
+                    // add points to graphs:
+//                    int nGrP = grVsDeltaEta[iObs]->GetN();
+//                    grVsDeltaEta[iObs]->SetPoint( nGrP, currenEtaSep, mean );
+//                    grVsDeltaEta[iObs]->SetPointError( nGrP, 0, std_dev );
+
+//                    grVsWinId[iObs]->SetPoint( nGrP, iWinPair, mean );
+//                    grVsWinId[iObs]->SetPointError( nGrP, 0, std_dev );
+
+
+
+//                    gr2D_dEta_dPhi[iObs]->SetPoint( nGrP, currenEtaSep, currenPhiSep, mean );
+//                    gr2D_dEta_dPhi[iObs]->SetPointError( nGrP, 0, 0, std_dev );//currenEtaSep, currenPhiSep, std_dev );
+//                    //                cout << " gr2D_dEta_dPhi[iObs]->GetN() = " << gr2D_dEta_dPhi[iObs]->GetN() << endl;
+//                    //                cout << "iWinPair = " << iWinPair << ", obs = " << obsNames[iObs] << ", currenEtaSep = " << currenEtaSep << ", currenPhiSep = " << currenPhiSep << ", mean = " << mean << endl;
+
+//                    integrals[iObs] += mean;
+                }
+
+                //            int aa;
+                //            cin >> aa;
+            }  // end of loop over TRIPLETS
+        } // END OF TRIPLETS CALC
+
+
+
+
+
+
+
+
+
+
+
+
+
 //        cout << "BEFORE HIST2D" << endl;
 
         // fill 2D hist
@@ -601,6 +984,16 @@ struct CalcWithSubsamples
             const char *strName = h3D_winPairInfo->GetXaxis()->GetBinLabel(i+1);
             mapVarIdByNameWinPairs.insert( pair<string,int>( strName, i ) );
         }
+
+
+        // winTriplets:
+        if( h3D_winTripletsInfo )
+            for( int i=0; i < h3D_winTripletsInfo->GetNbinsX(); i++ )
+            {
+                const char *strName = h3D_winTripletsInfo->GetXaxis()->GetBinLabel(i+1);
+                mapVarIdByNameWinTriplets.insert( pair<string,int>( strName, i ) );
+            }
+
     }
 
 
@@ -621,7 +1014,21 @@ struct CalcWithSubsamples
         //        cout << "obsName = " << obsName << ", mapObsIdByName.at( obsName ) = " << mapObsIdByName.at( obsName ) << ", value = " << value << endl;
     }
 
-
+    // ###########
+    void fillHistWithTripletValue( const char *obsName, double value )
+    {
+        int obsId = -1;
+        try
+        {
+            obsId = mapTripletObsIdByName.at( obsName );
+        }
+        catch (const std::out_of_range& oor) {
+            if(FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_Obs) { std::cerr << " Obs " << obsName << ": out of range error: " << oor.what() << "this message is shown only once.\n"; FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_Obs = false; }
+        }
+        if( obsId >= 0 )
+            histCalcTripletObs->SetBinContent( obsId+1, currentWinTripletId+1, currentSubId+1, value );
+        //        cout << "obsName = " << obsName << ", mapObsIdByName.at( obsName ) = " << mapObsIdByName.at( obsName ) << ", value = " << value << endl;
+    }
 
 
     double valueByNameSW( int whichWin, const char* binName )
@@ -646,7 +1053,14 @@ struct CalcWithSubsamples
 
         if ( whichInputHist == 0 ) // if we have AllWinPairs histo. For this case, we EXPLICITLY find F and B win id-s (this is fast!)
         {
-            int winId = whichWin==0 ? current_winIdF : current_winIdB;
+//            int winId = whichWin==0 ? current_winIdF : current_winIdB;
+            int winId = -1;
+            if ( whichWin==0 )
+                winId = current_winIdF;
+            else if ( whichWin==1 )
+                winId = current_winIdB;
+            else if ( whichWin==2 )
+                winId = current_winIdC;
 
             if ( currentSubId < nSubs )
                 value = h3D_singleWinInfo->GetBinContent( varId+1, winId+1, currentSubId+1 );
@@ -780,6 +1194,102 @@ struct CalcWithSubsamples
 
         return value;
     }
+
+
+
+    double valueByNameTriplet( const char* binName )
+    {
+        //        cout << binName << endl;
+
+        double value = -1000;
+        int varId = -1;   //varIdByName( binName );
+
+        try
+        {
+            varId = mapVarIdByNameWinTriplets.at( binName );
+        }
+        catch (const std::out_of_range& oor) {
+            if(FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D) { std::cerr << " Var " << binName << ": out of range error: " << oor.what() << "this message is shown only once. (FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D)\n"; FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D = false; }
+        }
+
+
+        if ( varId == -1 )
+            return -1000;
+        //        cout << "getValueByName: binName = " << binName << ", mapVarIdByNameWinPairs[binName]+1 = " << mapVarIdByNameWinPairs[binName]+1 << endl;
+        if ( currentSubId < nSubs )
+            value = h3D_winTripletsInfo->GetBinContent( varId+1, currentWinTripletId+1, currentSubId+1 );
+        else // i.e. we calc now the full hist (=sum of all subsamples)
+        {
+            value = 0;
+            for( int subId = 0; subId < h3D_winTripletsInfo->GetNbinsZ(); subId++ )
+                value += h3D_winTripletsInfo->GetBinContent( varId+1, currentWinTripletId+1, subId+1 );
+        }
+
+        //            value = currentVarFullWinPairsHist->GetBinContent(  varId+1 );
+
+        return value;
+    }
+
+
+
+    // #######
+    double valueByNameWPforTriplet( int _w1, int _w2, const char* binName )
+    {
+        //        cout << binName << endl;
+
+        double value = -1000;
+        int varId = -1;   //varIdByName( binName );
+
+        try
+        {
+            varId = mapVarIdByNameWinPairs.at( binName );
+        }
+        catch (const std::out_of_range& oor) {
+            if(FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D_bis) { std::cerr << " Var " << binName << ": out of range error: " << oor.what() << "this message is shown only once. (FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D_bis)\n"; FLAG_CATCH_VAR_NOT_IN_MAP_SHOW_ONCE_3D_bis = false; }
+        }
+
+
+
+        if ( varId == -1 )
+            return -1000;
+        //        cout << "getValueByName: binName = " << binName << ", mapVarIdByNameWinPairs[binName]+1 = " << mapVarIdByNameWinPairs[binName]+1 << endl;
+
+        // F = 0, B = 1, C = 2
+        int thisWinPair = -1;
+        if      ( _w1 == 0 && _w2 == 1)     thisWinPair = current_wp_for_triplets_FB;
+        else if ( _w1 == 0 && _w2 == 2)     thisWinPair = current_wp_for_triplets_FC;
+        else if ( _w1 == 1 && _w2 == 2)     thisWinPair = current_wp_for_triplets_BC;
+
+        else if ( _w1 == 1 && _w2 == 0)     thisWinPair = current_wp_for_triplets_BF;
+        else if ( _w1 == 2 && _w2 == 0)     thisWinPair = current_wp_for_triplets_CF;
+        else if ( _w1 == 2 && _w2 == 1)     thisWinPair = current_wp_for_triplets_CB;
+
+
+
+
+        if ( currentSubId < nSubs )
+        {
+//            value = h3D_singleWinInfo->GetBinContent( varId+1, winId+1, currentSubId+1 );
+            value = h3D_winPairInfo->GetBinContent( varId+1, thisWinPair+1, currentSubId+1 );
+        }
+        else // i.e. we calc now the full hist (=sum of all subsamples)
+        {
+            value = 0;
+            for( int subId = 0; subId < h3D_winPairInfo->GetNbinsZ(); subId++ )
+                value += h3D_winPairInfo->GetBinContent( varId+1, thisWinPair+1, subId+1 );
+        }
+
+        //            value = currentVarFullWinPairsHist->GetBinContent(  varId+1 );
+
+        return value;
+    }
+
+
+
+
+
+
+
 
 
     // ###########
@@ -935,24 +1445,28 @@ struct CalcWithSubsamples
             }
             fillHistWithValue( "corr_rr_direct", corr_rr_direct );
             fillHistWithValue( "corr_rr_formula", corr_rr_formula );
-            if(0)cout << "corr_rr_formula = " << corr_rr_formula
+            if(0)
+            {
+                cout << "corr_rr_formula = " << corr_rr_formula
                       << ", F = " << F << ", X = " << X << ", Y = " << Y
                       << ", F2 = " << F2 << ", X2 = " << X2 << ", FY = " << FY << ", XB = " << XB
                       << ", _nEventsAccFB = " << _nEventsAccFB
                       << endl;
-            //            int aa;
-            //            cin >> aa;
+                        int aa;
+                        cin >> aa;
+            }
 
             // when denominator is in full acceptance:
             {
                 double FX = FY;
 
                 double corr_rr_FULL_ETA_DENOM_formula = Norm * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -1/X  ) ;
+//                double corr_rr_FULL_ETA_DENOM_formula = Norm * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -(X2-X*X)/X/X  ) ;
                 double corr_rr_FULL_ETA_DENOM_direct =  Norm * ( rFB/ratioF/ratioB - 1   -1/X  ) ;
 
                 // March 2023: what if instead of 1/<X> take (<X2>-<X>^2) / <X^2>
                 // poluchaetsya bredovo -> disable
-                double corr_rr_FULL_ETA_DENOM_formula_with_minusC2X = Norm * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -(X2-X*X)/X/X  ) ;
+//                double corr_rr_FULL_ETA_DENOM_formula_with_minusC2X = Norm * (FB/F/B + X2/X/X - FX/F/X - XB/X/B    -(X2-X*X)/X/X  ) ;
 
                 if (identical)
                 {
@@ -1217,8 +1731,253 @@ struct CalcWithSubsamples
             fillHistWithValue( "C_BOZEK_B", C_Bozek_B_nPairs_OUTSIDE_sum );
         }
 
+
+
+
+
+
+
+
+
         return true;
-    } // end of final calc
+    } // end of final calc for PAIRS
+
+
+
+
+
+    // ###########
+    bool finalCalcPerTriplet()
+    {
+//        double eSep = currenEtaSep;
+//        double phiSep = currenPhiSep;
+
+        // we assume that eSep=0 means windows are completely overlapped!
+//        bool identical = ( eSep==0 && phiSep==0 && if_Identical_FB_XY );
+//        cout << "finalCalcPerWP: " << eSep << endl;
+
+
+        // ##############################
+        // get n Events for F-, B-only, and for both FB - to deal with Acceptance Gaps!
+        double _nEventsAccFB = valueByNameWPforTriplet( 0, 1, "NeventsBothWin" );
+        if ( _nEventsAccFB < 0.0001 ) // GAP IN ACCEPTANCE (one of the two wins is zero), skip the rest
+            return false;
+
+//        cout << "_nEventsAccFB = " << _nEventsAccFB << endl;
+        if( DO_GLOBAL_QA )
+            QA_FLAG = true;
+        double _nEventsF     = valueByNameSW(  0, "Nevents" ); // take e.g. from F win
+        double _nEventsB     = valueByNameSW(  1, "Nevents" );
+        double _nEventsC     = valueByNameSW(  2, "Nevents" );
+        QA_FLAG = false;
+//        int aaa;
+//        cin >> aaa;
+
+        if ( _nEventsF < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
+        {
+            cout << "check _nEventsF < 0.0001: should never appear!.." << endl;
+            return false;
+        }
+        if ( _nEventsB < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
+        {
+            cout << "check _nEventsB < 0.0001: never should appear!.." << endl;
+            return false;
+        }
+        if ( _nEventsC < 0.0001 ) // GAP IN ACCEPTANCE, skip the rest
+        {
+            cout << "check _nEventsC < 0.0001: never should appear!.." << endl;
+            return false;
+        }
+
+        // ##############################
+        // now calc the observables
+//        current_wp_for_triplets_FB
+//        current_wp_for_triplets_FC
+//        current_wp_for_triplets_BC
+
+//        current_wp_for_triplets_BF
+//        current_wp_for_triplets_CF
+//        current_wp_for_triplets_CB
+        double FB = valueByNameWPforTriplet( 0, 1, "Nf*Nb" ) / _nEventsAccFB;
+        double FC = valueByNameWPforTriplet( 0, 2, "Nf*Nb" ) / _nEventsAccFB;
+        double BC = valueByNameWPforTriplet( 1, 2, "Nf*Nb" ) / _nEventsAccFB;
+
+        double BF = valueByNameWPforTriplet( 1, 0, "Nf*Nb" ) / _nEventsAccFB;
+        double CF = valueByNameWPforTriplet( 2, 0, "Nf*Nb" ) / _nEventsAccFB;
+        double CB = valueByNameWPforTriplet( 2, 1, "Nf*Nb" ) / _nEventsAccFB;
+
+
+
+        double FXX = valueByNameSW( 0, "Nf*Nx*Nx" ) / _nEventsAccFB;
+        double BXX = valueByNameSW( 1, "Nb*Nx*Nx" ) / _nEventsAccFB;  // temporary, VALID ONLY IF USE FULL-ETA DENOM (X)!
+        double CXX = valueByNameSW( 2, "Nc*Nx*Nx" ) / _nEventsAccFB;  // temporary, VALID ONLY IF USE FULL-ETA DENOM (X)!
+
+        //        double XY = valueByNameWP( "Nx*Ny" ) / _nEventsAccFB;
+//        double FY = valueByNameWP( "Nf*Ny" ) / _nEventsAccFB;
+        double FX = valueByNameSW( 0, "Nf*Nx" ) / _nEventsAccFB;
+        double BX = valueByNameWPforTriplet( 0, 1, "Nb*Nx" ) / _nEventsAccFB;
+        double CX = valueByNameWPforTriplet( 0, 2, "Nc*Nx" ) / _nEventsAccFB;
+
+        double F = valueByNameSW(  0,   "Nf" )  / _nEventsF;
+        double B = valueByNameSW(  1,   "Nb" )  / _nEventsB;
+        double C = valueByNameSW(  2,   "Nc" )  / _nEventsC;
+        double X = valueByNameSW(  0,   "Nx" )  / _nEventsF;
+//        double Y = valueByNameSW(  1,   "Ny" )  / _nEventsB;
+
+//        double F2 = valueByNameSW(  0,  "Nf2" ) / _nEventsF;
+//        double B2 = valueByNameSW(  1,  "Nb2" ) / _nEventsB;
+        double X2 = valueByNameSW(  0,  "Nx2" ) / _nEventsF;
+        double X3 = valueByNameSW(  0,  "Nx3" ) / _nEventsF;
+//        double Y2 = valueByNameSW(  1,  "Ny2" ) / _nEventsB;
+
+        double FBC = valueByNameTriplet( "Nf*Nb*Nc" ) / _nEventsAccFB;
+        double FBX = valueByNameTriplet( "Nf*Nb*Nx" ) / _nEventsAccFB;
+        double FXC = valueByNameTriplet( "Nf*Nx*Nc" ) / _nEventsAccFB;
+        double XBC = valueByNameTriplet( "Nx*Nb*Nc" ) / _nEventsAccFB;
+
+
+        if(FLAG_QA_TRIPLETS) cout << " !!! CX = " << CX << ", F=" << F << ", B=" << B << ", C=" << C
+              << ", current_wp_for_triplets_FB = " << current_wp_for_triplets_FB
+              << ", current_wp_for_triplets_FC = " << current_wp_for_triplets_FC
+              << ", current_wp_for_triplets_BC = " << current_wp_for_triplets_BC
+
+              << ", current_wp_for_triplets_BF = " << current_wp_for_triplets_BF
+              << ", current_wp_for_triplets_CF = " << current_wp_for_triplets_CF
+              << ", current_wp_for_triplets_CB = " << current_wp_for_triplets_CB
+             << endl;
+
+
+
+
+        double Norm = /*(X+Y)/2*/ X /eSizeDenom;
+        // ##### c3 (March 2023)
+        {
+            double c3 = Norm*Norm *
+                    (
+                        FBC/F/B/C - ( FBX/F/B/X + FXC/F/X/C + XBC/X/B/C )
+                        + 2*( FXX/F/X/X + BXX/B/X/X + CXX/C/X/X )
+                        - 2*( FX/F/X + BX/B/X + CX/C/X )
+                        - X3/X/X/X - 3*X2/X/X + 6
+                        + 1/X/X  // this is the CORRECTION for poissonian baseline
+                        );
+
+            if(FLAG_QA_TRIPLETS) cout << "Norm = " << Norm << ",  X = " << X << ",  F = " << F << ",  1/X/X = " << +1/X/X << ",  C(X)/X3 = " << X3/X/X/X - 3*X2/X/X +2 << endl;
+            if(FLAG_QA_TRIPLETS) cout << "       FBC/F/B/C = " << FBC/F/B/C << endl;
+            if(FLAG_QA_TRIPLETS) cout << "       FBX/F/B/X + FXC/F/X/C + XBC/X/B/C = " << FBX/F/B/X + FXC/F/X/C + XBC/X/B/C << endl;
+            if(FLAG_QA_TRIPLETS) cout << "       FXX/F/X/X + BXX/B/X/X + CXX/C/X/X = " << FXX/F/X/X + BXX/B/X/X + CXX/C/X/X << endl;
+            if(FLAG_QA_TRIPLETS) cout << "       FXX/F/X/X = " << FXX/F/X/X << ", BXX/B/X/X = " << BXX/B/X/X << ", CXX/C/X/X = " << CXX/C/X/X << ", compare with: 1/X = " << 1/X << endl;
+            if(FLAG_QA_TRIPLETS) cout << "       FX/F/X + BX/B/X + CX/C/X = " << FX/F/X + BX/B/X + CX/C/X << endl;
+            if(FLAG_QA_TRIPLETS) cout << "       FX/F/X = " << FX/F/X << ",  BX/B/X = " << BX/B/X << ",  CX/C/X = " << CX/C/X << endl;
+            if(FLAG_QA_TRIPLETS) cout << "       - X3/X/X/X - 3*X2/X/X + 6 = " << - X3/X/X/X - 3*X2/X/X + 6 << endl;
+
+
+
+            // ######### !!! TRY NON-RATIO - ordinary cumulant (March 29)
+            double c3_notRatio = Norm*Norm *
+                    (
+                        FBC/F/B/C - ( FB/F/B + FC/F/C + BC/B/C )
+                        + 2
+                        );
+
+
+
+//            if (identical)
+//            {
+//                double PX2 =    valueByNameSW(  0,  "PX2" ) / _nEventsF;
+//                double piX2 =   valueByNameSW(  0,  "piX2" ) / _nEventsF;
+
+//                //                double subtrX = identical ? 1/X : 0;
+//                avPtX_avPtY_formula = Norm * ( (PX2 - piX2)/PX/PX + X2/X/X  - nX_PX/X/PX  - nX_PX/X/PX     - 1/X + 1/X + 1/X );
+//            }
+
+//            fillHistWithTripletValue( "c3", c3 );
+//            fillHistWithTripletValue( "c3", FBC/F/B/C );
+            fillHistWithTripletValue( "c3", c3_notRatio );
+
+            // ##### c3 direct:
+            {
+                double _nEventsAccXY = valueByNameWPforTriplet( 0, 1, "xy_Nevents" );
+cout << "        >>> _nEventsAccXY = " << _nEventsAccXY  << ", _nEventsAccFB = " << _nEventsAccFB << endl;
+                double rF  = valueByNameWPforTriplet( 0, 1, "Nf_OVER_Nx" ) / _nEventsAccXY;
+                double rFB  = valueByNameWPforTriplet( 0, 1, "Nf_OVER_Nx_vs_Nb_OVER_Ny" ) / _nEventsAccXY;
+                double rFC  = valueByNameWPforTriplet( 0, 2, "Nf_OVER_Nx_vs_Nc_OVER_Nz" ) / _nEventsAccFB;
+                double rBC  = valueByNameWPforTriplet( 1, 2, "Nb_OVER_Ny_vs_Nc_OVER_Nz" ) / _nEventsAccFB;
+                double rFBC = valueByNameTriplet( "Nfbc_OVER_NNN" ) / _nEventsAccFB;
+
+                if(FLAG_QA_TRIPLETS) cout << "rF = " << rF << endl;
+                if(FLAG_QA_TRIPLETS) cout << "rFBC = " << rFBC << endl;
+                if(FLAG_QA_TRIPLETS) cout << "rFB = " << rFB << endl;
+                if(FLAG_QA_TRIPLETS) cout << "rFC = " << rFC << endl;
+                if(FLAG_QA_TRIPLETS) cout << "rBC = " << rBC << endl;
+                if(FLAG_QA_TRIPLETS) cout << "1/X/X = " << 1/X/X << endl;
+
+
+                double c3_direct = Norm*Norm *
+                        (
+                            rFBC / rF / rF / rF  // TMP! use only rF here, while should be also rB and rC!
+                            - (rFB + rFC + rBC) / rF / rF
+                            + 2
+//                            - X3/X/X/X - 3*X2/X/X + 6
+//                            + 1/X/X  // this is the CORRECTION for poissonian baseline
+                            + 1/X/X // this is the CORRECTION for poissonian baseline
+                            );
+                if(FLAG_QA_TRIPLETS) cout << "######## c3_direct = " << c3_direct << endl;
+                fillHistWithTripletValue( "c3_direct", c3_direct );
+//                fillHistWithTripletValue( "c3_direct", rFB / rF / rF );
+//                fillHistWithTripletValue( "c3_direct", rFBC / rF / rF / rF );
+//                fillHistWithTripletValue( "c3_direct", rBC / rF/ rF  );
+//                fillHistWithTripletValue( "c3_direct", rFBC   );
+//                fillHistWithTripletValue( "c3_direct", rF  );
+
+//            }
+            // ##### c3 CHECK POISSONIAN BASELINE:
+//            {
+//                double _nEventsAccXY = valueByNameWPforTriplet( 0, 1, "xy_Nevents" );
+
+//                double rF  = valueByNameWPforTriplet( 0, 1, "Nf_OVER_Nx" ) / _nEventsAccFB;
+                double one_OVER_NN  = valueByNameWPforTriplet( 0, 1, "1_OVER_NN" ) / _nEventsAccFB;
+//                double rFC  = valueByNameWPforTriplet( 0, 2, "Nf_OVER_Nx_vs_Nc_OVER_Nz" ) / _nEventsAccFB;
+//                double rBC  = valueByNameWPforTriplet( 1, 2, "Nb_OVER_Ny_vs_Nc_OVER_Nz" ) / _nEventsAccFB;
+                double one_OVER_NNN = valueByNameTriplet( "1_OVER_NNN" ) / _nEventsAccFB;
+
+//                if(FLAG_QA_TRIPLETS) cout << "rF = " << rF << endl;
+                if(FLAG_QA_TRIPLETS) cout << "one_OVER_NNN = " << one_OVER_NNN << endl;
+                if(FLAG_QA_TRIPLETS) cout << "one_OVER_NN = " << one_OVER_NN << endl;
+                if(FLAG_QA_TRIPLETS) cout << "<F>*<B> = " << F*B << ", <FB> = " << FB << endl;
+                if(FLAG_QA_TRIPLETS) cout << "<F>*<B>*<C> = " << F*B*C << ", <FBC> = " << FBC << endl;
+//                if(FLAG_QA_TRIPLETS) cout << "rFC = " << rFC << endl;
+//                if(FLAG_QA_TRIPLETS) cout << "rBC = " << rBC << endl;
+//                if(FLAG_QA_TRIPLETS) cout << "1/X/X = " << 1/X/X << endl;
+
+
+                double c3_POISSON = Norm*Norm *
+                        (
+                            one_OVER_NNN / (1/X) / (1/X) / (1/X)  // TMP! use only rF here, while should be also rB and rC!
+                            - 3*one_OVER_NN / (1/X) / (1/X)
+                            + 2
+                            + 1/X/X // this is the CORRECTION for poissonian baseline
+                            );
+                if(FLAG_QA_TRIPLETS) cout << "######## c3_POISSON = " << c3_POISSON << endl;
+                if(FLAG_QA_TRIPLETS) cout << "##### one_OVER_NNN / (1/X) / (1/X) / (1/X)  = " << one_OVER_NNN / (1/X) / (1/X) / (1/X) << ", rFBC / rF / rF / rF = rFBC / rF / rF / rF = " << rFBC / rF / rF / rF << endl;
+                fillHistWithTripletValue( "c3_direct_Poisson", c3_POISSON );
+//                fillHistWithTripletValue( "c3_direct_Poisson", one_OVER_NN / (1/X) / (1/X)  );
+//                fillHistWithTripletValue( "c3_direct_Poisson", one_OVER_NNN / (1/X) / (1/X) / (1/X)  );
+//                fillHistWithTripletValue( "c3_direct_Poisson", one_OVER_NN / (1/X) / (1/X) );
+//                fillHistWithTripletValue( "c3_direct_Poisson", one_OVER_NNN * F * F * F );
+//                fillHistWithTripletValue( "c3_direct_Poisson", F/X );
+
+            }
+
+        }
+
+
+
+
+        return true;
+
+    } // end of final calc for TRIPLETS
+
+
 
 
 }; // end of class
